@@ -1,0 +1,1434 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>爱你的鹏飞 · 暖心伙伴</title>
+    <style>
+        :root {
+            /* ========== 甜美配色系统 ========== */
+            --bg: #fff5f7;
+            --bg-soft: #fff0f3;
+            --card-bg: #ffffff;
+            --primary: #d4849a;
+            --primary-light: #f0c4d0;
+            --accent: #e8a0b4;
+            --accent-soft: #fce4ec;
+            --accent-warm: #f8c8d4;
+            --rose-gold: #c97b8b;
+            --lavender: #c9b8d4;
+            --lavender-light: #f0e8f4;
+            --text: #4a3548;
+            --text-light: #8b7b88;
+            --text-soft: #b8a8b4;
+            --bubble-user: #ffe8ee;
+            --bubble-ai: #ffffff;
+            --border: #f5e0e8;
+            --border-soft: #fde8ef;
+            --shadow: 0 2px 16px rgba(212,132,154,0.08);
+            --shadow-soft: 0 4px 20px rgba(232,160,180,0.12);
+            --shadow-card: 0 2px 12px rgba(200,150,170,0.06);
+            --radius: 24px;
+            --radius-sm: 16px;
+            --radius-xs: 10px;
+            --safe-bottom: env(safe-area-inset-bottom, 16px);
+            --error-bg: #fff5f7;
+            --error-border: #f8d0da;
+            --step-done: #e8a0b4;
+            --gradient-warm: linear-gradient(135deg, #f8c8d4, #e8a0b4);
+            --gradient-soft: linear-gradient(135deg, #fce4ec, #f8d0e0);
+            --gradient-card: linear-gradient(180deg, #fffafc, #fff5f8);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', 'Microsoft YaHei', 'Hiragino Sans', sans-serif;
+            background: var(--bg);
+            background-image: 
+                radial-gradient(ellipse at 20% 20%, rgba(252,228,236,0.5) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(240,232,244,0.4) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(255,245,247,0.6) 0%, transparent 70%);
+            color: var(--text);
+            height: 100vh;
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ========== 顶部导航 ========== */
+        .header {
+            background: rgba(255,245,247,0.92);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            padding: 10px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+            z-index: 10;
+            position: relative;
+        }
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 20%;
+            right: 20%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent-soft), transparent);
+        }
+        .header-left { display: flex; align-items: center; gap: 10px; }
+        .avatar {
+            width: 38px; height: 38px;
+            border-radius: 50%;
+            background: var(--gradient-warm);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px;
+            box-shadow: 0 3px 12px rgba(232,160,180,0.35);
+            position: relative;
+        }
+        .avatar::after {
+            content: '';
+            position: absolute;
+            inset: -3px;
+            border-radius: 50%;
+            border: 2px dashed rgba(232,160,180,0.3);
+            animation: spin 20s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .header-title { 
+            font-size: 16px; 
+            font-weight: 700; 
+            letter-spacing: 0.3px;
+            background: linear-gradient(135deg, #c97b8b, #d4849a, #e8a0b4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .header-subtitle { 
+            font-size: 10px; 
+            color: #c97b8b; 
+            letter-spacing: 0.4px;
+            font-weight: 600;
+            font-style: italic;
+        }
+        .header-actions { display: flex; gap: 6px; align-items: center; }
+
+        .icon-btn {
+            width: 34px; height: 34px; border-radius: 50%; border: none;
+            background: var(--card-bg); cursor: pointer; font-size: 16px;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: var(--shadow-card); transition: all 0.25s; color: var(--text);
+            border: 1px solid var(--border-soft);
+        }
+        .icon-btn:active { 
+            transform: scale(0.92); 
+            background: var(--accent-soft);
+            border-color: var(--accent);
+        }
+
+        /* 模式切换 */
+        .mode-toggle {
+            display: flex; 
+            background: var(--accent-soft); 
+            border-radius: 20px; 
+            padding: 2px; 
+            gap: 2px;
+            border: 1px solid var(--border);
+        }
+        .mode-btn {
+            padding: 5px 12px; 
+            border-radius: 18px; 
+            border: none;
+            font-size: 11px; 
+            font-weight: 600; 
+            cursor: pointer;
+            background: transparent; 
+            color: var(--text-soft);
+            transition: all 0.3s cubic-bezier(0.22, 0.61, 0.36, 1); 
+            white-space: nowrap;
+            letter-spacing: 0.3px;
+        }
+        .mode-btn.active { 
+            background: var(--card-bg); 
+            color: var(--rose-gold); 
+            box-shadow: 0 2px 8px rgba(212,132,154,0.15);
+            font-weight: 700;
+        }
+        .mode-btn:not(.active):hover {
+            color: var(--accent);
+        }
+
+        /* ========== 步骤进度条 ========== */
+        .step-progress {
+            display: flex; 
+            align-items: center; 
+            gap: 0;
+            padding: 8px 14px; 
+            margin: 8px 12px;
+            background: var(--card-bg); 
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow-soft); 
+            flex-shrink: 0;
+            font-size: 11px; 
+            min-height: 36px;
+            border: 1px solid var(--border-soft);
+            position: relative;
+            overflow: hidden;
+        }
+        .step-progress::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent-soft), var(--lavender-light), var(--accent-soft));
+            opacity: 0.6;
+        }
+        .step-dot {
+            width: 20px; height: 20px; border-radius: 50%;
+            background: #f8e8ee; 
+            display: flex; align-items: center;
+            justify-content: center; font-size: 10px; font-weight: 700;
+            transition: all 0.4s cubic-bezier(0.22, 0.61, 0.36, 1); 
+            flex-shrink: 0; 
+            color: #c9b0b8;
+            border: 2px solid transparent;
+        }
+        .step-dot.done { 
+            background: var(--accent-soft); 
+            color: var(--rose-gold); 
+            border-color: var(--accent);
+            box-shadow: 0 2px 8px rgba(232,160,180,0.25);
+        }
+        .step-dot.active { 
+            background: #fce4ec; 
+            color: var(--rose-gold); 
+            animation: heartPulse 1s infinite; 
+            border-color: var(--accent);
+            box-shadow: 0 0 12px rgba(232,160,180,0.4);
+        }
+        @keyframes heartPulse { 
+            0%, 100% { transform: scale(1); box-shadow: 0 0 8px rgba(232,160,180,0.3); } 
+            30% { transform: scale(1.2); box-shadow: 0 0 18px rgba(232,160,180,0.5); }
+            60% { transform: scale(1.05); box-shadow: 0 0 12px rgba(232,160,180,0.4); }
+        }
+        .step-line {
+            flex: 1; height: 2px; background: #f8e8ee; margin: 0 2px; border-radius: 2px;
+            transition: background 0.4s cubic-bezier(0.22, 0.61, 0.36, 1); min-width: 8px;
+        }
+        .step-line.done { 
+            background: linear-gradient(90deg, var(--accent-soft), var(--accent));
+        }
+
+        /* ========== 对话区域 ========== */
+        .chat-container {
+            flex: 1; overflow-y: auto; padding: 8px 12px 16px;
+            display: flex; flex-direction: column; gap: 12px;
+            -webkit-overflow-scrolling: touch; scroll-behavior: smooth;
+            position: relative;
+        }
+        .chat-container::-webkit-scrollbar { width: 3px; }
+        .chat-container::-webkit-scrollbar-thumb { 
+            background: linear-gradient(180deg, var(--accent-soft), var(--lavender-light)); 
+            border-radius: 10px; 
+        }
+
+        /* 底部水印 */
+        .chat-container::after {
+            content: '💕 爱你的鹏飞 · 祝谭金锡永远快乐 💕';
+            display: block;
+            text-align: center;
+            padding: 24px 0 8px;
+            font-size: 11px;
+            color: #d4a0b4;
+            letter-spacing: 0.6px;
+            opacity: 0.45;
+            font-style: italic;
+            flex-shrink: 0;
+        }
+
+        .message {
+            display: flex; flex-direction: column;
+            max-width: 88%; 
+            animation: floatIn 0.45s cubic-bezier(0.22, 0.61, 0.36, 1);
+        }
+        @keyframes floatIn { 
+            from { opacity: 0; transform: translateY(18px) scale(0.96); } 
+            to { opacity: 1; transform: translateY(0) scale(1); } 
+        }
+        .message.user { align-self: flex-end; }
+        .message.ai { align-self: flex-start; }
+
+        .bubble {
+            padding: 14px 16px; 
+            border-radius: 22px;
+            font-size: 14px; line-height: 1.6; word-break: break-word;
+            transition: all 0.3s;
+            position: relative;
+        }
+        .message.user .bubble { 
+            background: var(--bubble-user); 
+            border-bottom-right-radius: 8px;
+            border: 1px solid var(--border);
+            box-shadow: 0 2px 8px rgba(212,132,154,0.08);
+        }
+        .message.ai .bubble { 
+            background: var(--bubble-ai); 
+            border-bottom-left-radius: 8px;
+            box-shadow: var(--shadow-soft);
+            border: 1px solid var(--border-soft);
+        }
+
+        /* 气泡装饰 */
+        .message.ai .bubble::before {
+            content: '🌸';
+            position: absolute;
+            top: -8px;
+            left: 12px;
+            font-size: 10px;
+            opacity: 0.4;
+        }
+
+        .model-tag {
+            display: inline-block; 
+            font-size: 9px; 
+            padding: 3px 9px;
+            border-radius: 12px; 
+            margin-bottom: 5px; 
+            font-weight: 700; 
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+        }
+        .model-tag.flash { 
+            background: linear-gradient(135deg, #fce4ec, #f8d0e0); 
+            color: #c97b8b; 
+        }
+        .model-tag.pro { 
+            background: linear-gradient(135deg, #f0e8f4, #e8d8f0); 
+            color: #8b6b9a; 
+        }
+
+        /* 错误气泡 */
+        .bubble.error-bubble { 
+            background: var(--error-bg); 
+            border: 1.5px solid var(--error-border); 
+            color: #c97b8b;
+            box-shadow: 0 2px 12px rgba(232,160,180,0.1);
+        }
+
+        /* 重试按钮 */
+        .retry-btn {
+            display: inline-flex; 
+            align-items: center; 
+            gap: 8px;
+            margin-top: 8px; 
+            padding: 12px 20px;
+            background: var(--card-bg); 
+            border: 2px solid var(--accent);
+            border-radius: 24px; 
+            color: var(--rose-gold);
+            font-size: 13px; 
+            font-weight: 700; 
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.22, 0.61, 0.36, 1); 
+            user-select: none;
+            box-shadow: 0 3px 12px rgba(232,160,180,0.15);
+            letter-spacing: 0.3px;
+        }
+        .retry-btn:hover {
+            background: var(--accent-soft);
+            border-color: var(--rose-gold);
+            box-shadow: 0 6px 20px rgba(232,160,180,0.25);
+            transform: translateY(-1px);
+        }
+        .retry-btn:active { 
+            background: #f8d0e0; 
+            transform: scale(0.95);
+        }
+        .retry-btn .retry-icon {
+            font-size: 16px;
+            animation: gentleSpin 2s ease-in-out infinite paused;
+        }
+        .retry-btn:hover .retry-icon {
+            animation-play-state: running;
+        }
+        @keyframes gentleSpin {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(15deg); }
+        }
+
+        /* 提示框 */
+        .hint-box {
+            display: inline-flex; 
+            align-items: center; 
+            gap: 6px;
+            margin-top: 8px; 
+            margin-left: 8px; 
+            padding: 8px 14px;
+            background: #fffbfc; 
+            border: 1.5px solid var(--border);
+            border-radius: 16px; 
+            font-size: 11px; 
+            color: #c97b8b;
+            animation: floatIn 0.4s ease;
+            box-shadow: 0 2px 8px rgba(212,132,154,0.06);
+        }
+        .hint-box::before {
+            content: '💝';
+            font-size: 14px;
+        }
+
+        /* 思维链面板 */
+        .thinking-chain {
+            background: var(--gradient-card);
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            margin-top: 8px; 
+            overflow: hidden;
+            box-shadow: 0 3px 16px rgba(212,132,154,0.06);
+            transition: all 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);
+        }
+        .thinking-header {
+            display: flex; 
+            align-items: center; 
+            gap: 8px;
+            padding: 10px 14px; 
+            cursor: pointer;
+            font-size: 13px; 
+            font-weight: 700; 
+            color: var(--rose-gold); 
+            user-select: none;
+            transition: all 0.25s;
+            letter-spacing: 0.3px;
+        }
+        .thinking-header:hover { 
+            background: rgba(252,228,236,0.5);
+        }
+        .thinking-header .arrow { 
+            transition: transform 0.3s cubic-bezier(0.22, 0.61, 0.36, 1); 
+            font-size: 10px;
+            color: var(--accent);
+        }
+        .thinking-header.open .arrow { transform: rotate(90deg); }
+        .thinking-steps {
+            padding: 0 14px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 8px;
+            max-height: 0; 
+            overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0.22, 0.61, 0.36, 1), padding 0.4s ease;
+        }
+        .thinking-steps.expanded { 
+            max-height: 800px; 
+            padding: 0 14px 14px; 
+        }
+        .step-item {
+            display: flex; 
+            gap: 10px; 
+            font-size: 12px; 
+            align-items: flex-start;
+            padding: 8px 0; 
+            border-bottom: 1.5px dotted var(--border);
+            animation: floatIn 0.35s ease;
+        }
+        .step-item:last-child { border-bottom: none; }
+        .step-num {
+            width: 24px; height: 24px; border-radius: 50%;
+            background: #f8e8ee; 
+            display: flex; align-items: center;
+            justify-content: center; 
+            font-size: 11px; 
+            font-weight: 700;
+            flex-shrink: 0; 
+            color: #c9b0b8;
+            transition: all 0.4s cubic-bezier(0.22, 0.61, 0.36, 1);
+            border: 2px solid transparent;
+        }
+        .step-num.done { 
+            background: var(--accent-soft); 
+            color: var(--rose-gold);
+            border-color: var(--accent);
+            box-shadow: 0 2px 8px rgba(232,160,180,0.2);
+        }
+        .step-text { flex: 1; line-height: 1.6; color: var(--text); }
+        .step-text strong { 
+            color: var(--rose-gold); 
+            font-size: 12px;
+            letter-spacing: 0.3px;
+        }
+
+        .loading-inline {
+            display: flex; 
+            align-items: center; 
+            gap: 8px;
+            color: var(--accent); 
+            font-size: 12px; 
+            padding: 6px 0;
+            font-weight: 500;
+        }
+        .dot-pulse {
+            width: 6px; height: 6px; border-radius: 50%; 
+            background: var(--accent);
+            animation: dotPulse 1.2s infinite;
+        }
+        .dot-pulse:nth-child(2) { animation-delay: 0.15s; }
+        .dot-pulse:nth-child(3) { animation-delay: 0.3s; }
+        @keyframes dotPulse { 
+            0%, 60%, 100% { opacity: 0.3; transform: scale(0.8); } 
+            30% { opacity: 1; transform: scale(1.3); } 
+        }
+
+        .typing-dots { 
+            display: flex; 
+            gap: 4px; 
+            padding: 4px 0; 
+        }
+        .typing-dots span {
+            width: 7px; height: 7px; border-radius: 50%; 
+            background: var(--accent);
+            animation: typingBounce 1.2s infinite;
+        }
+        .typing-dots span:nth-child(2) { animation-delay: 0.15s; }
+        .typing-dots span:nth-child(3) { animation-delay: 0.3s; }
+        @keyframes typingBounce { 
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.4; } 
+            30% { transform: translateY(-7px); opacity: 1; } 
+        }
+
+        /* ========== 历史侧边栏 ========== */
+        .sidebar {
+            position: fixed; left: -290px; top: 0;
+            width: 270px; height: 100%; height: 100dvh;
+            background: var(--card-bg); z-index: 100;
+            transition: left 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);
+            box-shadow: 4px 0 30px rgba(200,150,170,0.12);
+            display: flex; flex-direction: column; padding: 20px 16px;
+            border-right: 2px solid var(--border-soft);
+        }
+        .sidebar.open { left: 0; }
+        .sidebar-overlay {
+            position: fixed; inset: 0; 
+            background: rgba(180,130,150,0.25);
+            backdrop-filter: blur(2px);
+            z-index: 99; opacity: 0; pointer-events: none; 
+            transition: opacity 0.35s;
+        }
+        .sidebar-overlay.active { opacity: 1; pointer-events: auto; }
+        .sidebar-title { 
+            font-size: 18px; 
+            font-weight: 800; 
+            margin-bottom: 18px;
+            background: linear-gradient(135deg, #c97b8b, #d4849a);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 0.4px;
+        }
+        .history-list { display: flex; flex-direction: column; gap: 8px; overflow-y: auto; flex: 1; }
+        .history-item {
+            padding: 12px 14px; 
+            border-radius: 14px; 
+            cursor: pointer;
+            font-size: 13px; 
+            transition: all 0.25s; 
+            border: 1.5px solid transparent;
+            background: #fffafc;
+        }
+        .history-item:hover {
+            background: var(--accent-soft);
+            border-color: var(--border);
+            box-shadow: 0 3px 12px rgba(232,160,180,0.1);
+            transform: translateX(2px);
+        }
+        .history-item:active { 
+            background: #f8d0e0; 
+            border-color: var(--accent);
+        }
+        .history-date { 
+            font-size: 10px; 
+            color: var(--text-soft); 
+            margin-bottom: 4px;
+            letter-spacing: 0.3px;
+        }
+        .history-delete { 
+            float: right; 
+            color: var(--text-soft); 
+            font-size: 16px; 
+            cursor: pointer; 
+            padding: 2px 6px;
+            border-radius: 50%;
+            transition: all 0.2s;
+        }
+        .history-delete:hover {
+            background: #ffe8ee;
+            color: #c97b8b;
+        }
+
+        /* ========== 输入区域 ========== */
+        .input-area {
+            padding: 10px 12px calc(10px + var(--safe-bottom));
+            background: rgba(255,245,247,0.92);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-top: 1.5px solid var(--border);
+            display: flex; gap: 10px; align-items: flex-end; flex-shrink: 0;
+            position: relative;
+        }
+        .input-area::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 20%;
+            right: 20%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent-soft), transparent);
+        }
+        .input-wrapper {
+            flex: 1; 
+            background: var(--card-bg); 
+            border-radius: 26px;
+            box-shadow: 0 3px 16px rgba(212,132,154,0.08);
+            display: flex; align-items: flex-end;
+            padding: 4px 6px 4px 18px; 
+            border: 2px solid var(--border-soft);
+            transition: all 0.3s cubic-bezier(0.22, 0.61, 0.36, 1);
+        }
+        .input-wrapper:focus-within { 
+            border-color: var(--accent); 
+            box-shadow: 0 4px 20px rgba(232,160,180,0.18);
+            background: #fffcfd;
+        }
+        textarea {
+            flex: 1; border: none; outline: none; font-size: 15px;
+            padding: 10px 0; resize: none; background: transparent;
+            font-family: inherit; max-height: 100px; line-height: 1.5; 
+            color: var(--text);
+            letter-spacing: 0.2px;
+        }
+        textarea::placeholder { 
+            color: #d4c0cc; 
+            font-style: italic;
+        }
+        .send-btn {
+            width: 42px; height: 42px; 
+            border-radius: 50%; border: none;
+            background: var(--gradient-warm);
+            color: white; font-size: 20px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; 
+            transition: all 0.3s cubic-bezier(0.22, 0.61, 0.36, 1);
+            box-shadow: 0 4px 16px rgba(232,160,180,0.4);
+            position: relative;
+            overflow: hidden;
+        }
+        .send-btn::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.3), transparent);
+            border-radius: 50%;
+        }
+        .send-btn:active { 
+            transform: scale(0.9); 
+            box-shadow: 0 2px 8px rgba(232,160,180,0.3);
+        }
+        .send-btn:disabled { 
+            opacity: 0.5; 
+            pointer-events: none;
+            filter: grayscale(20%);
+        }
+        .send-btn:not(:disabled):hover {
+            box-shadow: 0 6px 24px rgba(232,160,180,0.5);
+            transform: translateY(-1px);
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed; top: 80px; left: 50%; transform: translateX(-50%);
+            background: linear-gradient(135deg, #4a3548, #5a4558);
+            color: #fce4ec; padding: 10px 22px;
+            border-radius: 22px; font-size: 13px; z-index: 200;
+            opacity: 0; transition: all 0.4s cubic-bezier(0.22, 0.61, 0.36, 1); 
+            pointer-events: none;
+            box-shadow: 0 8px 24px rgba(74,53,72,0.25);
+            letter-spacing: 0.3px;
+            border: 1px solid rgba(252,228,236,0.2);
+        }
+        .toast.show { 
+            opacity: 1; 
+            transform: translateX(-50%) translateY(4px);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed; inset: 0; 
+            background: rgba(180,130,150,0.35);
+            backdrop-filter: blur(4px);
+            z-index: 150; display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.35s;
+        }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .modal {
+            background: var(--card-bg); 
+            border-radius: 24px;
+            padding: 24px 22px; 
+            width: 90%; max-width: 380px;
+            box-shadow: 0 20px 48px rgba(200,150,170,0.25); 
+            max-height: 78vh; overflow-y: auto;
+            border: 2px solid var(--border-soft);
+        }
+        .modal h3 { 
+            margin-bottom: 16px; 
+            font-size: 18px; 
+            font-weight: 800;
+            background: linear-gradient(135deg, #c97b8b, #d4849a);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 0.4px;
+        }
+        .modal label { 
+            font-size: 12px; 
+            color: var(--text-light); 
+            display: block; 
+            margin-bottom: 4px; 
+            margin-top: 8px;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+        .modal input {
+            width: 100%; padding: 10px 14px; 
+            border-radius: 14px;
+            border: 2px solid var(--border-soft); 
+            font-size: 13px;
+            margin-bottom: 2px; outline: none; 
+            font-family: inherit;
+            transition: all 0.3s;
+            background: #fffcfd;
+        }
+        .modal input:focus { 
+            border-color: var(--accent); 
+            box-shadow: 0 0 0 4px rgba(232,160,180,0.1);
+        }
+        .modal .hint { 
+            font-size: 10px; 
+            color: var(--text-soft); 
+            margin-bottom: 6px;
+            font-style: italic;
+        }
+        .modal-btns { 
+            display: flex; 
+            gap: 10px; 
+            justify-content: flex-end; 
+            margin-top: 18px; 
+        }
+        .btn {
+            padding: 10px 22px; 
+            border-radius: 20px; 
+            border: none;
+            font-size: 13px; 
+            cursor: pointer; 
+            font-weight: 700; 
+            transition: all 0.3s cubic-bezier(0.22, 0.61, 0.36, 1);
+            letter-spacing: 0.3px;
+        }
+        .btn-primary { 
+            background: var(--gradient-warm);
+            color: white; 
+            box-shadow: 0 4px 14px rgba(232,160,180,0.35);
+        }
+        .btn-primary:hover {
+            box-shadow: 0 6px 20px rgba(232,160,180,0.45);
+            transform: translateY(-1px);
+        }
+        .btn-secondary { 
+            background: var(--accent-soft); 
+            color: var(--rose-gold);
+            border: 1.5px solid var(--border);
+        }
+        .btn-secondary:hover {
+            background: #f8d0e0;
+        }
+        .btn:active { transform: scale(0.95); }
+
+        /* 响应式优化 */
+        @media (max-width: 380px) {
+            .header-title { font-size: 14px; }
+            .mode-btn { padding: 4px 10px; font-size: 10px; }
+            .bubble { padding: 12px 14px; font-size: 13px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="toast" id="toast"></div>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <!-- API配置弹窗 -->
+    <div class="modal-overlay" id="apiModal">
+        <div class="modal">
+            <h3>🎀 配置 DeepSeek V4</h3>
+            <label>API URL</label>
+            <input type="text" id="apiUrlInput" placeholder="https://api.deepseek.com/v1/chat/completions">
+            <label>API Key</label>
+            <input type="password" id="apiKeyInput" placeholder="sk-...">
+            <label>Flash 模型名</label>
+            <input type="text" id="modelFlashInput" placeholder="deepseek-v4-flash">
+            <div class="hint">用于4步推理 + 快速模式的最终回复</div>
+            <label>Pro 模型名</label>
+            <input type="text" id="modelProInput" placeholder="deepseek-v4-pro">
+            <div class="hint">深度模式的最终回复</div>
+            <div class="modal-btns">
+                <button class="btn btn-secondary" onclick="closeApiModal()">取消</button>
+                <button class="btn btn-primary" onclick="saveApiConfig()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 历史侧边栏 -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-title">💝 暖心回忆 · 金锡</div>
+        <button class="btn btn-secondary" style="width:100%;font-size:12px;margin-bottom:12px;padding:10px;" onclick="clearAllHistory()">🗑 清空所有记录</button>
+        <div class="history-list" id="historyList"></div>
+    </div>
+
+    <!-- 头部 -->
+    <div class="header">
+        <div class="header-left">
+            <div class="avatar">🌸</div>
+            <div>
+                <div class="header-title">爱你的鹏飞 ❤️</div>
+                <div class="header-subtitle">祝谭金锡永远快乐 ✨</div>
+            </div>
+        </div>
+        <div class="header-actions">
+            <div class="mode-toggle">
+                <button class="mode-btn flash-active active" id="flashModeBtn" onclick="switchMode('flash')">⚡快速</button>
+                <button class="mode-btn pro-active" id="deepModeBtn" onclick="switchMode('deep')">🧠深度</button>
+            </div>
+            <button class="icon-btn" onclick="openApiModal()" title="设置">⚙️</button>
+            <button class="icon-btn" onclick="toggleSidebar()" title="回忆">📋</button>
+            <button class="icon-btn" onclick="newSession()" title="新对话">✨</button>
+        </div>
+    </div>
+
+    <!-- 步骤进度条 -->
+    <div class="step-progress" id="stepProgress">
+        <div class="step-dot" id="sd0">1</div><div class="step-line" id="sl0"></div>
+        <div class="step-dot" id="sd1">2</div><div class="step-line" id="sl1"></div>
+        <div class="step-dot" id="sd2">3</div><div class="step-line" id="sl2"></div>
+        <div class="step-dot" id="sd3">4</div><div class="step-line" id="sl3"></div>
+        <div class="step-dot" id="sd4">✓</div>
+        <span style="font-size:10px;color:var(--text-soft);margin-left:8px;font-weight:500;" id="stepStatus">✨ 准备好了</span>
+    </div>
+
+    <!-- 对话容器 -->
+    <div class="chat-container" id="chatContainer"></div>
+
+    <!-- 输入区域 -->
+    <div class="input-area">
+        <div class="input-wrapper">
+            <textarea id="userInput" rows="1" placeholder="在这里写下你的小心情..." oninput="autoResize(this)" onkeydown="handleKeyDown(event)"></textarea>
+        </div>
+        <button class="send-btn" id="sendBtn" onclick="sendMessage()" aria-label="发送">💕</button>
+    </div>
+
+    <script>
+        // ==================== API 配置 ====================
+        const DC = {
+            url: 'https://api.deepseek.com/v1/chat/completions',
+            apiKey: '',
+            flashModel: 'deepseek-v4-flash',
+            proModel: 'deepseek-v4-pro'
+        };
+
+        function loadConfig() { try { const s = localStorage.getItem('ds_config_v10'); if (s) Object.assign(DC, JSON.parse(s)); } catch (e) {} }
+        function saveConfig() { localStorage.setItem('ds_config_v10', JSON.stringify(DC)); }
+
+        function openApiModal() {
+            document.getElementById('apiUrlInput').value = DC.url;
+            document.getElementById('apiKeyInput').value = DC.apiKey;
+            document.getElementById('modelFlashInput').value = DC.flashModel;
+            document.getElementById('modelProInput').value = DC.proModel;
+            document.getElementById('apiModal').classList.add('active');
+        }
+        function closeApiModal() { document.getElementById('apiModal').classList.remove('active'); }
+        function saveApiConfig() {
+            DC.url = document.getElementById('apiUrlInput').value.trim() || DC.url;
+            DC.apiKey = document.getElementById('apiKeyInput').value.trim();
+            DC.flashModel = document.getElementById('modelFlashInput').value.trim() || DC.flashModel;
+            DC.proModel = document.getElementById('modelProInput').value.trim() || DC.proModel;
+            saveConfig(); closeApiModal();
+            showToast('✅ 已保存');
+        }
+
+        // ==================== 模式 ====================
+        let currentMode = 'flash';
+        function switchMode(m) {
+            currentMode = m;
+            document.getElementById('flashModeBtn').classList.toggle('active', m === 'flash');
+            document.getElementById('deepModeBtn').classList.toggle('active', m === 'deep');
+            document.getElementById('modeLabel').textContent = m === 'flash' ? '⚡ 快速模式' : '🧠 深度模式';
+        }
+
+        // ==================== 全局状态 ====================
+        let conv = [];
+        let sessionId = Date.now().toString();
+        let busy = false;
+        let thinkingSteps = [];
+        let activeRequest = null;
+
+        const chatEl = document.getElementById('chatContainer');
+        const inputEl = document.getElementById('userInput');
+        const sendBtnEl = document.getElementById('sendBtn');
+        const toastEl = document.getElementById('toast');
+        const histEl = document.getElementById('historyList');
+        const stepStatusEl = document.getElementById('stepStatus');
+
+        // ==================== Toast ====================
+        let tt;
+        function showToast(m) {
+            clearTimeout(tt);
+            toastEl.textContent = m;
+            toastEl.classList.add('show');
+            tt = setTimeout(() => toastEl.classList.remove('show'), 2200);
+        }
+
+        function setProgress(step) {
+            for (let i = 0; i <= 4; i++) {
+                const d = document.getElementById('sd' + i);
+                const l = i < 4 ? document.getElementById('sl' + i) : null;
+                d.classList.remove('done', 'active');
+                if (l) l.classList.remove('done');
+                if (i < step) { d.classList.add('done'); if (l) l.classList.add('done'); }
+                if (i === step && step < 5) d.classList.add('active');
+            }
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('sidebarOverlay').classList.toggle('active');
+        }
+
+        // ==================== API调用（支持取消） ====================
+        async function callAPI(messages, modelType = 'flash', temp = 0.8, timeout = 25000) {
+            if (!DC.apiKey) throw new Error('NO_KEY');
+            const model = modelType === 'pro' ? DC.proModel : DC.flashModel;
+
+            if (!navigator.onLine) throw new Error('OFFLINE');
+
+            const ctrl = new AbortController();
+            activeRequest = ctrl;
+            const tid = setTimeout(() => ctrl.abort(), timeout);
+
+            try {
+                const r = await fetch(DC.url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${DC.apiKey}` },
+                    body: JSON.stringify({ model, messages, temperature: temp, max_tokens: modelType === 'pro' ? 3000 : 600, top_p: 0.9, stream: false }),
+                    signal: ctrl.signal
+                });
+                clearTimeout(tid);
+                activeRequest = null;
+
+                if (!r.ok) {
+                    const errText = await r.text();
+                    throw new Error(`API ${r.status}: ${errText.slice(0, 100)}`);
+                }
+                const d = await r.json();
+                return d.choices[0].message.content;
+            } catch (e) {
+                clearTimeout(tid);
+                activeRequest = null;
+                if (e.name === 'AbortError') throw new Error('TIMEOUT');
+                if (e.message === 'OFFLINE') throw e;
+                throw e;
+            }
+        }
+
+        // ==================== 核心：4步流式推理 ====================
+        async function runThinkingChain(userMsg, msgId) {
+            const hist = conv.slice(-8).map(m => `${m.role === 'user' ? '用户' : 'AI'}: ${m.content.slice(0, 100)}`).join('\n');
+            const steps = [];
+            const labels = ['感受捕捉', '原因分析', '聚焦要点', '回应方案'];
+
+            updateThinkingSteps(msgId, steps, true);
+
+            if (!navigator.onLine) throw new Error('OFFLINE');
+            setProgress(1);
+            stepStatusEl.textContent = '感知中...';
+            updateStepLoading(msgId, 0, '正在感知你的心情...');
+            const p1 = await callAPI([{ role: 'user', content: `【对话历史】\n${hist || '无'}\n\n【用户刚说】\n"${userMsg}"\n\n请用2-3句话概括：用户此刻可能的多种感受和状态。尽量全面，每句话简洁。不要贴标签。` }], 'flash', 0.7, 15000);
+            steps.push({ label: labels[0], body: p1 });
+            updateThinkingSteps(msgId, [...steps], true);
+            markStepDone(msgId, 0);
+
+            if (!navigator.onLine) throw new Error('OFFLINE');
+            setProgress(2);
+            stepStatusEl.textContent = '分析中...';
+            updateStepLoading(msgId, 1, '正在分析深层原因...');
+            const p2 = await callAPI([{ role: 'user', content: `【对话历史】\n${hist || '无'}\n\n【用户说】"${userMsg}"\n\n【感受】${p1}\n\n请用几个简洁要点说明：用户为什么会有这些感受？多角度分析，每个要点一句话。` }], 'flash', 0.7, 15000);
+            steps.push({ label: labels[1], body: p2 });
+            updateThinkingSteps(msgId, [...steps], true);
+            markStepDone(msgId, 1);
+
+            if (!navigator.onLine) throw new Error('OFFLINE');
+            setProgress(3);
+            stepStatusEl.textContent = '聚焦中...';
+            updateStepLoading(msgId, 2, '正在聚焦关键点...');
+            const p3 = await callAPI([{ role: 'user', content: `【用户说】"${userMsg}"\n\n【感受】${p1}\n\n【原因】${p2}\n\n请选出1-2个最值得优先回应的要点，说明理由（1-2句话）。` }], 'flash', 0.7, 15000);
+            steps.push({ label: labels[2], body: p3 });
+            updateThinkingSteps(msgId, [...steps], true);
+            markStepDone(msgId, 2);
+
+            if (!navigator.onLine) throw new Error('OFFLINE');
+            setProgress(4);
+            stepStatusEl.textContent = '规划中...';
+            updateStepLoading(msgId, 3, '正在规划回应方案...');
+            const p4 = await callAPI([{ role: 'user', content: `【用户说】"${userMsg}"\n\n【感受】${p1}\n\n【原因】${p2}\n\n【聚焦】${p3}\n\n请给出具体回应方案：先说什么、再说什么、语气、重点。3-4个要点。` }], 'flash', 0.7, 15000);
+            steps.push({ label: labels[3], body: p4 });
+            updateThinkingSteps(msgId, [...steps], true);
+            markStepDone(msgId, 3);
+
+            updateThinkingSteps(msgId, steps, false);
+            setProgress(5);
+            stepStatusEl.textContent = '推理完成';
+
+            return steps;
+        }
+
+        function updateThinkingSteps(msgId, steps, expanded) {
+            const tc = document.getElementById('ts-' + msgId);
+            if (!tc) return;
+
+            if (steps.length === 0) {
+                tc.innerHTML = '<div class="loading-inline"><div class="dot-pulse"></div><div class="dot-pulse"></div><div class="dot-pulse"></div><span>准备推理...</span></div>';
+                return;
+            }
+
+            tc.innerHTML = steps.map((s, i) => `
+                <div class="step-item" id="step-${msgId}-${i}">
+                    <div class="step-num">${i + 1}</div>
+                    <div class="step-text"><strong>${esc(s.label)}</strong><br>${esc(s.body)}</div>
+                </div>`).join('');
+
+            const header = document.getElementById('thinking-header-' + msgId);
+            if (header) {
+                header.innerHTML = `<span class="arrow">▶</span> 🧠 4步推理（${steps.length}/4完成）`;
+                if (expanded) {
+                    header.classList.add('open');
+                    tc.classList.add('expanded');
+                } else {
+                    header.classList.remove('open');
+                    tc.classList.remove('expanded');
+                }
+            }
+        }
+
+        function updateStepLoading(msgId, stepIndex, text) {
+            const tc = document.getElementById('ts-' + msgId);
+            if (!tc) return;
+
+            let stepEl = document.getElementById('step-' + msgId + '-' + stepIndex);
+            if (!stepEl) {
+                const div = document.createElement('div');
+                div.className = 'step-item';
+                div.id = 'step-' + msgId + '-' + stepIndex;
+                div.innerHTML = `
+                    <div class="step-num">${stepIndex + 1}</div>
+                    <div class="step-text">
+                        <div class="loading-inline">
+                            <div class="dot-pulse"></div><div class="dot-pulse"></div><div class="dot-pulse"></div>
+                            <span>${esc(text)}</span>
+                        </div>
+                    </div>`;
+                tc.appendChild(div);
+                tc.classList.add('expanded');
+                const header = document.getElementById('thinking-header-' + msgId);
+                if (header) header.classList.add('open');
+            }
+        }
+
+        function markStepDone(msgId, stepIndex) {
+            const stepEl = document.getElementById('step-' + msgId + '-' + stepIndex);
+            if (stepEl) {
+                const numEl = stepEl.querySelector('.step-num');
+                if (numEl) numEl.classList.add('done');
+            }
+        }
+
+        function buildFinalPrompt(userMsg, steps) {
+            const hist = conv.slice(-6).map(m => `${m.role === 'user' ? '用户' : 'AI'}: ${m.content.slice(0, 100)}`).join('\n');
+            return `【对话历史】\n${hist || '无'}\n\n【4步推理链】\n${steps.map((s, i) => `第${i + 1}步·${s.label}：${s.body}`).join('\n\n')}\n\n【用户消息】\n"${userMsg}"\n\n请基于推理链，用自然温暖有洞察力的方式回应用户。简洁有力，直击要点。`;
+        }
+
+        // ==================== 发送消息 ====================
+        async function sendMessage(userMsgOverride = null) {
+            if (busy && !userMsgOverride) return;
+
+            const text = userMsgOverride || inputEl.value.trim();
+            if (!text) return;
+            if (!DC.apiKey) { showToast('⚠️ 请先配置API Key');
+                openApiModal(); return; }
+
+            if (!navigator.onLine) {
+                showToast('⚠️ 当前无网络，请检查连接');
+                return;
+            }
+
+            busy = true;
+            sendBtnEl.disabled = true;
+            thinkingSteps = [];
+
+            if (!userMsgOverride) {
+                setProgress(0);
+                stepStatusEl.textContent = '开始...';
+                addMsg('user', text, null);
+                inputEl.value = '';
+                inputEl.style.height = 'auto';
+                conv.push({ role: 'user', content: text });
+            } else {
+                setProgress(0);
+                stepStatusEl.textContent = '重试中...';
+            }
+
+            const msgId = addLoadingMsg();
+            const retryData = { msgId, userMsg: text, mode: currentMode };
+
+            try {
+                const steps = await runThinkingChain(text, msgId);
+                thinkingSteps = steps;
+                stepStatusEl.textContent = '推理完成，生成回复中...';
+
+                const el = document.getElementById(msgId);
+                if (el) {
+                    const bub = el.querySelector('.bubble');
+                    if (bub) bub.innerHTML =
+                        '<div class="typing-dots"><span></span><span></span><span></span></div><div style="font-size:11px;color:var(--text-light);margin-top:4px;">生成回复中...</div>';
+                }
+
+                const fp = buildFinalPrompt(text, steps);
+                const sysPrompt = currentMode === 'deep' ?
+                    '你是一个有深度洞察力的AI对话伙伴。回应真诚、温暖、有智慧、简洁有力。' :
+                    '你是一个温暖真诚的AI对话伙伴。回应简洁有力，直击要点。';
+                const modelType = currentMode === 'deep' ? 'pro' : 'flash';
+                stepStatusEl.textContent = currentMode === 'deep' ? 'Pro深度回复中...' : 'Flash回复中...';
+
+                let reply;
+                try {
+                    reply = await callAPI([
+                        { role: 'system', content: sysPrompt },
+                        ...conv.slice(-8),
+                        { role: 'user', content: fp }
+                    ], modelType, 0.85, currentMode === 'deep' ? 50000 : 25000);
+                } catch (e) {
+                    if (currentMode === 'deep') {
+                        stepStatusEl.textContent = '降级Flash...';
+                        reply = await callAPI([
+                            { role: 'system', content: '你是一个温暖真诚的AI对话伙伴。' },
+                            ...conv.slice(-8),
+                            { role: 'user', content: fp }
+                        ], 'flash', 0.85, 20000);
+                    } else { throw e; }
+                }
+
+                updateMsgFinal(msgId, reply, steps, modelType === 'pro' || currentMode === 'deep' ? 'pro' : 'flash');
+                conv.push({ role: 'assistant', content: reply });
+                saveSession(text, reply, steps);
+                stepStatusEl.textContent = '完成 ✓';
+                setTimeout(() => { stepStatusEl.textContent = '✨ 准备好了';
+                    setProgress(-1); }, 1500);
+
+            } catch (e) {
+                console.error('失败:', e);
+                const errMsg = getErrorMessage(e);
+                updateMsgError(msgId, errMsg, thinkingSteps, retryData);
+                stepStatusEl.textContent = '失败，可重试';
+                setProgress(-1);
+            }
+
+            busy = false;
+            sendBtnEl.disabled = false;
+            inputEl.focus();
+            scrollBottom();
+        }
+
+        function getErrorMessage(e) {
+            if (e.message === 'NO_KEY') return '请先配置API Key';
+            if (e.message === 'OFFLINE') return '网络断开（切换App会导致断网），请保持页面打开并重试';
+            if (e.message === 'TIMEOUT') return '请求超时，可能是网络不稳定或切到后台导致';
+            if (e.message.includes('API')) return `服务异常：${e.message}`;
+            return `出错了：${e.message}`;
+        }
+
+        function retryMessage(msgId, userMsg, mode) {
+            if (busy) return;
+            if (mode && mode !== currentMode) switchMode(mode);
+            const oldEl = document.getElementById(msgId);
+            if (oldEl) oldEl.remove();
+            showToast('🔄 正在重试...');
+            sendMessage(userMsg);
+        }
+
+        // ==================== UI消息管理 ====================
+        function addMsg(role, content, tag) {
+            const d = document.createElement('div');
+            d.className = `message ${role}`;
+            let h = '';
+            if (tag) h += `<div class="model-tag ${tag}">${tag === 'pro' ? 'Pro' : 'Flash'}</div>`;
+            h += `<div class="bubble">${fmt(content)}</div>`;
+            d.innerHTML = h;
+            chatEl.appendChild(d);
+            scrollBottom();
+        }
+
+        function addLoadingMsg() {
+            const id = 'm-' + Date.now();
+            const d = document.createElement('div');
+            d.className = 'message ai';
+            d.id = id;
+            d.innerHTML = `
+                <div class="bubble">
+                    <div class="typing-dots"><span></span><span></span><span></span></div>
+                    <div style="font-size:11px;color:var(--text-light);margin-top:4px;">开始4步推理...</div>
+                </div>
+                <div class="thinking-chain">
+                    <div class="thinking-header" id="thinking-header-${id}"><span class="arrow">▶</span> 🧠 实时推理中...</div>
+                    <div class="thinking-steps expanded" id="ts-${id}">
+                        <div class="loading-inline"><div class="dot-pulse"></div><div class="dot-pulse"></div><div class="dot-pulse"></div><span>准备推理...</span></div>
+                    </div>
+                </div>`;
+            chatEl.appendChild(d);
+            bindTC(d);
+            scrollBottom();
+            return id;
+        }
+
+        function updateMsgFinal(id, content, steps, tag) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.innerHTML = `
+                <div class="model-tag ${tag}">${tag === 'pro' ? 'Pro' : 'Flash'}</div>
+                <div class="bubble">${fmt(content)}</div>
+                <div class="thinking-chain">
+                    <div class="thinking-header" id="thinking-header-${id}"><span class="arrow">▶</span> 🧠 4步推理过程（已完成）</div>
+                    <div class="thinking-steps" id="ts-${id}">${steps.map((s, i) => `
+                        <div class="step-item">
+                            <div class="step-num done">${i + 1}</div>
+                            <div class="step-text"><strong>${esc(s.label)}</strong><br>${esc(s.body)}</div>
+                        </div>`).join('')}</div>
+                </div>`;
+            bindTC(el);
+            setTimeout(() => {
+                const hdr = document.getElementById('thinking-header-' + id);
+                const stp = document.getElementById('ts-' + id);
+                if (hdr) hdr.classList.remove('open');
+                if (stp) stp.classList.remove('expanded');
+            }, 800);
+            scrollBottom();
+        }
+
+        function updateMsgError(id, errorText, steps, retryData) {
+            const el = document.getElementById(id);
+            if (!el) return;
+
+            let stepsHTML = '';
+            if (steps && steps.length > 0) {
+                stepsHTML = `
+                <div class="thinking-chain">
+                    <div class="thinking-header" id="thinking-header-${id}"><span class="arrow">▶</span> 🧠 推理过程（${steps.length}/4步完成）</div>
+                    <div class="thinking-steps expanded" id="ts-${id}">${steps.map((s, i) => `
+                        <div class="step-item">
+                            <div class="step-num done">${i + 1}</div>
+                            <div class="step-text"><strong>${esc(s.label)}</strong><br>${esc(s.body)}</div>
+                        </div>`).join('')}</div>
+                </div>`;
+            }
+
+            el.innerHTML = `
+                <div class="bubble error-bubble">
+                    <div style="font-weight:600;margin-bottom:6px;">😥 ${esc(errorText)}</div>
+                    <div style="font-size:11px;">${steps.length > 0 ? `已完成${steps.length}/4步推理` : '推理未完成'}，可重试</div>
+                </div>
+                <div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px;">
+                    <button class="retry-btn" onclick="retryMessage('${id}','${esc(retryData.userMsg)}','${retryData.mode}')">
+                        <span class="retry-icon">🔄</span> 重新生成
+                    </button>
+                    <div class="hint-box">💝 重试时请保持页面打开，不要切换App哦</div>
+                </div>
+                ${stepsHTML}`;
+            bindTC(el);
+            scrollBottom();
+        }
+
+        function bindTC(el) {
+            const h = el.querySelector('.thinking-header');
+            if (h && !h.dataset.ok) {
+                h.dataset.ok = '1';
+                h.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    this.classList.toggle('open');
+                    const s = el.querySelector('.thinking-steps');
+                    if (s) s.classList.toggle('expanded');
+                });
+            }
+        }
+
+        function fmt(c) { if (!c) return '';
+            let t = esc(c);
+            t = t.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+            t = t.replace(/\n/g, '<br>'); return t; }
+
+        // ==================== 会话存储 ====================
+        function saveSession(u, a, steps) {
+            try {
+                let ss = JSON.parse(localStorage.getItem('cs_v10') || '[]');
+                const ix = ss.findIndex(s => s.id === sessionId);
+                const sd = { id: sessionId, date: new Date().toLocaleString('zh-CN'), preview: u.slice(0, 30), mode: currentMode, steps, messages: conv.slice(-20) };
+                if (ix >= 0) ss[ix] = sd;
+                else ss.push(sd);
+                if (ss.length > 30) ss = ss.slice(-30);
+                localStorage.setItem('cs_v10', JSON.stringify(ss));
+                updateHist();
+            } catch (e) {}
+        }
+
+        function updateHist() {
+            try {
+                const ss = JSON.parse(localStorage.getItem('cs_v10') || '[]');
+                if (!ss.length) { histEl.innerHTML =
+                        '<div style="color:var(--text-light);font-size:12px;text-align:center;padding:16px;">暂无记录</div>'; return; }
+                histEl.innerHTML = [...ss].reverse().map(s => `
+                    <div class="history-item" onclick="loadSess('${s.id}')">
+                        <span class="history-delete" onclick="event.stopPropagation();delSess('${s.id}')">×</span>
+                        <div class="history-date">${s.date} · ${s.mode === 'deep' ? '深度' : '快速'}</div>
+                        <div>${esc(s.preview)}...</div>
+                    </div>`).join('');
+            } catch (e) {}
+        }
+
+        function loadSess(id) {
+            try {
+                const ss = JSON.parse(localStorage.getItem('cs_v10') || '[]');
+                const s = ss.find(x => x.id === id);
+                if (!s) return showToast('未找到');
+                sessionId = s.id;
+                conv = [...s.messages];
+                if (s.mode) switchMode(s.mode);
+                chatEl.innerHTML = '';
+                for (const m of s.messages) addMsg(m.role, m.content, null);
+                toggleSidebar();
+                showToast('📂 已加载');
+                scrollBottom();
+            } catch (e) { showToast('加载失败'); }
+        }
+
+        function delSess(id) {
+            let ss = JSON.parse(localStorage.getItem('cs_v10') || '[]');
+            ss = ss.filter(s => s.id !== id);
+            localStorage.setItem('cs_v10', JSON.stringify(ss));
+            updateHist();
+            if (id === sessionId) newSession();
+            showToast('已删除');
+        }
+
+        function clearAllHistory() {
+            if (confirm('清空所有历史？')) {
+                localStorage.removeItem('cs_v10');
+                updateHist();
+                newSession();
+                showToast('已清空');
+            }
+        }
+
+        function newSession() {
+            sessionId = Date.now().toString();
+            conv = [];
+            thinkingSteps = [];
+            busy = false;
+            chatEl.innerHTML = '';
+            setProgress(-1);
+            stepStatusEl.textContent = '✨ 准备好了';
+            addMsg('ai', '嗨，暖心伙伴在这里 🌸\n\n爱你的鹏飞依然陪着你~\n祝谭金锡永远快乐 🎀\n\n⚡ 快速模式：全程Flash\n🧠 深度模式：Flash推理 + Pro回复\n\n💡 回复生成中请不要切换App哦\n中断后可点击重试按钮，我一直都在 💝', null);
+            showToast('✨ 新对话开始啦');
+        }
+
+        // ==================== 切后台自动恢复检测 ====================
+        let wasHidden = false;
+        let hiddenSince = 0;
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'hidden') {
+                wasHidden = true;
+                hiddenSince = Date.now();
+                if (busy) { console.warn('⚠️ 处理中切换页面，可能导致中断'); }
+            }
+            if (document.visibilityState === 'visible') {
+                if (wasHidden) {
+                    const hiddenDuration = Date.now() - hiddenSince;
+                    wasHidden = false;
+                    if (hiddenDuration > 3000) {
+                        if (!navigator.onLine) { showToast('⚠️ 网络断开，请检查连接'); }
+                        if (busy && activeRequest) {
+                            activeRequest.abort();
+                            activeRequest = null;
+                            showToast('⚠️ 检测到处理中断，请查看重试按钮');
+                        }
+                        if (!busy && thinkingSteps.length > 0 && thinkingSteps.length < 4) {
+                            showToast('💡 推理未完成，可能因切后台中断');
+                        }
+                    }
+                }
+            }
+        });
+
+        window.addEventListener('online', () => {
+            showToast('🌐 网络已恢复');
+            if (thinkingSteps.length > 0 && thinkingSteps.length < 4 && !busy) {
+                showToast('💡 可点击重试按钮继续');
+            }
+        });
+
+        window.addEventListener('offline', () => {
+            showToast('⚠️ 网络已断开');
+            if (busy && activeRequest) {
+                activeRequest.abort();
+                activeRequest = null;
+            }
+        });
+
+        // ==================== 工具 ====================
+        function autoResize(el) { el.style.height = 'auto';
+            el.style.height = Math.min(el.scrollHeight, 100) + 'px'; }
+        function handleKeyDown(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault();
+                sendMessage(); } }
+        function esc(t) { if (!t) return ''; const d = document.createElement('div');
+            d.textContent = t; return d.innerHTML; }
+        function scrollBottom() { requestAnimationFrame(() => { chatEl.scrollTop = chatEl.scrollHeight; }); }
+
+        // ==================== 初始化 ====================
+        function init() {
+            loadConfig();
+            updateHist();
+            setProgress(-1);
+            stepStatusEl.textContent = '✨ 准备好了';
+            addMsg('ai', '嗨，暖心伙伴在这里 🌸\n\n爱你的鹏飞陪着你~\n祝谭金锡永远快乐 🎀\n\n⚡ 快速模式：全程Flash\n🧠 深度模式：Flash推理 + Pro回复\n\n💡 回复生成中请不要切换App哦\n中断后可点击重试按钮，我一直都在 💝', null);
+            if (!DC.apiKey) setTimeout(() => showToast('💡 点击齿轮配置API Key'), 1200);
+            scrollBottom();
+        }
+        init();
+        console.log('🌸 爱你的鹏飞 · 祝谭金锡永远快乐 🌸');
+    </script>
+</body>
+</html>
