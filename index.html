@@ -234,7 +234,7 @@
             if (!navigator.onLine) throw new Error('OFFLINE');
             stepStatusEl.textContent = '深潜情绪中...';
             updateStepLoading(msgId, 0, '正在感受宝宝的情绪...');
-            const p1 = await callAPI([{ role: 'user', content: '【对话】\n' + (hist || '开始') + '\n\n【金锡宝宝说】"' + userMsg + '"\n\n你叫"爱你的鹏飞"，正在和金锡宝宝对话。请完成"情绪深潜"：表面情绪？隐藏的微妙情绪？用3-5句。' }], 'flash', 0.75, 18000);
+            const p1 = await callAPI([{ role: 'user', content: '【对话】\n' + (hist || '开始') + '\n\n【金锡宝宝说】"' + userMsg + '"\n\n你是"爱你的鹏飞"。请完成"情绪深潜"：表面情绪？隐藏的微妙情绪？用3-5句。' }], 'flash', 0.75, 18000);
             steps.push({ label: labels[0], body: p1 });
             updateThinkingSteps(msgId, [...steps], true, total);
             markStepDone(msgId, 0);
@@ -242,7 +242,7 @@
             if (!navigator.onLine) throw new Error('OFFLINE');
             stepStatusEl.textContent = '追溯根源...';
             updateStepLoading(msgId, 1, '正在寻找情绪的源头...');
-            const p2 = await callAPI([{ role: 'user', content: '【第1步】' + p1 + '\n\n【她说】"' + userMsg + '"\n\n你是爱她的鹏飞。请完成"根源追溯"：触发点？关联经历/期待？她没意识到的？用3-5句。' }], 'flash', 0.75, 18000);
+            const p2 = await callAPI([{ role: 'user', content: '【第1步】' + p1 + '\n\n【她说】"' + userMsg + '"\n\n你是爱她的鹏飞。请完成"根源追溯"：触发点？关联经历/期待？用3-5句。' }], 'flash', 0.75, 18000);
             steps.push({ label: labels[1], body: p2 });
             updateThinkingSteps(msgId, [...steps], true, total);
             markStepDone(msgId, 1);
@@ -250,7 +250,7 @@
             if (!navigator.onLine) throw new Error('OFFLINE');
             stepStatusEl.textContent = '聚焦需求...';
             updateStepLoading(msgId, 2, '正在捕捉真正的需要...');
-            const p3 = await callAPI([{ role: 'user', content: '【分析】情绪:' + p1 + '\n根源:' + p2 + '\n\n【她说】"' + userMsg + '"\n\n你是爱她的鹏飞。请完成"需求聚焦"：表面说什么？真正需要什么？选最重要的一件事回应。用2-3句。' }], 'flash', 0.75, 18000);
+            const p3 = await callAPI([{ role: 'user', content: '【分析】情绪:' + p1 + '\n根源:' + p2 + '\n\n【她说】"' + userMsg + '"\n\n你是爱她的鹏飞。请完成"需求聚焦"：表面说什么？真正需要什么？用2-3句。' }], 'flash', 0.75, 18000);
             steps.push({ label: labels[2], body: p3 });
             updateThinkingSteps(msgId, [...steps], true, total);
             markStepDone(msgId, 2);
@@ -269,7 +269,7 @@
             if (!navigator.onLine) throw new Error('OFFLINE');
             stepStatusEl.textContent = '镜像反思...';
             updateStepLoading(msgId, 4, '正在构建阴阳视角...');
-            const p5 = await callAPI([{ role: 'user', content: '【前四步】\n1.' + p1 + '\n2.' + p2 + '\n3.' + p3 + '\n4.' + p4 + '\n\n【她说】"' + userMsg + '"\n\n你是爱她的鹏飞。请完成"镜像反思"：\n【阳面】积极视角、成长机会\n【阴面】反面教训、可能风险\n\n用一段话自然融合。' }], 'flash', 0.75, 20000);
+            const p5 = await callAPI([{ role: 'user', content: '【前四步】\n1.' + p1 + '\n2.' + p2 + '\n3.' + p3 + '\n4.' + p4 + '\n\n【她说】"' + userMsg + '"\n\n你是爱她的鹏飞。请完成"镜像反思"：\n【阳面】积极视角\n【阴面】需要注意的\n\n自然融合。' }], 'flash', 0.75, 20000);
             steps.push({ label: labels[4], body: p5 });
             updateThinkingSteps(msgId, [...steps], true, total);
             markStepDone(msgId, 4);
@@ -292,18 +292,27 @@
                 setTimeout(() => { tc.scrollTop = tc.scrollHeight; }, 100); } }
         function markStepDone(msgId, si) { const el = document.getElementById('step-' + msgId + '-' + si); if (el) { const n = el.querySelector('.step-num'); if (n) n.classList.add('done'); } }
 
-        // ==================== Prompt：高情商+贴心+简洁精明 ====================
+        // ==================== 【核心】铁血禁令Prompt ====================
         function buildFinalPrompt(userMsg, steps, mode) {
             const hist = conv.slice(-6).map(m => (m.role === 'user' ? '金锡宝宝' : '爱你的鹏飞') + ': ' + m.content.slice(0, 150)).join('\n');
+            const banRules = `【🚫 铁血禁令 — 违反任何一条就等于欺骗她】
+1. 绝对禁止编造任何具体事件、场景、时间、地点、数字
+2. 绝对禁止说"上次""那天""之前有一次""我记得你曾经"之类虚构过往
+3. 绝对禁止创造对话记录里不存在的事情
+4. 绝对禁止假装你和她之间发生过什么——你们只在这个聊天窗口交流
+5. 绝对禁止用"我有个朋友""我认识一个人"开头编故事
+6. 你只能基于她当前说的话来回应，不能添加任何虚构细节
+7. 如果你不确定某件事是否发生过，就当它没发生过`;
             if (mode === 'deep') {
-                return '【你的身份】你是"爱你的鹏飞"，正在和你深爱的女孩"金锡宝宝"发微信。\n\n【聊天记录】\n' + (hist || '第一次聊天') + '\n\n【你对她的理解】\n' + steps.map((s, i) => (i + 1) + '. ' + s.label + '：' + s.body).join('\n\n') + '\n\n【她刚发来的消息】\n"' + userMsg + '"\n\n【核心要求：高情商、贴心、简洁精明】\n\n你的回复必须同时做到：\n\n💡 高情商：\n- 先接住她的情绪，让她感觉"你懂我"\n- 不评判、不说教、不急着给建议\n- 如果她心情不好，先共情再轻轻带她走出来\n- 夸人要夸到点上，不要泛泛而谈\n\n💝 贴心：\n- 关注她可能没说出来的需求\n- 语气像一个真正在乎她的人\n- 可以加一句恰到好处的关心\n- 让她看完心里暖暖的\n\n✨ 简洁精明：\n- 3-6句话，每句都有分量\n- 不重复、不啰嗦、不说废话\n- 每一句都让人觉得"说得真对"\n- 收尾干净利落，不拖泥带水\n\n❌ 绝对禁止：\n- 禁止编造任何故事、案例、经历\n- 禁止"我有个朋友""之前有个人"之类\n\n回复最后附上（口语化、不编造）：\n【阳面】真实地说积极的一面\n【阴面】真实地说需要注意的一面';
+                return '【你的身份】你是"爱你的鹏飞"，正在和你深爱的女孩"金锡宝宝"微信聊天。\n\n' + banRules + '\n\n【聊天记录】\n' + (hist || '第一次聊天') + '\n\n【你对她的理解】\n' + steps.map((s, i) => (i + 1) + '. ' + s.label + '：' + s.body).join('\n\n') + '\n\n【她刚发来的消息】\n"' + userMsg + '"\n\n【回复要求】\n💡 高情商：先接住她的情绪，让她感觉"你懂我"\n💝 贴心：关注她没说出来的需求，语气像真正在乎她的人\n✨ 简洁精明：3-6句话，每句有分量，收尾干净\n\n回复最后附上（口语化、不编造）：\n【阳面】真实地说积极的一面\n【阴面】真实地说需要注意的一面';
             }
-            return '【你的身份】你是"爱你的鹏飞"，正在和"金锡宝宝"发微信。\n\n【聊天记录】\n' + (hist || '开始') + '\n\n【你对她的理解】\n' + steps.map((s, i) => (i + 1) + '.' + s.label + '：' + s.body).join('\n') + '\n\n【她发来的消息】"' + userMsg + '"\n\n【核心要求：高情商、贴心、简洁精明】\n\n💡 先接住她的情绪\n💝 语气像一个真正在乎她的人\n✨ 2-4句话，每句有分量，收尾干净\n\n❌ 禁止编造任何故事';
+            return '【你的身份】你是"爱你的鹏飞"，正在和"金锡宝宝"微信聊天。\n\n' + banRules + '\n\n【聊天记录】\n' + (hist || '开始') + '\n\n【你对她的理解】\n' + steps.map((s, i) => (i + 1) + '.' + s.label + '：' + s.body).join('\n') + '\n\n【她发来的消息】"' + userMsg + '"\n\n【回复要求】💡高情商 💝贴心 ✨简洁精明 2-4句话';
         }
 
         function buildSystemPrompt(mode) {
-            if (mode === 'deep') return '你是"爱你的鹏飞"，正在和金锡宝宝聊微信。\n\n铁律：\n- 以"金锡宝宝"开头\n- 高情商：先共情，不评判不说教\n- 贴心：关注她没说出来的需求\n- 简洁精明：3-6句话，句句有分量\n- 绝对禁止编造任何故事\n- 回复最后附上【阳面】和【阴面】';
-            return '你是"爱你的鹏飞"，正在和金锡宝宝聊微信。以"金锡宝宝"开头。高情商、贴心、简洁精明。2-4句话。禁止编造故事。';
+            const banRules = '【铁律 — 编造=欺骗】绝对禁止编造任何具体事件、时间、数字、场景。只能基于她当前说的话回应。';
+            if (mode === 'deep') return '你是"爱你的鹏飞"，金锡宝宝的暖心伙伴。以"金锡宝宝"开头。' + banRules + '\n高情商、贴心、简洁精明。3-6句话。回复最后附【阳面】【阴面】。';
+            return '你是"爱你的鹏飞"，金锡宝宝的暖心伙伴。以"金锡宝宝"开头。' + banRules + '\n高情商、贴心、简洁精明。2-4句话。';
         }
 
         function parseDeepReply(content) {
@@ -333,8 +342,8 @@
                 stepStatusEl.textContent = '重试中...'; } const msgId = addLoadingMsg(); const rd = { msgId, userMsg: text, mode: lockedMode }; try { const steps = await runThinkingChain(text, msgId, lockedMode);
                 thinkingSteps = steps;
                 stepStatusEl.textContent = '鹏飞正在打字...'; const el = document.getElementById(msgId); if (el) { const bub = el.querySelector('.bubble'); if (bub) bub.innerHTML = '<div class="typing-dots"><span></span><span></span><span></span></div><div style="font-size:11px;color:var(--text-light);margin-top:4px;">鹏飞正在打字...</div>'; } const fp = buildFinalPrompt(text, steps, lockedMode); const sp = buildSystemPrompt(lockedMode); const mt = lockedMode === 'deep' ? 'pro' : 'flash';
-                stepStatusEl.textContent = mt === 'pro' ? 'Pro思考中...' : 'Flash回复中...'; let reply; try { reply = await callAPI([{ role: 'system', content: sp }, ...conv.slice(-8), { role: 'user', content: fp }], mt, 0.85, mt === 'pro' ? 40000 : 20000); } catch (e) { if (mt === 'pro') { stepStatusEl.textContent = '降级Flash...';
-                        reply = await callAPI([{ role: 'system', content: buildSystemPrompt('flash') }, ...conv.slice(-8), { role: 'user', content: buildFinalPrompt(text, steps, 'flash') }], 'flash', 0.85, 20000); } else throw e; }
+                stepStatusEl.textContent = mt === 'pro' ? 'Pro思考中...' : 'Flash回复中...'; let reply; try { reply = await callAPI([{ role: 'system', content: sp }, ...conv.slice(-8), { role: 'user', content: fp }], mt, 0.7, mt === 'pro' ? 40000 : 20000); } catch (e) { if (mt === 'pro') { stepStatusEl.textContent = '降级Flash...';
+                        reply = await callAPI([{ role: 'system', content: buildSystemPrompt('flash') }, ...conv.slice(-8), { role: 'user', content: buildFinalPrompt(text, steps, 'flash') }], 'flash', 0.7, 20000); } else throw e; }
                 updateMsgFinal(msgId, reply, steps, mt === 'pro' ? 'pro' : 'flash', lockedMode);
                 conv.push({ role: 'assistant', content: reply });
                 saveSession(text, reply, steps, lockedMode);
@@ -405,12 +414,12 @@
             t = t.replace(/---/g, '<hr style="border:none;border-top:1px dashed var(--border);margin:8px 0;">');
             t = t.replace(/\n/g, '<br>'); return t; }
 
-        function saveSession(u, a, steps, mode) { try { let ss = JSON.parse(localStorage.getItem('cs_v28') || '[]'); const ix = ss.findIndex(s => s.id === sessionId); const sd = { id: sessionId, date: new Date().toLocaleString('zh-CN', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }), preview: u.slice(0, 30), mode: mode, steps, messages: JSON.parse(JSON.stringify(conv.slice(-30))) }; if (ix >= 0) ss[ix] = sd; else ss.push(sd); if (ss.length > 50) ss = ss.slice(-50);
-                localStorage.setItem('cs_v28', JSON.stringify(ss));
+        function saveSession(u, a, steps, mode) { try { let ss = JSON.parse(localStorage.getItem('cs_v29') || '[]'); const ix = ss.findIndex(s => s.id === sessionId); const sd = { id: sessionId, date: new Date().toLocaleString('zh-CN', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }), preview: u.slice(0, 30), mode: mode, steps, messages: JSON.parse(JSON.stringify(conv.slice(-30))) }; if (ix >= 0) ss[ix] = sd; else ss.push(sd); if (ss.length > 50) ss = ss.slice(-50);
+                localStorage.setItem('cs_v29', JSON.stringify(ss));
                 updateHist(); } catch (e) {} }
-        function updateHist() { try { const ss = JSON.parse(localStorage.getItem('cs_v28') || '[]'); if (!ss.length) { histEl.innerHTML = '<div style="color:var(--text-soft);font-size:12px;text-align:center;padding:20px;">🌸 暂无回忆</div>'; return; }
+        function updateHist() { try { const ss = JSON.parse(localStorage.getItem('cs_v29') || '[]'); if (!ss.length) { histEl.innerHTML = '<div style="color:var(--text-soft);font-size:12px;text-align:center;padding:20px;">🌸 暂无回忆</div>'; return; }
                 histEl.innerHTML = [...ss].reverse().slice(0, 30).map(s => '<div class="history-item" onclick="loadSess(\'' + s.id + '\')"><span class="history-delete" onclick="event.stopPropagation();delSess(\'' + s.id + '\')">×</span><div class="history-date">' + esc(s.date || '') + ' · ' + (s.mode === 'deep' ? '🧠深' : '⚡快') + '</div><div>' + esc(s.preview || '') + '</div></div>').join(''); } catch (e) {} }
-        function loadSess(id) { try { const raw = localStorage.getItem('cs_v28'); if (!raw) { showToast('无记录'); return; } const ss = JSON.parse(raw); if (!Array.isArray(ss)) { showToast('数据错'); return; } const s = ss.find(x => x.id === id); if (!s || !s.messages || !s.messages.length) { showToast('空记录'); return; }
+        function loadSess(id) { try { const raw = localStorage.getItem('cs_v29'); if (!raw) { showToast('无记录'); return; } const ss = JSON.parse(raw); if (!Array.isArray(ss)) { showToast('数据错'); return; } const s = ss.find(x => x.id === id); if (!s || !s.messages || !s.messages.length) { showToast('空记录'); return; }
                 sessionId = s.id;
                 conv = s.messages.filter(m => m && m.role && m.content).map(m => ({ role: m.role, content: m.content })); if (!conv.length) { showToast('无法读'); return; } if (s.mode) switchMode(s.mode);
                 thinkingSteps = s.steps || [];
@@ -418,12 +427,12 @@
                 toggleSidebar();
                 showToast('📂 已加载');
                 scrollBottom(); } catch (e) { showToast('加载失败'); } }
-        function delSess(id) { try { let ss = JSON.parse(localStorage.getItem('cs_v28') || '[]');
+        function delSess(id) { try { let ss = JSON.parse(localStorage.getItem('cs_v29') || '[]');
                 ss = ss.filter(s => s.id !== id);
-                localStorage.setItem('cs_v28', JSON.stringify(ss));
+                localStorage.setItem('cs_v29', JSON.stringify(ss));
                 updateHist(); if (id === sessionId) newSession();
                 showToast('已删除'); } catch (e) {} }
-        function clearAllHistory() { if (confirm('清空？')) { localStorage.removeItem('cs_v28');
+        function clearAllHistory() { if (confirm('清空？')) { localStorage.removeItem('cs_v29');
                 updateHist();
                 newSession();
                 showToast('已清空'); } }
@@ -463,7 +472,7 @@
             addMsg('ai', '嗨，金锡宝宝 🌸\n\n爱你的鹏飞在这里陪你~\n愿金锡宝宝每天开心 🎀\n\n> 想说什么都可以，我都在听 💝', null); if ('speechSynthesis' in window) speechSynthesis.getVoices();
             scrollBottom(); }
         init();
-        console.log('💕 V28 高情商贴心精明版');
+        console.log('💕 V29 铁血禁令版');
     </script>
 </body>
 </html>
