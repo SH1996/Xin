@@ -25,7 +25,7 @@
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', 'Microsoft YaHei', 'Hiragino Sans', sans-serif;
             background: var(--bg);
-            background-image: 
+            background-image: 
                 radial-gradient(ellipse at 20% 20%, rgba(252,228,236,0.5) 0%, transparent 50%),
                 radial-gradient(ellipse at 80% 80%, rgba(240,232,244,0.4) 0%, transparent 50%),
                 radial-gradient(ellipse at 50% 50%, rgba(255,245,247,0.6) 0%, transparent 70%);
@@ -88,50 +88,17 @@
         .speak-btn:active { background: var(--accent-soft); color: var(--rose-gold); border-color: var(--accent); }
         .speak-btn.speaking { background: var(--accent-soft); color: var(--rose-gold); border-color: var(--accent); animation: speakPulse 0.6s ease-in-out infinite; }
         @keyframes speakPulse { 0%, 100% { box-shadow: 0 0 0 rgba(232,160,180,0); } 50% { box-shadow: 0 0 12px rgba(232,160,180,0.4); } }
-
-        /* ========== ☯️ 阴阳展开按钮 ========== */
-        .taiji-toggle {
-            display: inline-flex; align-items: center; justify-content: center;
-            width: 36px; height: 36px; border-radius: 50%;
-            background: linear-gradient(135deg, #fce4ec, #f0e8f4);
-            border: 2px solid var(--border);
-            cursor: pointer; font-size: 18px; margin: 8px 0;
-            transition: all 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);
-            user-select: none; box-shadow: 0 2px 8px rgba(200,150,170,0.1);
-        }
+        .taiji-toggle { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #fce4ec, #f0e8f4); border: 2px solid var(--border); cursor: pointer; font-size: 18px; margin: 8px 0; transition: all 0.35s; user-select: none; box-shadow: 0 2px 8px rgba(200,150,170,0.1); }
         .taiji-toggle:active { transform: scale(0.92); }
-        .taiji-toggle.open {
-            background: linear-gradient(135deg, #f0d78c, #c9b8d4);
-            border-color: #c9b8d4;
-            transform: rotate(180deg);
-        }
-
-        /* ========== 阴阳模块容器 ========== */
-        .yinyang-panels {
-            max-height: 0; overflow: hidden;
-            transition: max-height 0.5s cubic-bezier(0.22, 0.61, 0.36, 1);
-            display: flex; flex-direction: column; gap: 8px;
-        }
+        .taiji-toggle.open { background: linear-gradient(135deg, #f0d78c, #c9b8d4); border-color: #c9b8d4; transform: rotate(180deg); }
+        .yinyang-panels { max-height: 0; overflow: hidden; transition: max-height 0.5s; display: flex; flex-direction: column; gap: 8px; }
         .yinyang-panels.expanded { max-height: 600px; }
-
-        /* 阳面模块 */
-        .yang-panel {
-            background: var(--yang-bg); border: 1.5px solid var(--yang-border);
-            border-radius: 14px; padding: 12px 14px;
-            animation: floatIn 0.4s ease;
-        }
+        .yang-panel { background: var(--yang-bg); border: 1.5px solid var(--yang-border); border-radius: 14px; padding: 12px 14px; animation: floatIn 0.4s ease; }
         .yang-panel .panel-icon { font-size: 18px; margin-bottom: 6px; }
         .yang-panel .panel-text { font-size: 13px; line-height: 1.7; color: var(--yang-text); }
-
-        /* 阴面模块 */
-        .yin-panel {
-            background: var(--yin-bg); border: 1.5px solid var(--yin-border);
-            border-radius: 14px; padding: 12px 14px;
-            animation: floatIn 0.4s ease;
-        }
+        .yin-panel { background: var(--yin-bg); border: 1.5px solid var(--yin-border); border-radius: 14px; padding: 12px 14px; animation: floatIn 0.4s ease; }
         .yin-panel .panel-icon { font-size: 18px; margin-bottom: 6px; }
         .yin-panel .panel-text { font-size: 13px; line-height: 1.7; color: var(--yin-text); }
-
         .retry-btn { display: inline-flex; align-items: center; gap: 8px; margin-top: 8px; padding: 12px 20px; background: var(--card-bg); border: 2px solid var(--accent); border-radius: 24px; color: var(--rose-gold); font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.3s; user-select: none; box-shadow: 0 3px 12px rgba(232,160,180,0.15); letter-spacing: 0.3px; }
         .retry-btn:active { background: #f8d0e0; transform: scale(0.95); }
         .hint-box { display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; margin-left: 8px; padding: 8px 14px; background: #fffbfc; border: 1.5px solid var(--border); border-radius: 16px; font-size: 11px; color: #c97b8b; animation: floatIn 0.4s ease; box-shadow: 0 2px 8px rgba(212,132,154,0.06); }
@@ -251,14 +218,14 @@
             document.getElementById('sidebarOverlay').classList.toggle('active'); }
 
         async function callAPI(msgs, mt, temp, timeout) { const model = mt === 'pro' ? DC.proModel : DC.flashModel; if (!navigator.onLine) throw new Error('OFFLINE'); const ctrl = new AbortController();
-            activeRequest = ctrl; const tid = setTimeout(() => ctrl.abort(), timeout); try { const r = await fetch(DC.url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + DC.apiKey }, body: JSON.stringify({ model, messages: msgs, temperature: temp, max_tokens: mt === 'pro' ? 4000 : 800, top_p: 0.9, stream: false }), signal: ctrl.signal });
+            activeRequest = ctrl; const tid = setTimeout(() => ctrl.abort(), timeout); try { const r = await fetch(DC.url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + DC.apiKey }, body: JSON.stringify({ model, messages: msgs, temperature: temp, max_tokens: mt === 'pro' ? 2000 : 600, top_p: 0.95, stream: false }), signal: ctrl.signal });
                 clearTimeout(tid);
                 activeRequest = null; if (!r.ok) { const et = await r.text(); throw new Error('API ' + r.status + ': ' + et.slice(0, 100)); } const d = await r.json(); return d.choices[0].message.content; } catch (e) { clearTimeout(tid);
                 activeRequest = null; if (e.name === 'AbortError') throw new Error('TIMEOUT'); if (e.message === 'OFFLINE') throw e; throw e; } }
 
-        async function runThinkingChain(userMsg, msgId) {
+        async function runThinkingChain(userMsg, msgId, lockedMode) {
             const hist = conv.slice(-10).map(m => (m.role === 'user' ? '金锡宝宝' : '爱你的鹏飞') + ': ' + m.content.slice(0, 150)).join('\n');
-            const isDeep = currentMode === 'deep';
+            const isDeep = lockedMode === 'deep';
             const steps = [];
             const labels = isDeep ? ['情绪深潜', '根源追溯', '需求聚焦', '精准回应', '镜像反思'] : ['情绪深潜', '根源追溯', '需求聚焦'];
             const total = labels.length;
@@ -302,7 +269,7 @@
             if (!navigator.onLine) throw new Error('OFFLINE');
             stepStatusEl.textContent = '镜像反思...';
             updateStepLoading(msgId, 4, '正在构建阴阳视角...');
-            const p5 = await callAPI([{ role: 'user', content: '【前四步】\n1.' + p1 + '\n2.' + p2 + '\n3.' + p3 + '\n4.' + p4 + '\n\n【她说】"' + userMsg + '"\n\n你是爱她的鹏飞。请完成"镜像反思"，分成两个独立部分：\n【阳面】积极视角、成长机会\n【阴面】反面教训、可能风险\n\n用一段话自然融合。' }], 'flash', 0.75, 20000);
+            const p5 = await callAPI([{ role: 'user', content: '【前四步】\n1.' + p1 + '\n2.' + p2 + '\n3.' + p3 + '\n4.' + p4 + '\n\n【她说】"' + userMsg + '"\n\n你是爱她的鹏飞。请完成"镜像反思"：\n【阳面】积极视角、成长机会\n【阴面】反面教训、可能风险\n\n用一段话自然融合。' }], 'flash', 0.75, 20000);
             steps.push({ label: labels[4], body: p5 });
             updateThinkingSteps(msgId, [...steps], true, total);
             markStepDone(msgId, 4);
@@ -325,60 +292,59 @@
                 setTimeout(() => { tc.scrollTop = tc.scrollHeight; }, 100); } }
         function markStepDone(msgId, si) { const el = document.getElementById('step-' + msgId + '-' + si); if (el) { const n = el.querySelector('.step-num'); if (n) n.classList.add('done'); } }
 
+        // ==================== Prompt：高情商+贴心+简洁精明 ====================
         function buildFinalPrompt(userMsg, steps, mode) {
             const hist = conv.slice(-6).map(m => (m.role === 'user' ? '金锡宝宝' : '爱你的鹏飞') + ': ' + m.content.slice(0, 150)).join('\n');
             if (mode === 'deep') {
-                return '【你的身份】你叫"爱你的鹏飞"，正在和你深爱的女孩"金锡宝宝"对话。\n\n【对话历史】\n' + (hist || '第一次对话') + '\n\n【你的思考】\n' + steps.map((s, i) => (i + 1) + '. ' + s.label + '：' + s.body).join('\n\n') + '\n\n【金锡宝宝刚说】\n"' + userMsg + '"\n\n请以"金锡宝宝"开头，以"爱你的鹏飞"自称。回复分两部分：\n\n第一部分：☯️ 用一段温暖自然的文字做总结（阴阳融合的感悟）。\n\n第二部分：用以下格式分别输出阳面和阴面，用【阳面】和【阴面】标记：\n【阳面】积极视角和成长机会的内容\n【阴面】反面教训和需要警惕的内容';
+                return '【你的身份】你是"爱你的鹏飞"，正在和你深爱的女孩"金锡宝宝"发微信。\n\n【聊天记录】\n' + (hist || '第一次聊天') + '\n\n【你对她的理解】\n' + steps.map((s, i) => (i + 1) + '. ' + s.label + '：' + s.body).join('\n\n') + '\n\n【她刚发来的消息】\n"' + userMsg + '"\n\n【核心要求：高情商、贴心、简洁精明】\n\n你的回复必须同时做到：\n\n💡 高情商：\n- 先接住她的情绪，让她感觉"你懂我"\n- 不评判、不说教、不急着给建议\n- 如果她心情不好，先共情再轻轻带她走出来\n- 夸人要夸到点上，不要泛泛而谈\n\n💝 贴心：\n- 关注她可能没说出来的需求\n- 语气像一个真正在乎她的人\n- 可以加一句恰到好处的关心\n- 让她看完心里暖暖的\n\n✨ 简洁精明：\n- 3-6句话，每句都有分量\n- 不重复、不啰嗦、不说废话\n- 每一句都让人觉得"说得真对"\n- 收尾干净利落，不拖泥带水\n\n❌ 绝对禁止：\n- 禁止编造任何故事、案例、经历\n- 禁止"我有个朋友""之前有个人"之类\n\n回复最后附上（口语化、不编造）：\n【阳面】真实地说积极的一面\n【阴面】真实地说需要注意的一面';
             }
-            return '【你的身份】你叫"爱你的鹏飞"，正在和"金锡宝宝"对话。\n\n【对话】\n' + (hist || '开始') + '\n\n【推理】\n' + steps.map((s, i) => (i + 1) + '.' + s.label + '：' + s.body).join('\n') + '\n\n【宝宝说】"' + userMsg + '"\n\n以"金锡宝宝"开头，"爱你的鹏飞"自称，简洁温暖地回应她。';
+            return '【你的身份】你是"爱你的鹏飞"，正在和"金锡宝宝"发微信。\n\n【聊天记录】\n' + (hist || '开始') + '\n\n【你对她的理解】\n' + steps.map((s, i) => (i + 1) + '.' + s.label + '：' + s.body).join('\n') + '\n\n【她发来的消息】"' + userMsg + '"\n\n【核心要求：高情商、贴心、简洁精明】\n\n💡 先接住她的情绪\n💝 语气像一个真正在乎她的人\n✨ 2-4句话，每句有分量，收尾干净\n\n❌ 禁止编造任何故事';
         }
 
         function buildSystemPrompt(mode) {
-            if (mode === 'deep') return '你是"爱你的鹏飞"，金锡宝宝的暖心伙伴。以"金锡宝宝"开头，"爱你的鹏飞"自称。温暖有深度。回复必须包含【阳面】和【阴面】两个标记部分。';
-            return '你是"爱你的鹏飞"，金锡宝宝的暖心伙伴。以"金锡宝宝"开头，"爱你的鹏飞"自称。简洁温暖。';
+            if (mode === 'deep') return '你是"爱你的鹏飞"，正在和金锡宝宝聊微信。\n\n铁律：\n- 以"金锡宝宝"开头\n- 高情商：先共情，不评判不说教\n- 贴心：关注她没说出来的需求\n- 简洁精明：3-6句话，句句有分量\n- 绝对禁止编造任何故事\n- 回复最后附上【阳面】和【阴面】';
+            return '你是"爱你的鹏飞"，正在和金锡宝宝聊微信。以"金锡宝宝"开头。高情商、贴心、简洁精明。2-4句话。禁止编造故事。';
         }
 
-        // ==================== 解析AI回复，提取阴阳模块 ====================
         function parseDeepReply(content) {
             const yangMatch = content.match(/【阳面】([\s\S]*?)(?=【阴面】|$)/);
             const yinMatch = content.match(/【阴面】([\s\S]*?)$/);
             let mainText = content;
             let yangText = '';
             let yinText = '';
-            if (yangMatch && yinMatch) {
-                yangText = yangMatch[1].trim();
+            if (yangMatch && yinMatch) { yangText = yangMatch[1].trim();
                 yinText = yinMatch[1].trim();
-                mainText = content.replace(/【阳面】[\s\S]*$/, '').trim();
-            }
+                mainText = content.replace(/【阳面】[\s\S]*$/, '').trim(); }
             return { mainText, yangText, yinText };
         }
 
         async function sendMessage(override) { if (busy && !override) return; const text = override || inputEl.value.trim(); if (!text) return; if (!navigator.onLine) { showToast('⚠️ 无网络'); return; } if (currentSpeech) { currentSpeech.cancel();
                 currentSpeech = null;
                 document.querySelectorAll('.speak-btn.speaking').forEach(b => b.classList.remove('speaking')); }
+            const lockedMode = currentMode;
             busy = true;
             sendBtnEl.disabled = true;
-            thinkingSteps = []; if (!override) { syncProgress(-1, 3);
+            thinkingSteps = []; if (!override) { syncProgress(-1, lockedMode === 'deep' ? 5 : 3);
                 stepStatusEl.textContent = '开始...';
                 addMsg('user', text, null);
                 inputEl.value = '';
                 inputEl.style.height = 'auto';
-                conv.push({ role: 'user', content: text }); } else { syncProgress(-1, 3);
-                stepStatusEl.textContent = '重试中...'; } const msgId = addLoadingMsg(); const rd = { msgId, userMsg: text, mode: currentMode }; try { const steps = await runThinkingChain(text, msgId);
+                conv.push({ role: 'user', content: text }); } else { syncProgress(-1, lockedMode === 'deep' ? 5 : 3);
+                stepStatusEl.textContent = '重试中...'; } const msgId = addLoadingMsg(); const rd = { msgId, userMsg: text, mode: lockedMode }; try { const steps = await runThinkingChain(text, msgId, lockedMode);
                 thinkingSteps = steps;
-                stepStatusEl.textContent = '鹏飞正在回复...'; const el = document.getElementById(msgId); if (el) { const bub = el.querySelector('.bubble'); if (bub) bub.innerHTML = '<div class="typing-dots"><span></span><span></span><span></span></div><div style="font-size:11px;color:var(--text-light);margin-top:4px;">鹏飞正在用心敲字...</div>'; } const fp = buildFinalPrompt(text, steps, currentMode); const sp = buildSystemPrompt(currentMode); const mt = currentMode === 'deep' ? 'pro' : 'flash';
-                stepStatusEl.textContent = mt === 'pro' ? 'Pro深度思考...' : 'Flash回复中...'; let reply; try { reply = await callAPI([{ role: 'system', content: sp }, ...conv.slice(-8), { role: 'user', content: fp }], mt, 0.88, mt === 'pro' ? 60000 : 25000); } catch (e) { if (mt === 'pro') { stepStatusEl.textContent = '降级Flash...';
-                        reply = await callAPI([{ role: 'system', content: buildSystemPrompt('flash') }, ...conv.slice(-8), { role: 'user', content: buildFinalPrompt(text, steps, 'flash') }], 'flash', 0.88, 20000); } else throw e; }
-                updateMsgFinal(msgId, reply, steps, mt === 'pro' ? 'pro' : 'flash', currentMode);
+                stepStatusEl.textContent = '鹏飞正在打字...'; const el = document.getElementById(msgId); if (el) { const bub = el.querySelector('.bubble'); if (bub) bub.innerHTML = '<div class="typing-dots"><span></span><span></span><span></span></div><div style="font-size:11px;color:var(--text-light);margin-top:4px;">鹏飞正在打字...</div>'; } const fp = buildFinalPrompt(text, steps, lockedMode); const sp = buildSystemPrompt(lockedMode); const mt = lockedMode === 'deep' ? 'pro' : 'flash';
+                stepStatusEl.textContent = mt === 'pro' ? 'Pro思考中...' : 'Flash回复中...'; let reply; try { reply = await callAPI([{ role: 'system', content: sp }, ...conv.slice(-8), { role: 'user', content: fp }], mt, 0.85, mt === 'pro' ? 40000 : 20000); } catch (e) { if (mt === 'pro') { stepStatusEl.textContent = '降级Flash...';
+                        reply = await callAPI([{ role: 'system', content: buildSystemPrompt('flash') }, ...conv.slice(-8), { role: 'user', content: buildFinalPrompt(text, steps, 'flash') }], 'flash', 0.85, 20000); } else throw e; }
+                updateMsgFinal(msgId, reply, steps, mt === 'pro' ? 'pro' : 'flash', lockedMode);
                 conv.push({ role: 'assistant', content: reply });
-                saveSession(text, reply, steps);
+                saveSession(text, reply, steps, lockedMode);
                 syncProgress(steps.length, steps.length);
                 stepStatusEl.textContent = '完成 ✓';
                 setTimeout(() => { stepStatusEl.textContent = '✨ 准备好了';
                     syncProgress(-1, 3); }, 1500); } catch (e) { console.error(e);
                 updateMsgError(msgId, getErrorMessage(e), thinkingSteps, rd);
                 stepStatusEl.textContent = '失败';
-                syncProgress(-1, 3); }
+                syncProgress(-1, lockedMode === 'deep' ? 5 : 3); }
             busy = false;
             sendBtnEl.disabled = false;
             inputEl.focus();
@@ -403,22 +369,16 @@
         function addLoadingMsg() { const id = 'm-' + Date.now(); const d = document.createElement('div');
             d.className = 'message ai';
             d.id = id;
-            d.innerHTML = '<div class="bubble"><div class="typing-dots"><span></span><span></span><span></span></div><div style="font-size:11px;color:var(--text-light);margin-top:4px;">鹏飞正在思考...</div></div><div class="thinking-chain"><div class="thinking-header" id="thinking-header-' + id + '"><span class="arrow">▶</span> 🧠 深度思考中...</div><div class="thinking-steps expanded" id="ts-' + id + '"><div class="loading-inline"><div class="dot-pulse"></div><div class="dot-pulse"></div><div class="dot-pulse"></div><span>准备推理...</span></div></div></div>';
+            d.innerHTML = '<div class="bubble"><div class="typing-dots"><span></span><span></span><span></span></div><div style="font-size:11px;color:var(--text-light);margin-top:4px;">鹏飞正在想怎么回你...</div></div><div class="thinking-chain"><div class="thinking-header" id="thinking-header-' + id + '"><span class="arrow">▶</span> 🧠 深度思考中...</div><div class="thinking-steps expanded" id="ts-' + id + '"><div class="loading-inline"><div class="dot-pulse"></div><div class="dot-pulse"></div><div class="dot-pulse"></div><span>准备推理...</span></div></div></div>';
             chatEl.appendChild(d);
             bindTC(d);
             scrollBottom(); return id; }
 
-        // ==================== 渲染消息（深度模式带☯️展开） ====================
         function updateMsgFinal(id, content, steps, tag, mode) { const el = document.getElementById(id); if (!el) return; const bid = 'spk-f-' + id;
             let extraHTML = '';
-            if (mode === 'deep') {
-                const parsed = parseDeepReply(content);
-                if (parsed.yangText && parsed.yinText) {
-                    const panelId = 'yy-panels-' + id;
+            if (mode === 'deep') { const parsed = parseDeepReply(content); if (parsed.yangText && parsed.yinText) { const panelId = 'yy-panels-' + id;
                     extraHTML = '<div style="text-align:center;"><button class="taiji-toggle" id="taiji-btn-' + id + '" onclick="toggleYinYang(\'' + panelId + '\',\'taiji-btn-' + id + '\')">☯️</button></div><div class="yinyang-panels" id="' + panelId + '"><div class="yang-panel"><div class="panel-icon">☀️</div><div class="panel-text">' + fmt(parsed.yangText) + '</div></div><div class="yin-panel"><div class="panel-icon">🌙</div><div class="panel-text">' + fmt(parsed.yinText) + '</div></div></div>';
-                    content = parsed.mainText;
-                }
-            }
+                    content = parsed.mainText; } }
             el.innerHTML = '<div class="model-tag ' + tag + '">' + (tag === 'pro' ? 'Pro' : 'Flash') + '</div><div class="bubble">' + fmt(content) + '</div>' + extraHTML + '<button class="speak-btn" id="' + bid + '" onclick="event.stopPropagation();handleSpeakClick(\'' + bid + '\')"><span>🔊</span> 听鹏飞说</button><div class="thinking-chain"><div class="thinking-header" id="thinking-header-' + id + '"><span class="arrow">▶</span> 🧠 思考过程（已完成）</div><div class="thinking-steps" id="ts-' + id + '">' + steps.map((s, i) => '<div class="step-item"><div class="step-num done">' + (i + 1) + '</div><div class="step-text"><strong>' + esc(s.label) + '</strong><br>' + esc(s.body) + '</div></div>').join('') + '</div></div>';
             el.dataset.spkTxt = content;
             el.dataset.spkBid = bid;
@@ -426,14 +386,10 @@
             setTimeout(() => { const hdr = document.getElementById('thinking-header-' + id); const stp = document.getElementById('ts-' + id); if (hdr) hdr.classList.remove('open'); if (stp) stp.classList.remove('expanded'); }, 1000);
             scrollBottom(); }
 
-        function toggleYinYang(panelId, btnId) {
-            const panels = document.getElementById(panelId);
-            const btn = document.getElementById(btnId);
-            if (!panels || !btn) return;
+        function toggleYinYang(panelId, btnId) { const panels = document.getElementById(panelId); const btn = document.getElementById(btnId); if (!panels || !btn) return;
             panels.classList.toggle('expanded');
             btn.classList.toggle('open');
-            setTimeout(scrollBottom, 400);
-        }
+            setTimeout(scrollBottom, 400); }
 
         function updateMsgError(id, err, steps, rd) { const el = document.getElementById(id); if (!el) return; const total = rd.mode === 'deep' ? 5 : 3; let sh = ''; if (steps && steps.length > 0) { sh = '<div class="thinking-chain"><div class="thinking-header" id="thinking-header-' + id + '"><span class="arrow">▶</span> 🧠 思考（' + steps.length + '/' + total + '步）</div><div class="thinking-steps expanded" id="ts-' + id + '">' + steps.map((s, i) => '<div class="step-item"><div class="step-num done">' + (i + 1) + '</div><div class="step-text"><strong>' + esc(s.label) + '</strong><br>' + esc(s.body) + '</div></div>').join('') + '</div></div>'; }
             el.innerHTML = '<div class="bubble error-bubble"><div style="font-weight:600;margin-bottom:6px;">😥 ' + esc(err) + '</div><div style="font-size:11px;">' + (steps.length > 0 ? steps.length + '/' + total + '步完成' : '未完成') + '，可重试</div></div><div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px;"><button class="retry-btn" onclick="retryMessage(\'' + id + '\',\'' + esc(rd.userMsg) + '\',\'' + rd.mode + '\')"><span>🔄</span> 重新生成</button><div class="hint-box">💝 请保持页面打开</div></div>' + sh;
@@ -449,12 +405,12 @@
             t = t.replace(/---/g, '<hr style="border:none;border-top:1px dashed var(--border);margin:8px 0;">');
             t = t.replace(/\n/g, '<br>'); return t; }
 
-        function saveSession(u, a, steps) { try { let ss = JSON.parse(localStorage.getItem('cs_v24') || '[]'); const ix = ss.findIndex(s => s.id === sessionId); const sd = { id: sessionId, date: new Date().toLocaleString('zh-CN', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }), preview: u.slice(0, 30), mode: currentMode, steps, messages: JSON.parse(JSON.stringify(conv.slice(-30))) }; if (ix >= 0) ss[ix] = sd; else ss.push(sd); if (ss.length > 50) ss = ss.slice(-50);
-                localStorage.setItem('cs_v24', JSON.stringify(ss));
+        function saveSession(u, a, steps, mode) { try { let ss = JSON.parse(localStorage.getItem('cs_v28') || '[]'); const ix = ss.findIndex(s => s.id === sessionId); const sd = { id: sessionId, date: new Date().toLocaleString('zh-CN', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }), preview: u.slice(0, 30), mode: mode, steps, messages: JSON.parse(JSON.stringify(conv.slice(-30))) }; if (ix >= 0) ss[ix] = sd; else ss.push(sd); if (ss.length > 50) ss = ss.slice(-50);
+                localStorage.setItem('cs_v28', JSON.stringify(ss));
                 updateHist(); } catch (e) {} }
-        function updateHist() { try { const ss = JSON.parse(localStorage.getItem('cs_v24') || '[]'); if (!ss.length) { histEl.innerHTML = '<div style="color:var(--text-soft);font-size:12px;text-align:center;padding:20px;">🌸 暂无回忆</div>'; return; }
+        function updateHist() { try { const ss = JSON.parse(localStorage.getItem('cs_v28') || '[]'); if (!ss.length) { histEl.innerHTML = '<div style="color:var(--text-soft);font-size:12px;text-align:center;padding:20px;">🌸 暂无回忆</div>'; return; }
                 histEl.innerHTML = [...ss].reverse().slice(0, 30).map(s => '<div class="history-item" onclick="loadSess(\'' + s.id + '\')"><span class="history-delete" onclick="event.stopPropagation();delSess(\'' + s.id + '\')">×</span><div class="history-date">' + esc(s.date || '') + ' · ' + (s.mode === 'deep' ? '🧠深' : '⚡快') + '</div><div>' + esc(s.preview || '') + '</div></div>').join(''); } catch (e) {} }
-        function loadSess(id) { try { const raw = localStorage.getItem('cs_v24'); if (!raw) { showToast('无记录'); return; } const ss = JSON.parse(raw); if (!Array.isArray(ss)) { showToast('数据错'); return; } const s = ss.find(x => x.id === id); if (!s || !s.messages || !s.messages.length) { showToast('空记录'); return; }
+        function loadSess(id) { try { const raw = localStorage.getItem('cs_v28'); if (!raw) { showToast('无记录'); return; } const ss = JSON.parse(raw); if (!Array.isArray(ss)) { showToast('数据错'); return; } const s = ss.find(x => x.id === id); if (!s || !s.messages || !s.messages.length) { showToast('空记录'); return; }
                 sessionId = s.id;
                 conv = s.messages.filter(m => m && m.role && m.content).map(m => ({ role: m.role, content: m.content })); if (!conv.length) { showToast('无法读'); return; } if (s.mode) switchMode(s.mode);
                 thinkingSteps = s.steps || [];
@@ -462,12 +418,12 @@
                 toggleSidebar();
                 showToast('📂 已加载');
                 scrollBottom(); } catch (e) { showToast('加载失败'); } }
-        function delSess(id) { try { let ss = JSON.parse(localStorage.getItem('cs_v24') || '[]');
+        function delSess(id) { try { let ss = JSON.parse(localStorage.getItem('cs_v28') || '[]');
                 ss = ss.filter(s => s.id !== id);
-                localStorage.setItem('cs_v24', JSON.stringify(ss));
+                localStorage.setItem('cs_v28', JSON.stringify(ss));
                 updateHist(); if (id === sessionId) newSession();
                 showToast('已删除'); } catch (e) {} }
-        function clearAllHistory() { if (confirm('清空？')) { localStorage.removeItem('cs_v24');
+        function clearAllHistory() { if (confirm('清空？')) { localStorage.removeItem('cs_v28');
                 updateHist();
                 newSession();
                 showToast('已清空'); } }
@@ -479,7 +435,7 @@
             chatEl.innerHTML = '';
             syncProgress(-1, 3);
             stepStatusEl.textContent = '✨ 准备好了';
-            addMsg('ai', '嗨，金锡宝宝 🌸\n\n**爱你的鹏飞** 在这里陪你~\n愿金锡宝宝每天开心 🎀\n\n> 鹏飞会用心听你说的每一句话 💝', null);
+            addMsg('ai', '嗨，金锡宝宝 🌸\n\n爱你的鹏飞在这里陪你~\n愿金锡宝宝每天开心 🎀\n\n> 想说什么都可以，我都在听 💝', null);
             showToast('✨ 新对话');
             scrollBottom(); }
 
@@ -504,10 +460,10 @@
         function init() { updateHist();
             syncProgress(-1, 3);
             stepStatusEl.textContent = '✨ 准备好了';
-            addMsg('ai', '嗨，金锡宝宝 🌸\n\n**爱你的鹏飞** 在这里陪你~\n愿金锡宝宝每天开心 🎀\n\n> 鹏飞会用心听你说的每一句话 💝', null); if ('speechSynthesis' in window) speechSynthesis.getVoices();
+            addMsg('ai', '嗨，金锡宝宝 🌸\n\n爱你的鹏飞在这里陪你~\n愿金锡宝宝每天开心 🎀\n\n> 想说什么都可以，我都在听 💝', null); if ('speechSynthesis' in window) speechSynthesis.getVoices();
             scrollBottom(); }
         init();
-        console.log('💕 爱你的鹏飞 · V24 ☯️阴阳展开版');
+        console.log('💕 V28 高情商贴心精明版');
     </script>
 </body>
 </html>
