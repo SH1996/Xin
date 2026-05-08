@@ -1620,8 +1620,8 @@
         const html = records.slice().reverse().map((r, i) => {
             const realIndex = records.length - 1 - i;
             const date = r.date || '';
-            const preview = (r.user || '').slice(0, 60);
-            const reply = (r.reply || '').slice(0, 120);
+            const preview = r.user || '';
+const reply = r.reply || '';
             return `<div class="query-item" id="qitem-${realIndex}">
                 <div class="meta">
                     <span>${esc(date)}</span>
