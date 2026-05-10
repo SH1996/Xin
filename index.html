@@ -1327,9 +1327,12 @@
     <div class="query-overlay" id="queryOverlay" onclick="closeQueryPanel()"></div>
     <div class="query-panel" id="queryPanel">
         <div class="query-header">
-            <span>📋 对话记录查询</span>
-            <button class="icon-btn" onclick="closeQueryPanel()" style="width:30px;height:30px;">✕</button>
-        </div>
+    <span>📋 对话记录查询</span>
+    <div style="display:flex;gap:8px;align-items:center;">
+        <button id="deleteAllBtn" onclick="deleteAllRecords()" style="background:none;border:1px solid #e8c0c8;color:#c97b8b;padding:4px 12px;border-radius:14px;font-size:12px;cursor:pointer;transition:all 0.2s;">🗑 全部删除</button>
+        <button class="icon-btn" onclick="closeQueryPanel()" style="width:30px;height:30px;">✕</button>
+    </div>
+</div>
         <div id="queryContent" style="flex:1;display:flex;flex-direction:column;overflow:hidden;"></div>
     </div>
 
@@ -1390,6 +1393,16 @@
                 await sleep(100);
             }
             return res;
+        }
+        async function deleteAllRecords() {
+    if (!confirm('⚠️ 确定要删除所有聊天记录吗？此操作不可撤销！')) return;
+    try {
+        await saveChatJson([]);
+        showToast('✅ 已全部删除');
+        loadQueryRecords(); // 刷新列表
+    } catch (e) {
+        showToast('❌ 删除失败');
+    }
         }
 
         // ===== AI意图识别 =====
