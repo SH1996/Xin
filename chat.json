@@ -75,5 +75,13 @@
     "mode": "flash",
     "rp": true,
     "type": "voice"
+  },
+  {
+    "date": "2026-05-17T09:44:41.202Z",
+    "user": "你是谁",
+    "reply": "[🎤语音:我是谁]",
+    "mode": "flash",
+    "rp": true,
+    "type": "voice"
   }
 ]
