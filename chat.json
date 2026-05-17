@@ -134,5 +134,13 @@
     "mode": "flash",
     "rp": true,
     "type": "voice"
+  },
+  {
+    "date": "2026-05-17T10:12:23.246Z",
+    "user": "你不要老是哎呀",
+    "reply": "[🎤语音:酷]",
+    "mode": "flash",
+    "rp": true,
+    "type": "voice"
   }
 ]
