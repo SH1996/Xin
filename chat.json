@@ -37,5 +37,13 @@
     "mode": "flash",
     "rp": true,
     "type": "voice"
+  },
+  {
+    "date": "2026-05-17T12:12:06.998Z",
+    "user": "呵呵",
+    "reply": "[🎤语音:哎呀]",
+    "mode": "flash",
+    "rp": true,
+    "type": "voice"
   }
 ]
