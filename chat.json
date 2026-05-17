@@ -224,5 +224,13 @@
     "mode": "flash",
     "rp": true,
     "type": "voice"
+  },
+  {
+    "date": "2026-05-17T08:34:10.312Z",
+    "user": "笑一个",
+    "reply": "[🎤语音:笑]",
+    "mode": "flash",
+    "rp": true,
+    "type": "voice"
   }
 ]
