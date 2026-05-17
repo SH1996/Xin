@@ -165,5 +165,13 @@
     "mode": "flash",
     "rp": true,
     "type": "voice"
+  },
+  {
+    "date": "2026-05-17T10:21:01.218Z",
+    "user": "你哎呀个屁啊",
+    "reply": "[🎤语音:哎呀]",
+    "mode": "flash",
+    "rp": true,
+    "type": "voice"
   }
 ]
