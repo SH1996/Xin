@@ -144,5 +144,13 @@
     "mode": "flash",
     "rp": true,
     "type": "voice"
+  },
+  {
+    "date": "2026-05-17T12:26:50.268Z",
+    "user": "到底是谁？",
+    "reply": "[🎤语音:我是谁（不想说）]",
+    "mode": "flash",
+    "rp": true,
+    "type": "voice"
   }
 ]
