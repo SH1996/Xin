@@ -22,5 +22,13 @@
     "mode": "flash",
     "rp": true,
     "type": "voice"
+  },
+  {
+    "date": "2026-05-17T09:34:16.078Z",
+    "user": "唱首歌",
+    "reply": "[🎤语音:唱首歌]",
+    "mode": "flash",
+    "rp": true,
+    "type": "voice"
   }
 ]
