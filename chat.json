@@ -166,5 +166,13 @@
     "mode": "flash",
     "rp": true,
     "type": "voice"
+  },
+  {
+    "date": "2026-05-17T09:00:36.154Z",
+    "user": "你喝多了？",
+    "reply": "[🎤语音:醉了]",
+    "mode": "flash",
+    "rp": true,
+    "type": "voice"
   }
 ]
