@@ -152,5 +152,13 @@
     "mode": "flash",
     "rp": true,
     "type": "voice"
+  },
+  {
+    "date": "2026-05-17T08:17:17.143Z",
+    "user": "哈哈，皮一个？",
+    "reply": "[🎤语音:调皮]",
+    "mode": "flash",
+    "rp": true,
+    "type": "voice"
   }
 ]
