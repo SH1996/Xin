@@ -200,5 +200,13 @@
     "mode": "flash",
     "rp": true,
     "type": "voice"
+  },
+  {
+    "date": "2026-05-17T13:29:48.607Z",
+    "user": "你好",
+    "reply": "[🎤语音:微笑]",
+    "mode": "flash",
+    "rp": true,
+    "type": "voice"
   }
 ]
