@@ -70,5 +70,13 @@
     "mode": "flash",
     "rp": true,
     "type": "voice"
+  },
+  {
+    "date": "2026-05-17T08:52:58.170Z",
+    "user": "哭",
+    "reply": "[🎤语音:你好]",
+    "mode": "flash",
+    "rp": true,
+    "type": "voice"
   }
 ]
