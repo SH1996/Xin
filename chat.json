@@ -46,5 +46,13 @@
     "mode": "flash",
     "rp": true,
     "type": "voice"
+  },
+  {
+    "date": "2026-05-17T08:51:37.507Z",
+    "user": "吃饭了吗？",
+    "reply": "[🎤语音:你好]",
+    "mode": "flash",
+    "rp": true,
+    "type": "voice"
   }
 ]
