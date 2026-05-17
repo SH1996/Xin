@@ -150,5 +150,13 @@
     "mode": "flash",
     "rp": true,
     "type": "voice"
+  },
+  {
+    "date": "2026-05-17T09:00:07.307Z",
+    "user": "你还好吧",
+    "reply": "[🎤语音:笑]",
+    "mode": "flash",
+    "rp": true,
+    "type": "voice"
   }
 ]
