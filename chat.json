@@ -78,5 +78,13 @@
     "mode": "flash",
     "rp": true,
     "type": "voice"
+  },
+  {
+    "date": "2026-05-17T08:53:04.983Z",
+    "user": "给爷哭一个",
+    "reply": "[🎤语音:哭]",
+    "mode": "flash",
+    "rp": true,
+    "type": "voice"
   }
 ]
