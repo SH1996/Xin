@@ -152,5 +152,13 @@
     "mode": "flash",
     "rp": true,
     "type": "voice"
+  },
+  {
+    "date": "2026-05-17T12:32:37.501Z",
+    "user": "hi",
+    "reply": "[🎤语音:微笑]",
+    "mode": "flash",
+    "rp": true,
+    "type": "voice"
   }
 ]
