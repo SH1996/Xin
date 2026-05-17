@@ -216,5 +216,13 @@
     "mode": "flash",
     "rp": true,
     "type": "voice"
+  },
+  {
+    "date": "2026-05-17T08:32:21.975Z",
+    "user": "给爷笑一个",
+    "reply": "[🎤语音:哈哈]",
+    "mode": "flash",
+    "rp": true,
+    "type": "voice"
   }
 ]
