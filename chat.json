@@ -46,5 +46,13 @@
     "mode": "flash",
     "rp": true,
     "type": "voice"
+  },
+  {
+    "date": "2026-05-17T10:08:33.498Z",
+    "user": "你干啥",
+    "reply": "[🎤语音:你在说啥_]",
+    "mode": "flash",
+    "rp": true,
+    "type": "voice"
   }
 ]
