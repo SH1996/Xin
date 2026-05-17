@@ -35,5 +35,13 @@
     "mode": "flash",
     "rp": true,
     "type": "voice"
+  },
+  {
+    "date": "2026-05-17T14:38:41.214Z",
+    "user": "你好",
+    "reply": "[🎤语音:想我了吗_柔和带笑_]",
+    "mode": "flash",
+    "rp": true,
+    "type": "voice"
   }
 ]
