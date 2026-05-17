@@ -192,5 +192,13 @@
     "mode": "flash",
     "rp": true,
     "type": "voice"
+  },
+  {
+    "date": "2026-05-17T12:43:57.632Z",
+    "user": "来来来",
+    "reply": "[🎤语音:哎呀_无语_]",
+    "mode": "flash",
+    "rp": true,
+    "type": "voice"
   }
 ]
