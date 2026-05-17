@@ -59,5 +59,13 @@
     "mode": "flash",
     "rp": true,
     "type": "voice"
+  },
+  {
+    "date": "2026-05-17T09:43:30.146Z",
+    "user": "你啥时候准备睡觉？",
+    "reply": "[🎤语音:睡觉]",
+    "mode": "flash",
+    "rp": true,
+    "type": "voice"
   }
 ]
