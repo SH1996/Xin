@@ -123,5 +123,13 @@
     "mode": "flash",
     "rp": true,
     "type": "voice"
+  },
+  {
+    "date": "2026-05-17T09:48:09.358Z",
+    "user": "你咋了",
+    "reply": "[🎤语音:无语]",
+    "mode": "flash",
+    "rp": true,
+    "type": "voice"
   }
 ]
