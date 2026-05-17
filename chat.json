@@ -21,5 +21,13 @@
     "mode": "flash",
     "rp": true,
     "type": "voice"
+  },
+  {
+    "date": "2026-05-17T11:09:43.532Z",
+    "user": "额",
+    "reply": "[🎤语音:我是谁]",
+    "mode": "flash",
+    "rp": true,
+    "type": "voice"
   }
 ]
