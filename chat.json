@@ -110,5 +110,13 @@
     "mode": "flash",
     "rp": true,
     "type": "voice"
+  },
+  {
+    "date": "2026-05-17T08:56:43.553Z",
+    "user": "啊？",
+    "reply": "[🎤语音:笑]",
+    "mode": "flash",
+    "rp": true,
+    "type": "voice"
   }
 ]
