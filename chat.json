@@ -14,5 +14,13 @@
     "mode": "flash",
     "rp": true,
     "type": "voice"
+  },
+  {
+    "date": "2026-05-17T09:54:12.142Z",
+    "user": "你咋了",
+    "reply": "[🎤语音:没事]",
+    "mode": "flash",
+    "rp": true,
+    "type": "voice"
   }
 ]
