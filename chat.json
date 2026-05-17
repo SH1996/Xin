@@ -142,5 +142,13 @@
     "mode": "flash",
     "rp": true,
     "type": "voice"
+  },
+  {
+    "date": "2026-05-17T08:57:20.376Z",
+    "user": "就会这一句吗？",
+    "reply": "[🎤语音:无语]",
+    "mode": "flash",
+    "rp": true,
+    "type": "voice"
   }
 ]
