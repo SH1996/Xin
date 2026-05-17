@@ -54,5 +54,13 @@
     "mode": "flash",
     "rp": true,
     "type": "voice"
+  },
+  {
+    "date": "2026-05-17T08:52:32.421Z",
+    "user": "给爷笑一个",
+    "reply": "[🎤语音:笑]",
+    "mode": "flash",
+    "rp": true,
+    "type": "voice"
   }
 ]
