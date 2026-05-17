@@ -174,5 +174,13 @@
     "mode": "flash",
     "rp": true,
     "type": "voice"
+  },
+  {
+    "date": "2026-05-17T09:03:29.641Z",
+    "user": "好累啊？",
+    "reply": "[🎤语音:哭]",
+    "mode": "flash",
+    "rp": true,
+    "type": "voice"
   }
 ]
