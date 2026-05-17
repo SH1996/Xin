@@ -244,5 +244,13 @@
     "mode": "flash",
     "rp": true,
     "type": "voice"
+  },
+  {
+    "date": "2026-05-17T10:36:15.179Z",
+    "user": "额",
+    "reply": "[🎤语音:哎呀]",
+    "mode": "flash",
+    "rp": true,
+    "type": "voice"
   }
 ]
