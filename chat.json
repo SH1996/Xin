@@ -184,5 +184,13 @@
     "mode": "flash",
     "rp": true,
     "type": "voice"
+  },
+  {
+    "date": "2026-05-17T12:40:07.698Z",
+    "user": "你放屁",
+    "reply": "[🎤语音:微笑]",
+    "mode": "flash",
+    "rp": true,
+    "type": "voice"
   }
 ]
