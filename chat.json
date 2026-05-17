@@ -176,5 +176,13 @@
     "mode": "flash",
     "rp": true,
     "type": "voice"
+  },
+  {
+    "date": "2026-05-17T08:22:05.827Z",
+    "user": "哈个屁",
+    "reply": "[🎤语音:哈哈]",
+    "mode": "flash",
+    "rp": true,
+    "type": "voice"
   }
 ]
