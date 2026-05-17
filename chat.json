@@ -54,5 +54,13 @@
     "mode": "flash",
     "rp": true,
     "type": "voice"
+  },
+  {
+    "date": "2026-05-17T10:08:55.819Z",
+    "user": "想你了",
+    "reply": "[🎤语音:想你了]",
+    "mode": "flash",
+    "rp": true,
+    "type": "voice"
   }
 ]
