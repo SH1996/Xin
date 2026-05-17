@@ -86,5 +86,13 @@
     "mode": "flash",
     "rp": true,
     "type": "voice"
+  },
+  {
+    "date": "2026-05-17T10:10:48.935Z",
+    "user": "你哎呀个屁",
+    "reply": "[🎤语音:你在说啥_]",
+    "mode": "flash",
+    "rp": true,
+    "type": "voice"
   }
 ]
