@@ -96,5 +96,13 @@
     "mode": "flash",
     "rp": true,
     "type": "voice"
+  },
+  {
+    "date": "2026-05-17T12:20:16.197Z",
+    "user": "你笑个啥笑？我问你是谁。",
+    "reply": "[🎤语音:我是谁]",
+    "mode": "flash",
+    "rp": true,
+    "type": "voice"
   }
 ]
