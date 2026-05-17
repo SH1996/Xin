@@ -104,5 +104,13 @@
     "mode": "flash",
     "rp": true,
     "type": "voice"
+  },
+  {
+    "date": "2026-05-17T07:20:21.381Z",
+    "user": "哈哈，你是谁",
+    "reply": "[🎤语音:哈哈]",
+    "mode": "flash",
+    "rp": true,
+    "type": "voice"
   }
 ]
