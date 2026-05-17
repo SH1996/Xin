@@ -13,5 +13,13 @@
     "mode": "flash",
     "rp": true,
     "type": "voice"
+  },
+  {
+    "date": "2026-05-17T11:09:34.782Z",
+    "user": "我说你猜我是谁",
+    "reply": "[🎤语音:我是谁]",
+    "mode": "flash",
+    "rp": true,
+    "type": "voice"
   }
 ]
