@@ -120,5 +120,13 @@
     "mode": "flash",
     "rp": true,
     "type": "voice"
+  },
+  {
+    "date": "2026-05-17T12:21:42.000Z",
+    "user": "你哎呀个屁",
+    "reply": "[🎤语音:笑]",
+    "mode": "flash",
+    "rp": true,
+    "type": "voice"
   }
 ]
