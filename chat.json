@@ -104,5 +104,13 @@
     "mode": "flash",
     "rp": true,
     "type": "voice"
+  },
+  {
+    "date": "2026-05-17T12:20:33.225Z",
+    "user": "真的假的？",
+    "reply": "[🎤语音:哎呀]",
+    "mode": "flash",
+    "rp": true,
+    "type": "voice"
   }
 ]
