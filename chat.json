@@ -174,5 +174,14 @@
     "mode": "advisor",
     "rp": false,
     "clientId": "c000000"
+  },
+  {
+    "date": "2026-05-18T06:39:22.651Z",
+    "user": "我想聊聊店铺",
+    "reply": "（发了一段语音：来吧_我准备好听啦_耳朵竖高高_认真带笑_）",
+    "mode": "warm",
+    "rp": true,
+    "type": "voice",
+    "clientId": "c000000"
   }
 ]
