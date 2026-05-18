@@ -71,5 +71,13 @@
     "mode": "flash",
     "rp": true,
     "type": "voice"
+  },
+  {
+    "date": "2026-05-18T04:24:55.351Z",
+    "user": "想你了",
+    "reply": "[🎤语音:其实我刚刚在想你呀]",
+    "mode": "flash",
+    "rp": true,
+    "type": "voice"
   }
 ]
