@@ -6,5 +6,14 @@
     "mode": "warm",
     "rp": true,
     "clientId": "csh79pl"
+  },
+  {
+    "date": "2026-05-18T09:00:27.074Z",
+    "user": "我真想你了",
+    "reply": "（发了一段语音：我也想你，好巧(轻柔)）",
+    "mode": "warm",
+    "rp": true,
+    "type": "voice",
+    "clientId": "csh79pl"
   }
 ]
