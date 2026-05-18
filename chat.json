@@ -273,5 +273,14 @@
     "rp": true,
     "type": "voice",
     "clientId": "c000000"
+  },
+  {
+    "date": "2026-05-18T07:23:46.338Z",
+    "user": "想了",
+    "reply": "（发了一段语音：其实我刚刚在想你呀）",
+    "mode": "warm",
+    "rp": true,
+    "type": "voice",
+    "clientId": "c000000"
   }
 ]
