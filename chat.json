@@ -15,5 +15,14 @@
     "rp": true,
     "type": "voice",
     "clientId": "csh79pl"
+  },
+  {
+    "date": "2026-05-18T09:01:27.726Z",
+    "user": "你还在不在？",
+    "reply": "（发了一段语音：我在呢_轻声_）",
+    "mode": "warm",
+    "rp": true,
+    "type": "voice",
+    "clientId": "csh79pl"
   }
 ]
