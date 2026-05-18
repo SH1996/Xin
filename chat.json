@@ -24,5 +24,14 @@
     "rp": true,
     "type": "voice",
     "clientId": "csh79pl"
+  },
+  {
+    "date": "2026-05-18T09:01:59.333Z",
+    "user": "一直都在在吗？",
+    "reply": "（发了一段语音：我在呢，一直都在(轻声)）",
+    "mode": "warm",
+    "rp": true,
+    "type": "voice",
+    "clientId": "csh79pl"
   }
 ]
