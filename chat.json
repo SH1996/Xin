@@ -264,5 +264,14 @@
     "mode": "warm",
     "rp": true,
     "clientId": "c000000"
+  },
+  {
+    "date": "2026-05-18T07:23:17.074Z",
+    "user": "你好",
+    "reply": "（发了一段语音：想我了吗_柔和带笑_）",
+    "mode": "warm",
+    "rp": true,
+    "type": "voice",
+    "clientId": "c000000"
   }
 ]
