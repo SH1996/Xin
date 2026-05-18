@@ -101,5 +101,13 @@
     "mode": "flash",
     "rp": true,
     "type": "voice"
+  },
+  {
+    "date": "2026-05-18T04:35:54.353Z",
+    "user": "你好吗",
+    "reply": "[🎤语音:其实我刚刚在想你呀]",
+    "mode": "flash",
+    "rp": true,
+    "type": "voice"
   }
 ]
