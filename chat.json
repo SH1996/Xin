@@ -22,5 +22,14 @@
     "mode": "warm",
     "rp": true,
     "clientId": "crvncm5"
+  },
+  {
+    "date": "2026-05-19T06:51:28.209Z",
+    "user": "我是你哥",
+    "reply": "（发了一段语音：我是谁）",
+    "mode": "warm",
+    "rp": true,
+    "type": "voice",
+    "clientId": "crvncm5"
   }
 ]
