@@ -14,5 +14,13 @@
     "mode": "advisor",
     "rp": false,
     "clientId": "csh79pl"
+  },
+  {
+    "date": "2026-05-19T06:50:35.290Z",
+    "user": "你是谁",
+    "reply": "哎呀，这么快就问我是谁，是不是偷偷关注我好久了？先说说你是谁，我再考虑要不要告诉你我是谁～",
+    "mode": "warm",
+    "rp": true,
+    "clientId": "crvncm5"
   }
 ]
