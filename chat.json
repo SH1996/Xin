@@ -22,5 +22,14 @@
     "mode": "advisor",
     "rp": false,
     "clientId": "csh79pl"
+  },
+  {
+    "date": "2026-05-21T02:25:28.633Z",
+    "user": "你好",
+    "reply": "（发了一段语音：我在呢_轻声_）",
+    "mode": "warm",
+    "rp": true,
+    "type": "voice",
+    "clientId": "c000000"
   }
 ]
