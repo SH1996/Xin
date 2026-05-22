@@ -31,5 +31,14 @@
     "rp": true,
     "type": "voice",
     "clientId": "csh79pl"
+  },
+  {
+    "date": "2026-05-22T10:18:52.046Z",
+    "user": "所以呢？你想表达什么🌚",
+    "reply": "（发了一段语音：其实我刚刚在想你呀）",
+    "mode": "warm",
+    "rp": true,
+    "type": "voice",
+    "clientId": "csh79pl"
   }
 ]
