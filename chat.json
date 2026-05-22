@@ -22,5 +22,14 @@
     "mode": "advisor",
     "rp": false,
     "clientId": "csh79pl"
+  },
+  {
+    "date": "2026-05-22T10:17:24.390Z",
+    "user": "哎呀，感觉突然回来找你聊聊好开心啊",
+    "reply": "（发了一段语音：我在呢_一直都在_轻声_）",
+    "mode": "warm",
+    "rp": true,
+    "type": "voice",
+    "clientId": "csh79pl"
   }
 ]
