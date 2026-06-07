@@ -2232,6 +2232,26 @@
             document.getElementById('voicePanel').classList.remove('open');
             document.getElementById('voiceOverlay').classList.remove('active');
         }
+        function openVideosPanel() {
+            closeLibrary(); closeWeekly(); closeVoicePanel();
+            document.getElementById('videosOverlay').classList.add('active');
+            document.getElementById('videosPanel').classList.add('active');
+            renderVideosWall();
+        }
+        function closeVideosPanel() {
+            document.getElementById('videosOverlay').classList.remove('active');
+            document.getElementById('videosPanel').classList.remove('active');
+        }
+        function openShopsPanel() {
+            closeLibrary(); closeWeekly(); closeVoicePanel();
+            document.getElementById('shopsOverlay').classList.add('active');
+            document.getElementById('shopsPanel').classList.add('active');
+            loadShopTransfersV2();
+        }
+        function closeShopsPanel() {
+            document.getElementById('shopsOverlay').classList.remove('active');
+            document.getElementById('shopsPanel').classList.remove('active');
+        }
         function renderVoiceLibrary() {
             const cn = document.getElementById('voiceLibCount');
             const keys = Object.keys(voiceLibrary);
@@ -4554,8 +4574,8 @@
             videoList.splice(idx, 1);
             saveVideos();
         }
-        function renderVideoWall() {
-            var wall = document.getElementById('videoWall');
+        function renderVideosWall() {
+            var wall = document.getElementById('videosWall');
             if (!wall) return;
             if (!videoList.length) {
                 wall.innerHTML = '<div style="color:#666;padding:60px 20px;text-align:center;font-size:14px;">📭 还没有收藏视频<br><span style="font-size:12px;color:#444;">粘贴链接添加</span></div>';
@@ -4590,23 +4610,23 @@
         const SHOP_TRANSFER_KEY = 'xin_shop_transfers';
         var shopTransfers = [];
 
-        function loadShopTransfers() {
-            var list = document.getElementById('shopTransferList');
+        function loadShopTransfersV2() {
+            var list = document.getElementById('shopsWall');
             if (!list) return;
+            list.innerHTML = '<div style="color:#8b949e;text-align:center;padding:20px;">⏳ 加载中…</div>';
             // 先从 localStorage 加载缓存
             try {
                 var cached = localStorage.getItem(SHOP_TRANSFER_KEY);
                 if (cached) {
                     shopTransfers = JSON.parse(cached);
+                    renderShopTransfersV2();
                 }
             } catch(e) { shopTransfers = []; }
-            renderShopTransfers();
-
-            // 尝试刷新(通过个简单的跨域请求)
-            fetchShopData();
+            // 再从 GitHub 加载最新
+            fetchShopDataV2();
         }
-        function renderShopTransfers() {
-            var list = document.getElementById('shopTransferList');
+        function renderShopTransfersV2() {
+            var list = document.getElementById('shopsWall');
             if (!list) return;
             if (!shopTransfers.length) {
                 list.innerHTML = '<div style="color:#8b949e;text-align:center;padding:40px 20px;font-size:13px;">📭 暂无数据<br><span style="font-size:11px;color:#484f58;">点击"刷新"获取最新店铺转让信息</span></div>';
@@ -4618,16 +4638,12 @@
                 var badge = s.top ? '<span style="background:#da3633;color:#fff;font-size:10px;padding:1px 5px;border-radius:3px;margin-right:4px;">顶</span>' : '';
                 var catBadge = '<span style="background:#21262d;color:#58a6ff;font-size:10px;padding:1px 6px;border-radius:3px;">' + esc(s.cat) + '</span>';
                 var telDisplay = s.tel ? ('<a href="tel:' + escAttr(s.tel) + '" style="color:#58a6ff;font-size:12px;text-decoration:none;">📞 ' + esc(s.tel) + '</a>') : '';
-                var timeDisplay = s.time ? ('<span style="color:#8b949e;font-size:11px;">' + esc(s.time) + '</span>') : '';
-                var addrDisplay = s.addr ? ('<div style="color:#8b949e;font-size:11px;margin-top:2px;">📍 ' + esc(s.addr) + '</div>') : '';
                 h += '<div style="background:#161b22;border:1px solid #21262d;border-radius:8px;padding:12px;margin-bottom:8px;">' +
                     '<div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:6px;">' +
                         '<div style="flex:1;">' + badge + catBadge + '</div>' +
-                        '<div>' + timeDisplay + '</div>' +
                     '</div>' +
                     '<div style="color:#c9d1d9;font-size:14px;line-height:1.5;margin-bottom:6px;">' + esc(s.desc || s.attrs || '') + '</div>' +
                     '<div style="color:#8b949e;font-size:12px;margin-bottom:4px;">' + esc(s.attrs || '') + '</div>' +
-                    addrDisplay +
                     '<div style="margin-top:6px;display:flex;justify-content:space-between;align-items:center;">' +
                         telDisplay +
                         '<span style="color:#484f58;font-size:11px;">👤 ' + esc(s.user || '') + '</span>' +
@@ -4636,19 +4652,11 @@
             }
             list.innerHTML = h;
         }
-        function fetchShopData() {
-            // 由于浏览器跨域限制，无法直接从前端抓取包友通
-            // 数据由定时任务后端抓取后写入 GitHub，前端从 GitHub 加载
-            var list = document.getElementById('shopTransferList');
+        function fetchShopDataV2() {
+            var list = document.getElementById('shopsWall');
             if (!list) return;
-            list.innerHTML = '<div style="color:#8b949e;text-align:center;padding:20px;">⏳ 加载中…<br><span style="font-size:11px;">数据由后台定时采集</span></div>';
-
-            // 从 GitHub raw 加载已爬取的数据
-            var githubUser = 'SH1996';
-            var githubRepo = 'Xin';
-            // 尝试加载 shop_transfers.json
             var cacheBuster = Date.now();
-            var url = 'https://raw.githubusercontent.com/' + githubUser + '/' + githubRepo + '/main/shop_transfers.json?t=' + cacheBuster;
+            var url = 'https://raw.githubusercontent.com/SH1996/Xin/main/shop_transfers.json?t=' + cacheBuster;
             fetch(url)
                 .then(function(r) {
                     if (!r.ok) throw new Error('no data');
@@ -4658,12 +4666,11 @@
                     if (Array.isArray(data) && data.length > 0) {
                         shopTransfers = data;
                         try { localStorage.setItem(SHOP_TRANSFER_KEY, JSON.stringify(shopTransfers)); } catch(e) {}
-                        renderShopTransfers();
+                        renderShopTransfersV2();
                     }
                 })
                 .catch(function() {
-                    // 回退到 localStorage
-                    renderShopTransfers();
+                    renderShopTransfersV2();
                 });
         }
 
@@ -4764,6 +4771,35 @@
         </div>
     </div>
 
+    <!-- === 视频收藏 === -->
+    <div class="weekly-overlay" id="videosOverlay" onclick="closeVideosPanel()"></div>
+    <div class="weekly-panel" id="videosPanel">
+        <div class="weekly-topbar">
+            <span>📱 视频收藏</span>
+            <button class="weekly-close" onclick="closeVideosPanel()">✕</button>
+        </div>
+        <div class="weekly-body" style="padding:0;">
+            <div id="videosWall" style="display:flex;flex-direction:column;align-items:center;gap:0;scroll-snap-type:y mandatory;overflow-y:auto;height:100%;"></div>
+        </div>
+    </div>
+
+    <!-- === 店铺转让 === -->
+    <div class="weekly-overlay" id="shopsOverlay" onclick="closeShopsPanel()"></div>
+    <div class="weekly-panel" id="shopsPanel">
+        <div class="weekly-topbar">
+            <span>🏪 店铺转让</span>
+            <span style="font-size:11px;color:#8b949e;">包友通 · 每日更新</span>
+            <button class="weekly-close" onclick="closeShopsPanel()">✕</button>
+        </div>
+        <div class="weekly-body" style="padding:0;">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:#161b22;border-bottom:1px solid #21262d;">
+                <span style="font-size:11px;color:#484f58;">最新5条转让信息</span>
+                <button onclick="fetchShopDataV2()" style="background:#238636;color:#fff;border:none;padding:4px 12px;border-radius:6px;font-size:11px;cursor:pointer;">刷新</button>
+            </div>
+            <div id="shopsWall" style="overflow-y:auto;height:100%;padding:8px;"></div>
+        </div>
+    </div>
+
 
     <div class="hamburger-backdrop" id="hamburgerBackdrop" onclick="toggleHamburger()"></div>
     <div class="hamburger-menu" id="hamburgerMenu">
@@ -4772,6 +4808,8 @@
         <button class="hamburger-item" onclick="openWeekly();toggleHamburger()">📰 精选周刊</button>
         <button class="hamburger-item" onclick="openLibrary();toggleHamburger()">📚 书库</button>
         <button class="hamburger-item" onclick="openVoicePanel();toggleHamburger()">📼 语音库</button>
+        <button class="hamburger-item" onclick="openVideosPanel();toggleHamburger()">📱 视频收藏</button>
+        <button class="hamburger-item" onclick="openShopsPanel();toggleHamburger()">🏪 店铺转让</button>
         <button class="hamburger-item" onclick="startRebirth();toggleHamburger()">🔄 重生世界</button>
         <button class="hamburger-item" onclick="openQueryPanel();toggleHamburger()">🔑 管理员入口</button>
     </div>
