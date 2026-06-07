@@ -1753,11 +1753,11 @@
         </div>
         <!-- 标签页 -->
         <div style="display:flex;border-bottom:1px solid var(--border);flex-shrink:0;">
-            <button class="query-tab" id="tabChat" onclick="switchQueryTab('chat')" style="flex:1;padding:10px;background:none;border:none;color:var(--accent);font-size:14px;cursor:pointer;border-bottom:2px solid var(--accent);">💬 聊天记录</button>
-            <button class="query-tab" id="tabVoice" onclick="switchQueryTab('voice')" style="flex:1;padding:10px;background:none;border:none;color:var(--text-light);font-size:14px;cursor:pointer;border-bottom:2px solid transparent;">🎤 语音库</button>
-            <button class="query-tab" id="tabBooks" onclick="switchQueryTab('books')" style="flex:1;padding:10px;background:none;border:none;color:var(--text-light);font-size:14px;cursor:pointer;border-bottom:2px solid transparent;">📚 书库管理</button>
-            <button class="query-tab" id="tabJournals" onclick="switchQueryTab('journals')" style="flex:1;padding:10px;background:none;border:none;color:var(--text-light);font-size:14px;cursor:pointer;border-bottom:2px solid transparent;">📰 周刊管理</button>
-            <button class="query-tab" id="tabVideos" onclick="switchQueryTab('videos')" style="flex:1;padding:10px;background:none;border:none;color:var(--text-light);font-size:14px;cursor:pointer;border-bottom:2px solid transparent;">📱 视频</button>
+            <button class="query-tab" id="tabChat" onclick="switchQueryTab('chat')" style="flex:1;padding:10px 4px;background:none;border:none;color:var(--accent);font-size:12px;cursor:pointer;border-bottom:2px solid var(--accent);">💬 聊天</button>
+            <button class="query-tab" id="tabVoice" onclick="switchQueryTab('voice')" style="flex:1;padding:10px 4px;background:none;border:none;color:var(--text-light);font-size:12px;cursor:pointer;border-bottom:2px solid transparent;">🎤 语音</button>
+            <button class="query-tab" id="tabBooks" onclick="switchQueryTab('books')" style="flex:1;padding:10px 4px;background:none;border:none;color:var(--text-light);font-size:12px;cursor:pointer;border-bottom:2px solid transparent;">📚 书库</button>
+            <button class="query-tab" id="tabJournals" onclick="switchQueryTab('journals')" style="flex:1;padding:10px 4px;background:none;border:none;color:var(--text-light);font-size:12px;cursor:pointer;border-bottom:2px solid transparent;">📰 周刊</button>
+            <button class="query-tab" id="tabVideos" onclick="switchQueryTab('videos')" style="flex:1;padding:10px 4px;background:none;border:none;color:var(--text-light);font-size:12px;cursor:pointer;border-bottom:2px solid transparent;">📱 视频</button>
         </div>
         <!-- 聊天记录 -->
         <div id="queryContent" style="flex:1;display:flex;flex-direction:column;overflow:hidden;padding:0 12px;">
@@ -2653,8 +2653,8 @@
             var tabVideos = document.getElementById('tabVideos');
             var allTabs = [tabChat, tabVoice, tabBooks, tabJournals, tabVideos];
             var allPanels = [chat, voice, books, journals, videos];
-            allPanels.forEach(function(p) { p.style.display = 'none'; });
-            allTabs.forEach(function(t) { t.style.color = 'var(--text-light)'; t.style.borderBottom = '2px solid transparent'; });
+            allPanels.forEach(function(p) { if (p) p.style.display = 'none'; });
+            allTabs.forEach(function(t) { if (t) { t.style.color = 'var(--text-light)'; t.style.borderBottom = '2px solid transparent'; } });
             if (tab === 'chat') {
                 chat.style.display = 'flex';
                 tabChat.style.color = 'var(--accent)'; tabChat.style.borderBottom = '2px solid var(--accent)';
