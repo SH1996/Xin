@@ -3025,12 +3025,15 @@
         }
                 // 书名 → { cat: '分类名', css: 'tag样式', emoji: '图标' }
         const BOOK_TAGS = {
-            '找店参谋实战手册': { cat: '商业·选址', css: 'tag-business', emoji: '🏪' },
-            '生活健康与日常饮食': { cat: '健康·饮食', css: 'tag-health', emoji: '🥗' },
-            '没啥病':               { cat: '健康·心态', css: 'tag-mind',   emoji: '🧠' },
-            '逆袭女王':             { cat: '文学·小说', css: 'tag-mind',   emoji: '📖' },
-            '做一个有福的人':       { cat: '处世·哲学', css: 'tag-health', emoji: '🍀' },
-            '拾暮·迟刃':           { cat: '精选', css: 'tag-featured', emoji: '🔥', featured: true }
+            '找店参谋实战手册':             { cat: '商业·选址', css: 'tag-business', emoji: '🏪', color: '#6b4226', color2: '#8b5e3c' },
+            '找店参谋实战手册·探店补充手册': { cat: '商业·选址', css: 'tag-business', emoji: '🔍', color: '#5a3820', color2: '#7d5030' },
+            '生活健康与日常饮食':           { cat: '健康·饮食', css: 'tag-health',   emoji: '🥗', color: '#2e5a30', color2: '#3e7a40' },
+            '24小时舒适生活节律':           { cat: '健康·生活', css: 'tag-health',   emoji: '🌿', color: '#3d6b4f', color2: '#4f8b63' },
+            '网络基础通俗手册':             { cat: '技能·科普', css: 'tag-mind',     emoji: '🌐', color: '#1a3a6e', color2: '#2a5a9e' },
+            '怎么结合AI给AI提示词啊':       { cat: '技能·科普', css: 'tag-mind',     emoji: '🤖', color: '#2a2a5e', color2: '#4a4a8e' },
+            '逆袭女王':                     { cat: '文学·小说', css: 'tag-mind',     emoji: '👑', color: '#5e1a3e', color2: '#8e3a5e' },
+            '做一个有福的人':               { cat: '处世·哲学', css: 'tag-health',   emoji: '🍀', color: '#4a6b2e', color2: '#6a8b4e' },
+            '拾暮·迟刃':                   { cat: '精选', css: 'tag-featured', emoji: '🔥', color: '#8b1a1a', color2: '#c93030', featured: true }
         };
         let libFilter = '全部';
 
@@ -3048,14 +3051,16 @@
             var cards = '';
             for (var i = 0; i < bookList.length; i++) {
                 var b = bookList[i];
-                var tag = BOOK_TAGS[b.name] || { cat: '其他', css: 'tag-business', emoji: '📖' };
+                var tag = BOOK_TAGS[b.name] || { cat: '其他', css: 'tag-business', emoji: '📖', color: '#1a1a2e' };
                 if (libFilter !== '全部' && tag.cat !== libFilter) continue;
                 var isFeat = tag.featured ? ' featured-card' : '';
+                var color = tag.color || '#1a1a2e';
+                var color2 = tag.color2 || '#2a2a4e';
                 cards += '<div class="book-card' + isFeat + '" onclick="openReader(&quot;' + esc(b.name) + '&quot;)">';
-                cards += '<div class="book-cover">' + tag.emoji + '</div>';
+                cards += '<div class="book-cover" style="background:linear-gradient(135deg,' + color + ',' + color2 + ')">' + tag.emoji + '</div>';
                 cards += '<div class="book-info">';
                 cards += '<div class="book-title">' + b.name + '<span class="book-tag ' + tag.css + '">' + tag.cat + '</span></div>';
-                cards += '<div class="book-subtitle"></div>';
+                cards += '<div class="book-subtitle">' + (b.subtitle || '') + '</div>';
                 cards += '</div>';
                 cards += '<span class="book-arrow">›</span>';
                 cards += '</div>';
