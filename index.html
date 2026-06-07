@@ -3663,6 +3663,8 @@
             document.getElementById('readerListenBtn').textContent = '⏳';
             document.getElementById('readerListenBtn').classList.add('playing');
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            // 确保 AudioContext 被用户手势激活
+            if (audioCtx.state === 'suspended') { audioCtx.resume(); }
             // 先快速缓存前2段，立即开始播放；后台继续缓存剩余
             primeAndPlay();
         }
@@ -3674,16 +3676,46 @@
             document.getElementById('readerListenBtn').textContent = '听';
             document.getElementById('readerListenBtn').classList.remove('playing');
         }
+        function stripHtml(html) {
+            var tmp = document.createElement('div');
+            tmp.innerHTML = html;
+            return tmp.textContent || tmp.innerText || '';
+        }
+        function splitTextForTTS(text) {
+            var parts = [];
+            var paras = text.split(/\n{2,}/);
+            for (var i = 0; i < paras.length; i++) {
+                var p = paras[i].trim();
+                if (!p) continue;
+                if (p.length <= 900) { parts.push(p); continue; }
+                var sents = p.split(/(?<=[。！？.!?])/);
+                var cur = '';
+                for (var j = 0; j < sents.length; j++) {
+                    if (cur.length + sents[j].length > 900 && cur.length > 0) {
+                        parts.push(cur.trim());
+                        cur = sents[j];
+                    } else {
+                        cur += sents[j];
+                    }
+                }
+                if (cur.trim()) parts.push(cur.trim());
+            }
+            return parts;
+        }
         async function primeAndPlay() {
-            // 先缓存前 PRELOAD_AHEAD 段（至少1段）
             var PRELOAD_AHEAD = Math.min(2, listenParts.length);
             for (var i = 0; i < PRELOAD_AHEAD; i++) {
                 if (!isListening) return;
                 listenCache[i] = await fetchTTSChunk(listenParts[i]);
             }
             if (!isListening) return;
+            // 如果前2段都没拿到，给个提示
+            if (!listenCache[0] && !listenCache[1]) {
+                stopListen();
+                showToast('⚠️ 语音服务暂时不可用，请重试');
+                return;
+            }
             cacheCursor = PRELOAD_AHEAD;
-            // 开始播放 + 后台继续缓存
             document.getElementById('readerListenBtn').textContent = '⏸';
             playFromCache();
             backgroundCache();
@@ -3695,10 +3727,10 @@
                     headers: { 'Authorization': 'Bearer ' + ZHIPU_API_KEY, 'Content-Type': 'application/json' },
                     body: JSON.stringify({ model: 'glm-tts', input: text, voice: 'tongtong', response_format: 'wav', speed: 1.0 })
                 });
-                if (!resp.ok) return null;
+                if (!resp.ok) { console.error('TTS HTTP ' + resp.status); return null; }
                 var buf = await resp.arrayBuffer();
                 return await audioCtx.decodeAudioData(buf);
-            } catch(e) { return null; }
+            } catch(e) { console.error('TTS err:', e); return null; }
         }
         async function backgroundCache() {
             while (cacheCursor < listenParts.length && isListening) {
