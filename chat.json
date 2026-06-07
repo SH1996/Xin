@@ -7,5 +7,14 @@
     "rp": true,
     "type": "voice",
     "clientId": "cx7ljgq"
+  },
+  {
+    "date": "2026-06-07T14:04:23.363Z",
+    "user": "你好",
+    "reply": "（发了一段语音：手伸半天了呢_假装委屈_）",
+    "mode": "warm",
+    "rp": true,
+    "type": "voice",
+    "clientId": "cx7ljgq"
   }
 ]
