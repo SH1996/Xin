@@ -2855,14 +2855,37 @@
         function autoResize(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 100) + 'px'; }
 
         let currentSpeech = null;
+        var chatAudioCtx = null;
+        var chatListenBusy = false;
 
-        function speakText(text, btnEl) { if (currentSpeech) { currentSpeech.cancel(); currentSpeech = null;
-                document.querySelectorAll('.speak-btn.speaking').forEach(b => b.classList.remove('speaking')); if (btnEl?.classList.contains('speaking')) { btnEl.classList.remove('speaking'); return; } } if (!('speechSynthesis' in window)) { showToast('⚠️ 浏览器不支持'); return; } const ct = text.replace(/\*\*/g, '').replace(/\*/g, '').replace(/`/g, '').replace(/#/g, '').replace(/\n/g, '，'); const u = new SpeechSynthesisUtterance(ct);
-            u.lang = 'zh-CN'; u.rate = 0.95; u.pitch = 1.1; const vs = speechSynthesis.getVoices(); const zv = vs.find(v => v.lang.startsWith('zh') && (v.name.includes('Ting') || v.name.includes('Lili'))); if (zv) u.voice = zv;
-            currentSpeech = u; if (btnEl) btnEl.classList.add('speaking');
-            u.onend = () => { currentSpeech = null; if (btnEl) btnEl.classList.remove('speaking'); };
-            u.onerror = () => { currentSpeech = null; if (btnEl) btnEl.classList.remove('speaking'); };
-            speechSynthesis.speak(u); }
+        async function speakText(text, btnEl, voiceOverride) {
+            if (chatListenBusy) { chatListenBusy = false; if (btnEl) btnEl.classList.remove('speaking'); return; }
+            if (!text) return;
+            // 如果正在播放，停止
+            if (chatListenBusy) { chatListenBusy = false; if (btnEl) btnEl.classList.remove('speaking'); return; }
+            chatListenBusy = true;
+            if (btnEl) btnEl.classList.add('speaking');
+            var voice = voiceOverride || 'xiaochen';
+            var ct = text.replace(/\*\*/g, '').replace(/\*/g, '').replace(/`/g, '').replace(/#/g, '').replace(/\n/g, '，').replace(/<[^>]*>/g, '');
+            if (ct.length > 1024) ct = ct.slice(0, 1024);
+            if (!ct.trim()) { chatListenBusy = false; if (btnEl) btnEl.classList.remove('speaking'); return; }
+            try {
+                if (!chatAudioCtx) chatAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                var resp = await fetch(ZHIPU_TTS_URL, {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + ZHIPU_API_KEY, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ model: 'glm-tts', input: ct, voice: voice, response_format: 'wav', speed: 1.0 })
+                });
+                if (!resp.ok) { chatListenBusy = false; if (btnEl) btnEl.classList.remove('speaking'); return; }
+                var buf = await resp.arrayBuffer();
+                var audioBuf = await chatAudioCtx.decodeAudioData(buf);
+                var src = chatAudioCtx.createBufferSource();
+                src.buffer = audioBuf;
+                src.connect(chatAudioCtx.destination);
+                src.onended = function() { chatListenBusy = false; if (btnEl) btnEl.classList.remove('speaking'); };
+                src.start();
+            } catch(e) { chatListenBusy = false; if (btnEl) btnEl.classList.remove('speaking'); }
+        }
 
         function init() { updateHist(); syncProgress(-1, 5); stepStatusEl.textContent = '✨ 准备好了'; addMsg('ai', getWelcomeMessage(), null); if ('speechSynthesis' in window) speechSynthesis.getVoices(); scrollBottom(); }
         init();
@@ -3550,7 +3573,7 @@
                 var resp = await fetch(ZHIPU_TTS_URL, {
                     method: 'POST',
                     headers: { 'Authorization': 'Bearer ' + ZHIPU_API_KEY, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ model: 'glm-tts', input: text, voice: 'xiaochen', response_format: 'wav', speed: 1.0 })
+                    body: JSON.stringify({ model: 'glm-tts', input: text, voice: 'tongtong', response_format: 'wav', speed: 1.0 })
                 });
                 if (!resp.ok) { console.error('TTS error:', resp.status); listenIndex++; playNextChunk(); return; }
                 var buf = await resp.arrayBuffer();
