@@ -1,1 +1,11 @@
-[]
+[
+  {
+    "date": "2026-06-07T14:01:01.125Z",
+    "user": "我想你了",
+    "reply": "（发了一段语音：我也想你_好巧_轻柔_）",
+    "mode": "warm",
+    "rp": true,
+    "type": "voice",
+    "clientId": "cx7ljgq"
+  }
+]
