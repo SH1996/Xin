@@ -1752,12 +1752,13 @@
             </label>
         </div>
         <!-- 标签页 -->
-        <div style="display:flex;border-bottom:1px solid var(--border);flex-shrink:0;">
-            <button class="query-tab" id="tabChat" onclick="switchQueryTab('chat')" style="flex:1;padding:10px 4px;background:none;border:none;color:var(--accent);font-size:12px;cursor:pointer;border-bottom:2px solid var(--accent);">💬 聊天</button>
-            <button class="query-tab" id="tabVoice" onclick="switchQueryTab('voice')" style="flex:1;padding:10px 4px;background:none;border:none;color:var(--text-light);font-size:12px;cursor:pointer;border-bottom:2px solid transparent;">🎤 语音</button>
-            <button class="query-tab" id="tabBooks" onclick="switchQueryTab('books')" style="flex:1;padding:10px 4px;background:none;border:none;color:var(--text-light);font-size:12px;cursor:pointer;border-bottom:2px solid transparent;">📚 书库</button>
-            <button class="query-tab" id="tabJournals" onclick="switchQueryTab('journals')" style="flex:1;padding:10px 4px;background:none;border:none;color:var(--text-light);font-size:12px;cursor:pointer;border-bottom:2px solid transparent;">📰 周刊</button>
-            <button class="query-tab" id="tabVideos" onclick="switchQueryTab('videos')" style="flex:1;padding:10px 4px;background:none;border:none;color:var(--text-light);font-size:12px;cursor:pointer;border-bottom:2px solid transparent;">📱 视频</button>
+        <div style="display:flex;border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto;-webkit-overflow-scrolling:touch;">
+            <button class="query-tab" id="tabChat" onclick="switchQueryTab('chat')" style="padding:10px 8px;background:none;border:none;color:var(--accent);font-size:12px;cursor:pointer;border-bottom:2px solid var(--accent);white-space:nowrap;flex-shrink:0;">💬 聊天</button>
+            <button class="query-tab" id="tabVoice" onclick="switchQueryTab('voice')" style="padding:10px 8px;background:none;border:none;color:var(--text-light);font-size:12px;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;flex-shrink:0;">🎤 语音</button>
+            <button class="query-tab" id="tabBooks" onclick="switchQueryTab('books')" style="padding:10px 8px;background:none;border:none;color:var(--text-light);font-size:12px;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;flex-shrink:0;">📚 书库</button>
+            <button class="query-tab" id="tabJournals" onclick="switchQueryTab('journals')" style="padding:10px 8px;background:none;border:none;color:var(--text-light);font-size:12px;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;flex-shrink:0;">📰 周刊</button>
+            <button class="query-tab" id="tabVideos" onclick="switchQueryTab('videos')" style="padding:10px 8px;background:none;border:none;color:var(--text-light);font-size:12px;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;flex-shrink:0;">📱 视频</button>
+            <button class="query-tab" id="tabShops" onclick="switchQueryTab('shops')" style="padding:10px 8px;background:none;border:none;color:var(--text-light);font-size:12px;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;flex-shrink:0;">🏪 转让</button>
         </div>
         <!-- 聊天记录 -->
         <div id="queryContent" style="flex:1;display:flex;flex-direction:column;overflow:hidden;padding:0 12px;">
@@ -1804,6 +1805,14 @@
             </div>
             <!-- 视频流 -->
             <div id="videoWall" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;align-items:center;gap:0;scroll-snap-type:y mandatory;"></div>
+        </div>
+        <!-- 店铺转让 -->
+        <div id="queryShopsContent" style="flex:1;display:none;flex-direction:column;overflow:hidden;background:#0d1117;">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:#161b22;border-bottom:1px solid #21262d;">
+                <span style="font-size:12px;color:#8b949e;">🔄 包友通 · 每日更新</span>
+                <button onclick="loadShopTransfers()" style="background:#238636;color:#fff;border:none;padding:4px 12px;border-radius:6px;font-size:11px;cursor:pointer;">刷新</button>
+            </div>
+            <div id="shopTransferList" style="flex:1;overflow-y:auto;padding:8px;"></div>
         </div>
     </div>
 
@@ -2646,13 +2655,15 @@
             var books = document.getElementById('queryBooksContent');
             var journals = document.getElementById('queryJournalsContent');
             var videos = document.getElementById('queryVideosContent');
+            var shops = document.getElementById('queryShopsContent');
             var tabChat = document.getElementById('tabChat');
             var tabVoice = document.getElementById('tabVoice');
             var tabBooks = document.getElementById('tabBooks');
             var tabJournals = document.getElementById('tabJournals');
             var tabVideos = document.getElementById('tabVideos');
-            var allTabs = [tabChat, tabVoice, tabBooks, tabJournals, tabVideos];
-            var allPanels = [chat, voice, books, journals, videos];
+            var tabShops = document.getElementById('tabShops');
+            var allTabs = [tabChat, tabVoice, tabBooks, tabJournals, tabVideos, tabShops];
+            var allPanels = [chat, voice, books, journals, videos, shops];
             allPanels.forEach(function(p) { if (p) p.style.display = 'none'; });
             allTabs.forEach(function(t) { if (t) { t.style.color = 'var(--text-light)'; t.style.borderBottom = '2px solid transparent'; } });
             if (tab === 'chat') {
@@ -2685,6 +2696,11 @@
                 tabVideos.style.color = 'var(--accent)'; tabVideos.style.borderBottom = '2px solid var(--accent)';
                 document.getElementById('queryTabTitle').textContent = '📱 视频收藏';
                 renderVideoWall();
+            } else if (tab === 'shops') {
+                shops.style.display = 'flex';
+                tabShops.style.color = 'var(--accent)'; tabShops.style.borderBottom = '2px solid var(--accent)';
+                document.getElementById('queryTabTitle').textContent = '🏪 店铺转让';
+                loadShopTransfers();
             }
         }
 
@@ -4569,6 +4585,87 @@
         function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/'/g,'&#39;'); }
 
         loadVideos();
+
+        // ========== 店铺转让 (包友通爬取) ==========
+        const SHOP_TRANSFER_KEY = 'xin_shop_transfers';
+        var shopTransfers = [];
+
+        function loadShopTransfers() {
+            var list = document.getElementById('shopTransferList');
+            if (!list) return;
+            // 先从 localStorage 加载缓存
+            try {
+                var cached = localStorage.getItem(SHOP_TRANSFER_KEY);
+                if (cached) {
+                    shopTransfers = JSON.parse(cached);
+                }
+            } catch(e) { shopTransfers = []; }
+            renderShopTransfers();
+
+            // 尝试刷新(通过个简单的跨域请求)
+            fetchShopData();
+        }
+        function renderShopTransfers() {
+            var list = document.getElementById('shopTransferList');
+            if (!list) return;
+            if (!shopTransfers.length) {
+                list.innerHTML = '<div style="color:#8b949e;text-align:center;padding:40px 20px;font-size:13px;">📭 暂无数据<br><span style="font-size:11px;color:#484f58;">点击"刷新"获取最新店铺转让信息</span></div>';
+                return;
+            }
+            var h = '';
+            for (var i = 0; i < shopTransfers.length; i++) {
+                var s = shopTransfers[i];
+                var badge = s.top ? '<span style="background:#da3633;color:#fff;font-size:10px;padding:1px 5px;border-radius:3px;margin-right:4px;">顶</span>' : '';
+                var catBadge = '<span style="background:#21262d;color:#58a6ff;font-size:10px;padding:1px 6px;border-radius:3px;">' + esc(s.cat) + '</span>';
+                var telDisplay = s.tel ? ('<a href="tel:' + escAttr(s.tel) + '" style="color:#58a6ff;font-size:12px;text-decoration:none;">📞 ' + esc(s.tel) + '</a>') : '';
+                var timeDisplay = s.time ? ('<span style="color:#8b949e;font-size:11px;">' + esc(s.time) + '</span>') : '';
+                var addrDisplay = s.addr ? ('<div style="color:#8b949e;font-size:11px;margin-top:2px;">📍 ' + esc(s.addr) + '</div>') : '';
+                h += '<div style="background:#161b22;border:1px solid #21262d;border-radius:8px;padding:12px;margin-bottom:8px;">' +
+                    '<div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:6px;">' +
+                        '<div style="flex:1;">' + badge + catBadge + '</div>' +
+                        '<div>' + timeDisplay + '</div>' +
+                    '</div>' +
+                    '<div style="color:#c9d1d9;font-size:14px;line-height:1.5;margin-bottom:6px;">' + esc(s.desc || s.attrs || '') + '</div>' +
+                    '<div style="color:#8b949e;font-size:12px;margin-bottom:4px;">' + esc(s.attrs || '') + '</div>' +
+                    addrDisplay +
+                    '<div style="margin-top:6px;display:flex;justify-content:space-between;align-items:center;">' +
+                        telDisplay +
+                        '<span style="color:#484f58;font-size:11px;">👤 ' + esc(s.user || '') + '</span>' +
+                    '</div>' +
+                '</div>';
+            }
+            list.innerHTML = h;
+        }
+        function fetchShopData() {
+            // 由于浏览器跨域限制，无法直接从前端抓取包友通
+            // 数据由定时任务后端抓取后写入 GitHub，前端从 GitHub 加载
+            var list = document.getElementById('shopTransferList');
+            if (!list) return;
+            list.innerHTML = '<div style="color:#8b949e;text-align:center;padding:20px;">⏳ 加载中…<br><span style="font-size:11px;">数据由后台定时采集</span></div>';
+
+            // 从 GitHub raw 加载已爬取的数据
+            var githubUser = 'SH1996';
+            var githubRepo = 'Xin';
+            // 尝试加载 shop_transfers.json
+            var cacheBuster = Date.now();
+            var url = 'https://raw.githubusercontent.com/' + githubUser + '/' + githubRepo + '/main/shop_transfers.json?t=' + cacheBuster;
+            fetch(url)
+                .then(function(r) {
+                    if (!r.ok) throw new Error('no data');
+                    return r.json();
+                })
+                .then(function(data) {
+                    if (Array.isArray(data) && data.length > 0) {
+                        shopTransfers = data;
+                        try { localStorage.setItem(SHOP_TRANSFER_KEY, JSON.stringify(shopTransfers)); } catch(e) {}
+                        renderShopTransfers();
+                    }
+                })
+                .catch(function() {
+                    // 回退到 localStorage
+                    renderShopTransfers();
+                });
+        }
 
         function escJs(s) { return s.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, '\\n'); }
         function escText(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>'); }
