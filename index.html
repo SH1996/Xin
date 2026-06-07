@@ -1648,8 +1648,8 @@
         .comment-send { padding:8px 14px; border-radius:20px; background:linear-gradient(135deg,#4a90d9,#5b6abf); color:#fff; border:none; font-size:13px; cursor:pointer; font-weight:500; flex-shrink:0; }
         .comment-send:active { opacity:0.8; }
         @media (max-width: 600px) {
-            .comment-bubble { right: 12px; bottom: 110px; width: 40px; height: 40px; font-size: 18px; }
-            .comment-panel { right: 4px; bottom: 170px; width: auto; max-width: calc(100vw - 8px); max-height: 45vh; border-radius: 14px; }
+            .comment-bubble { right: 12px; bottom: 110px; width: 38px; height: 38px; font-size: 16px; border-radius: 50%; }
+            .comment-panel { right: 4px; bottom: 165px; width: auto; max-width: calc(100vw - 8px); max-height: 45vh; border-radius: 14px; }
             .comment-header { padding: 10px 12px; }
             .comment-input-row input { font-size: 16px; /* 防止iOS缩放 */ }
         }
@@ -3435,8 +3435,13 @@
             var total = currentBookData.chapters.length;
             document.getElementById('readerPrevBtn').disabled = (idx === 0);
             document.getElementById('readerNextBtn').disabled = (idx >= total - 1);
-            // 章节切换时显示气泡，关闭留言面板
-            document.getElementById('commentBubble').classList.remove('hidden');
+            // 章节切换时显示气泡，关闭留言面板，重置为默认
+            var bub = document.getElementById('commentBubble');
+            bub.classList.remove('hidden');
+            bub.textContent = '💬';
+            bub.style.fontSize = '';
+            bub.style.fontWeight = '';
+            bub.style.background = 'linear-gradient(135deg,#4a90d9,#5b6abf)';
             document.getElementById('commentPanel').classList.remove('open');
             commentBook = currentBookData.title;
             commentChapter = ch.title;
@@ -3457,11 +3462,17 @@
                 var json = decodeURIComponent(escape(atob(data.content)));
                 var parsed = JSON.parse(json);
                 commentStore = parsed.comments || [];
-                // 有留言则气泡变橙色提示
-                if (commentStore.length > 0) {
+                var count = commentStore.length;
+                if (count > 0) {
                     document.getElementById('commentBubble').style.background = 'linear-gradient(135deg,#e8a040,#d9705a)';
+                    document.getElementById('commentBubble').textContent = count;
+                    document.getElementById('commentBubble').style.fontSize = '13px';
+                    document.getElementById('commentBubble').style.fontWeight = 'bold';
                 } else {
                     document.getElementById('commentBubble').style.background = 'linear-gradient(135deg,#4a90d9,#5b6abf)';
+                    document.getElementById('commentBubble').textContent = '💬';
+                    document.getElementById('commentBubble').style.fontSize = '';
+                    document.getElementById('commentBubble').style.fontWeight = '';
                 }
             } catch(e) { commentStore = []; }
         }
