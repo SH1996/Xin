@@ -1440,6 +1440,77 @@
         .tag-business { background: #e8d5b7; color: #6b4226; }
         .tag-health { background: #c8e6c9; color: #2e5a30; }
         .tag-mind { background: #d1c4e9; color: #4a2e7a; }
+        /* 精选标签 · 网吧广告风格 · 闪彩跑马灯 */
+        .tag-featured {
+            position: relative;
+            padding: 3px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 900;
+            letter-spacing: 1.5px;
+            color: #fff;
+            background: linear-gradient(90deg, #ff2d55, #ff6b35, #ffc107, #00c853, #2979ff, #d500f9, #ff2d55);
+            background-size: 300% 100%;
+            animation: featuredScroll 2s linear infinite, featuredGlow 0.8s ease-in-out infinite;
+            text-shadow: 0 0 6px rgba(255,255,255,0.8);
+            box-shadow: 0 0 12px rgba(255,45,85,0.5), 0 0 28px rgba(213,0,249,0.25);
+            border: 1px solid rgba(255,255,255,0.4);
+            overflow: hidden;
+        }
+        .tag-featured::before {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: linear-gradient(45deg, transparent 40%, rgba(255,255,255,0.5) 45%, rgba(255,255,255,0.5) 55%, transparent 60%);
+            animation: featuredShine 1.5s linear infinite;
+        }
+        @keyframes featuredScroll {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 300% 50%; }
+        }
+        @keyframes featuredGlow {
+            0%, 100% { box-shadow: 0 0 12px rgba(255,45,85,0.5), 0 0 28px rgba(213,0,249,0.25); }
+            50% { box-shadow: 0 0 24px rgba(255,45,85,0.85), 0 0 48px rgba(213,0,249,0.6), 0 0 60px rgba(255,193,7,0.4); }
+        }
+        @keyframes featuredShine {
+            0% { transform: translateX(-100%) rotate(25deg); }
+            100% { transform: translateX(100%) rotate(25deg); }
+        }
+        /* 书库列表页精选卡片 */
+        .book-card.featured-card {
+            border: 2px solid transparent;
+            background: linear-gradient(#fff, #fff) padding-box,
+                        linear-gradient(90deg, #ff2d55, #ff6b35, #ffc107, #00c853, #2979ff, #d500f9) border-box;
+            animation: featuredBorder 2s linear infinite;
+            position: relative;
+        }
+        .book-card.featured-card::after {
+            content: '🔥 精选推荐';
+            position: absolute;
+            top: -10px;
+            right: 12px;
+            background: linear-gradient(90deg, #ff2d55, #d500f9);
+            color: #fff;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 2px 10px;
+            border-radius: 8px;
+            letter-spacing: 1px;
+            animation: featuredBadge 0.5s ease-in-out infinite alternate;
+        }
+        @keyframes featuredBorder {
+            0% { border-image: linear-gradient(90deg, #ff2d55, #ff6b35, #ffc107, #00c853, #2979ff, #d500f9) 1; }
+            100% { border-image: linear-gradient(90deg, #d500f9, #00c853, #ffc107, #ff6b35, #ff2d55, #ff6b35) 1; }
+        }
+        @keyframes featuredBadge {
+            0% { transform: translateY(0px); box-shadow: 0 2px 8px rgba(255,45,85,0.4); }
+            100% { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(213,0,249,0.6); }
+        }
+        @keyframes featuredBtnPulse {
+            0%, 100% { box-shadow: 0 0 8px rgba(255,45,85,0.4); }
+            50% { box-shadow: 0 0 20px rgba(213,0,249,0.7), 0 0 32px rgba(255,193,7,0.35); }
+        }
         .lib-filters { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
         .lib-filter-btn { padding: 5px 12px; border-radius: 14px; border: 1px solid #d4c8b0; background: #fff; color: #8a7a6a; font-size: 12px; cursor: pointer; font-family: inherit; transition: all 0.15s; }
         .lib-filter-btn:hover { border-color: #c9a96e; color: #5a4a2a; }
@@ -2958,7 +3029,8 @@
             '生活健康与日常饮食': { cat: '健康·饮食', css: 'tag-health', emoji: '🥗' },
             '没啥病':               { cat: '健康·心态', css: 'tag-mind',   emoji: '🧠' },
             '逆袭女王':             { cat: '文学·小说', css: 'tag-mind',   emoji: '📖' },
-            '做一个有福的人':       { cat: '处世·哲学', css: 'tag-health', emoji: '🍀' }
+            '做一个有福的人':       { cat: '处世·哲学', css: 'tag-health', emoji: '🍀' },
+            '拾暮·迟刃':           { cat: '精选', css: 'tag-featured', emoji: '🔥', featured: true }
         };
         let libFilter = '全部';
 
@@ -2969,14 +3041,17 @@
             }
             var cats = ['全部'].concat([...new Set(bookList.map(function(b) { return (BOOK_TAGS[b.name] || {}).cat || '其他'; }))]);
             document.getElementById('libFilters').innerHTML = cats.map(function(c) {
-                return '<button class="lib-filter-btn' + (c === libFilter ? ' active' : '') + '" onclick="libFilter=&quot;' + esc(c) + '&quot;;renderBookList()">' + c + '</button>';
+                var isFeatBtn = c === '精选' ? ' style="background:linear-gradient(90deg,#ff2d55,#d500f9);color:#fff;font-weight:800;border-color:transparent;animation:featuredBtnPulse 1.5s ease-in-out infinite;"' : '';
+                if (c === '精选' && c !== libFilter) isFeatBtn = ' style="background:linear-gradient(90deg,#ff2d55,#d500f9);color:#fff;font-weight:800;border-color:transparent;animation:featuredBtnPulse 1.5s ease-in-out infinite;opacity:0.85;"';
+                return '<button class="lib-filter-btn' + (c === libFilter ? ' active' : '') + '"' + isFeatBtn + ' onclick="libFilter=&quot;' + esc(c) + '&quot;;renderBookList()">' + (c === '精选' ? '🔥 ' : '') + c + '</button>';
             }).join('');
             var cards = '';
             for (var i = 0; i < bookList.length; i++) {
                 var b = bookList[i];
                 var tag = BOOK_TAGS[b.name] || { cat: '其他', css: 'tag-business', emoji: '📖' };
                 if (libFilter !== '全部' && tag.cat !== libFilter) continue;
-                cards += '<div class="book-card" onclick="openReader(&quot;' + esc(b.name) + '&quot;)">';
+                var isFeat = tag.featured ? ' featured-card' : '';
+                cards += '<div class="book-card' + isFeat + '" onclick="openReader(&quot;' + esc(b.name) + '&quot;)">';
                 cards += '<div class="book-cover">' + tag.emoji + '</div>';
                 cards += '<div class="book-info">';
                 cards += '<div class="book-title">' + b.name + '<span class="book-tag ' + tag.css + '">' + tag.cat + '</span></div>';
