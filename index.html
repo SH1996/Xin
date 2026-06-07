@@ -3508,85 +3508,81 @@
         // === 朗读功能 (智谱 TTS) ===
         var ZHIPU_API_KEY = 'bf709c17973f4d48a6254b03bd7c5544.6RkZwVp54GW1ZyJA';
         var ZHIPU_TTS_URL = 'https://open.bigmodel.cn/api/paas/v4/audio/speech';
-        var listenQueue = [];
-        var listenIndex = 0;
+        var listenCache = [];     // 预缓存的 AudioBuffer
+        var listenCacheIdx = 0;
         var isListening = false;
+        var isCaching = false;
         var audioCtx = null;
+        var activeSource = null;
         function toggleListen() {
             if (isListening) { stopListen(); return; }
+            if (isCaching) return;
             if (!currentBookData || currentBookData._idx === undefined) return;
             var ch = currentBookData.chapters[currentBookData._idx];
             if (!ch) return;
             var text = stripHtml(ch.html);
             if (!text.trim()) return;
-            // 按句号/段落切分，每段不超过1000字
             var parts = splitTextForTTS(text);
-            listenQueue = parts;
-            listenIndex = 0;
+            if (parts.length === 0) return;
+            listenCache = new Array(parts.length);
+            listenCacheIdx = 0;
             isListening = true;
-            document.getElementById('readerListenBtn').textContent = '⏸';
+            document.getElementById('readerListenBtn').textContent = '⏳';
             document.getElementById('readerListenBtn').classList.add('playing');
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            playNextChunk();
+            // 后台缓存所有段落
+            cacheAllChunks(parts);
         }
         function stopListen() {
             isListening = false;
-            listenQueue = [];
+            isCaching = false;
+            if (activeSource) { try { activeSource.stop(); } catch(e) {} activeSource = null; }
+            listenCache = [];
             document.getElementById('readerListenBtn').textContent = '听';
             document.getElementById('readerListenBtn').classList.remove('playing');
         }
-        function stripHtml(html) {
-            var tmp = document.createElement('div');
-            tmp.innerHTML = html;
-            return tmp.textContent || tmp.innerText || '';
-        }
-        function splitTextForTTS(text) {
-            var parts = [];
-            // 先按自然段落（连续换行）切
-            var paras = text.split(/\n{2,}/);
-            for (var i = 0; i < paras.length; i++) {
-                var p = paras[i].trim();
-                if (!p) continue;
-                if (p.length <= 900) { parts.push(p); continue; }
-                // 超过900字按句号切
-                var sents = p.split(/(?<=[。！？.!?])/);
-                var cur = '';
-                for (var j = 0; j < sents.length; j++) {
-                    if (cur.length + sents[j].length > 900 && cur.length > 0) {
-                        parts.push(cur.trim());
-                        cur = sents[j];
-                    } else {
-                        cur += sents[j];
-                    }
-                }
-                if (cur.trim()) parts.push(cur.trim());
+        async function cacheAllChunks(parts) {
+            isCaching = true;
+            var total = parts.length;
+            for (var i = 0; i < total; i++) {
+                if (!isListening) { isCaching = false; return; }
+                try {
+                    var resp = await fetch(ZHIPU_TTS_URL, {
+                        method: 'POST',
+                        headers: { 'Authorization': 'Bearer ' + ZHIPU_API_KEY, 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ model: 'glm-tts', input: parts[i], voice: 'tongtong', response_format: 'wav', speed: 1.0 })
+                    });
+                    if (!resp.ok) { continue; }
+                    var buf = await resp.arrayBuffer();
+                    var audioBuf = await audioCtx.decodeAudioData(buf);
+                    listenCache[i] = audioBuf;
+                } catch(e) { console.error('cache err:', i, e); }
             }
-            return parts;
+            isCaching = false;
+            if (!isListening) return;
+            // 缓存完成，开始播放
+            document.getElementById('readerListenBtn').textContent = '⏸';
+            playFromCache();
         }
-        async function playNextChunk() {
-            if (!isListening || listenIndex >= listenQueue.length) {
-                stopListen();
+        function playFromCache() {
+            if (!isListening) return;
+            if (listenCacheIdx >= listenCache.length) { stopListen(); return; }
+            // 如果下一个还没缓存好，等一会儿
+            if (!listenCache[listenCacheIdx]) {
+                setTimeout(function() { playFromCache(); }, 200);
                 return;
             }
-            var text = listenQueue[listenIndex];
-            try {
-                var resp = await fetch(ZHIPU_TTS_URL, {
-                    method: 'POST',
-                    headers: { 'Authorization': 'Bearer ' + ZHIPU_API_KEY, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ model: 'glm-tts', input: text, voice: 'tongtong', response_format: 'wav', speed: 1.0 })
-                });
-                if (!resp.ok) { console.error('TTS error:', resp.status); listenIndex++; playNextChunk(); return; }
-                var buf = await resp.arrayBuffer();
-                var audioBuf = await audioCtx.decodeAudioData(buf);
-                var src = audioCtx.createBufferSource();
-                src.buffer = audioBuf;
-                src.connect(audioCtx.destination);
-                src.onended = function() {
-                    listenIndex++;
-                    playNextChunk();
-                };
-                src.start();
-            } catch(e) { console.error('TTS err:', e); listenIndex++; playNextChunk(); }
+            var buffer = listenCache[listenCacheIdx];
+            var src = audioCtx.createBufferSource();
+            src.buffer = buffer;
+            src.connect(audioCtx.destination);
+            activeSource = src;
+            src.onended = function() {
+                activeSource = null;
+                listenCacheIdx++;
+                playFromCache();
+            };
+            src.start();
         }
         function nextChapter() {
             if (!currentBookData || currentBookData._idx >= currentBookData.chapters.length - 1) return;
