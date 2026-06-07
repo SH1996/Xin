@@ -3547,8 +3547,10 @@
         var ZHIPU_TTS_URL = 'https://open.bigmodel.cn/api/paas/v4/audio/speech';
         var listenCache = [];     // 预缓存的 AudioBuffer
         var listenCacheIdx = 0;
+        var listenParts = [];     // 文本段落
         var isListening = false;
         var isCaching = false;
+        var cacheCursor = 0;
         var audioCtx = null;
         var activeSource = null;
         function toggleListen() {
@@ -3561,14 +3563,17 @@
             if (!text.trim()) return;
             var parts = splitTextForTTS(text);
             if (parts.length === 0) return;
+            listenParts = parts;
             listenCache = new Array(parts.length);
             listenCacheIdx = 0;
+            cacheCursor = 0;
             isListening = true;
+            isCaching = true;
             document.getElementById('readerListenBtn').textContent = '⏳';
             document.getElementById('readerListenBtn').classList.add('playing');
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            // 后台缓存所有段落
-            cacheAllChunks(parts);
+            // 先快速缓存前2段，立即开始播放；后台继续缓存剩余
+            primeAndPlay();
         }
         function stopListen() {
             isListening = false;
@@ -3578,35 +3583,46 @@
             document.getElementById('readerListenBtn').textContent = '听';
             document.getElementById('readerListenBtn').classList.remove('playing');
         }
-        async function cacheAllChunks(parts) {
-            isCaching = true;
-            var total = parts.length;
-            for (var i = 0; i < total; i++) {
-                if (!isListening) { isCaching = false; return; }
-                try {
-                    var resp = await fetch(ZHIPU_TTS_URL, {
-                        method: 'POST',
-                        headers: { 'Authorization': 'Bearer ' + ZHIPU_API_KEY, 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ model: 'glm-tts', input: parts[i], voice: 'tongtong', response_format: 'wav', speed: 1.0 })
-                    });
-                    if (!resp.ok) { continue; }
-                    var buf = await resp.arrayBuffer();
-                    var audioBuf = await audioCtx.decodeAudioData(buf);
-                    listenCache[i] = audioBuf;
-                } catch(e) { console.error('cache err:', i, e); }
+        async function primeAndPlay() {
+            // 先缓存前 PRELOAD_AHEAD 段（至少1段）
+            var PRELOAD_AHEAD = Math.min(2, listenParts.length);
+            for (var i = 0; i < PRELOAD_AHEAD; i++) {
+                if (!isListening) return;
+                listenCache[i] = await fetchTTSChunk(listenParts[i]);
             }
-            isCaching = false;
             if (!isListening) return;
-            // 缓存完成，开始播放
+            cacheCursor = PRELOAD_AHEAD;
+            // 开始播放 + 后台继续缓存
             document.getElementById('readerListenBtn').textContent = '⏸';
             playFromCache();
+            backgroundCache();
+        }
+        async function fetchTTSChunk(text) {
+            try {
+                var resp = await fetch(ZHIPU_TTS_URL, {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + ZHIPU_API_KEY, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ model: 'glm-tts', input: text, voice: 'tongtong', response_format: 'wav', speed: 1.0 })
+                });
+                if (!resp.ok) return null;
+                var buf = await resp.arrayBuffer();
+                return await audioCtx.decodeAudioData(buf);
+            } catch(e) { return null; }
+        }
+        async function backgroundCache() {
+            while (cacheCursor < listenParts.length && isListening) {
+                var i = cacheCursor;
+                cacheCursor++;
+                listenCache[i] = await fetchTTSChunk(listenParts[i]);
+            }
+            isCaching = false;
         }
         function playFromCache() {
             if (!isListening) return;
-            if (listenCacheIdx >= listenCache.length) { stopListen(); return; }
-            // 如果下一个还没缓存好，等一会儿
+            if (listenCacheIdx >= listenParts.length) { stopListen(); return; }
+            // 如果当前段还没缓存好，等一下（正常情况不会发生，因为播放速度远慢于缓存速度）
             if (!listenCache[listenCacheIdx]) {
-                setTimeout(function() { playFromCache(); }, 200);
+                setTimeout(function() { playFromCache(); }, 150);
                 return;
             }
             var buffer = listenCache[listenCacheIdx];
