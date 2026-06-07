@@ -1128,7 +1128,7 @@
 
         .send-btn:active { transform: scale(0.9); box-shadow: 0 2px 8px rgba(232, 160, 180, 0.3); }
         .send-btn:disabled { opacity: 0.5; pointer-events: none; filter: grayscale(20%); }
-        .mic-btn { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg,#8b5cf6,#7c3aed); color: #fff; border: none; font-size: 18px; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+        .mic-btn { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg,#f0c0d0,#e8a0b8); color: #fff; border: none; font-size: 18px; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
         .mic-btn:active { transform: scale(0.9); }
         .mic-btn.recording { background: linear-gradient(135deg,#ef4444,#dc2626); animation: micPulse 0.8s ease-in-out infinite; }
         @keyframes micPulse { 0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,0.4)} 50%{box-shadow:0 0 0 12px rgba(239,68,68,0)}}}
@@ -1946,8 +1946,7 @@
             }
             // 开始录音
             if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                showToast('⚠️ 当前环境不支持录音（需HTTPS或localhost）');
-                return;
+                micBtn.textContent = '🎤'; return;
             }
             try {
                 var stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -1962,9 +1961,8 @@
                 isRecording = true;
                 micBtn.classList.add('recording');
                 micBtn.textContent = '🔴';
-                showToast('🎤 录音中…松开结束');
             } catch(e) {
-                showToast('❌ 麦克风权限被拒绝');
+                micBtn.textContent = '🎤';
             }
         }
         function stopRecording() {
@@ -1979,12 +1977,11 @@
             var micBtn = document.getElementById('micBtn');
             if (audioChunks.length === 0) { micBtn.textContent = '🎤'; return; }
             var blob = new Blob(audioChunks, { type: 'audio/webm' });
-            if (blob.size < 1000) { micBtn.textContent = '🎤'; showToast('⚠️ 没录到声音'); return; }
-            showToast('🔍 识别中…');
+            if (blob.size < 1000) { micBtn.textContent = '🎤'; return; }
             try {
                 // 将 webm blob 转为 wav（智谱 ASR 需要 wav/mp3）
                 var wavBlob = await convertToWavBlob(blob);
-                if (!wavBlob) { micBtn.textContent = '🎤'; showToast('⚠️ 音频转换失败'); return; }
+                if (!wavBlob) { micBtn.textContent = '🎤'; return; }
                 var formData = new FormData();
                 formData.append('file', wavBlob, 'audio.wav');
                 formData.append('model', 'glm-asr-2512');
@@ -1994,20 +1991,18 @@
                     body: formData
                 });
                 micBtn.textContent = '🎤';
-                if (!resp.ok) { showToast('⚠️ 识别失败，请重试'); return; }
+                if (!resp.ok) { micBtn.textContent = '🎤'; return; }
                 var result = await resp.json();
                 var text = result.text || '';
-                if (!text.trim()) { showToast('⚠️ 没识别到内容'); return; }
+                if (!text.trim()) { micBtn.textContent = '🎤'; return; }
                 var inp = document.getElementById('userInput');
                 var cur = inp.value;
                 if (cur && !cur.endsWith(' ')) cur += ' ';
                 inp.value = cur + text;
                 inp.focus();
                 autoResize(inp);
-                showToast('✅ ' + text);
             } catch(e) {
                 micBtn.textContent = '🎤';
-                showToast('❌ 识别出错');
             }
         }
         // 将 webm/mp4 blob 解码后编码为 WAV (PCM 16-bit mono)，返回 wav blob
