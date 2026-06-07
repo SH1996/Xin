@@ -3681,7 +3681,7 @@
         var cacheCursor = 0;
         var audioCtx = null;
         var activeSource = null;
-        function toggleListen() {
+        async function toggleListen() {
             if (isListening) { stopListen(); return; }
             if (isCaching) return;
             if (!currentBookData || currentBookData._idx === undefined) return;
@@ -3701,8 +3701,7 @@
             document.getElementById('readerListenBtn').classList.add('playing');
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             // 确保 AudioContext 被用户手势激活
-            if (audioCtx.state === 'suspended') { audioCtx.resume(); }
-            // 先快速缓存前2段，立即开始播放；后台继续缓存剩余
+            if (audioCtx.state === 'suspended') { await audioCtx.resume(); console.log('AudioCtx resumed, state:', audioCtx.state); }
             primeAndPlay();
         }
         function stopListen() {
