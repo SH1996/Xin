@@ -3550,7 +3550,7 @@
                 var resp = await fetch(ZHIPU_TTS_URL, {
                     method: 'POST',
                     headers: { 'Authorization': 'Bearer ' + ZHIPU_API_KEY, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ model: 'glm-tts', input: text, voice: 'tongtong', response_format: 'wav', speed: 1.0 })
+                    body: JSON.stringify({ model: 'glm-tts', input: text, voice: 'xiaochen', response_format: 'wav', speed: 1.0 })
                 });
                 if (!resp.ok) { console.error('TTS error:', resp.status); listenIndex++; playNextChunk(); return; }
                 var buf = await resp.arrayBuffer();
