@@ -3681,9 +3681,15 @@
         var cacheCursor = 0;
         var audioCtx = null;
         var activeSource = null;
+        var listenUnlocked = false;
         async function toggleListen() {
             if (isListening) { stopListen(); return; }
             if (isCaching) return;
+            if (!listenUnlocked) {
+                var pwd = prompt('请输入听书密码：');
+                if (pwd !== '2027') { showToast('⚠️ 密码错误'); return; }
+                listenUnlocked = true;
+            }
             if (!currentBookData || currentBookData._idx === undefined) return;
             var ch = currentBookData.chapters[currentBookData._idx];
             if (!ch) return;
