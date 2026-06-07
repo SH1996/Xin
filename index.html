@@ -1408,6 +1408,7 @@
             .reader-topbar { padding: 8px 8px; gap: 6px; }
             .reader-topbar .toc-toggle,
             .reader-topbar .lib-back { width: 28px; height: 28px; }
+            #readerListenBtn { padding: 4px 8px; font-size: 12px; }
             .reader-content { padding: 14px 10px 65px; }
         }
         /* 固定面板在小屏幕上全宽 */
@@ -1527,6 +1528,10 @@
         .reader-topbar .toc-toggle { width: 34px; height: 34px; border-radius: 8px; background: rgba(255,255,255,0.08); color: #c9a96e; border: 1px solid rgba(255,255,255,0.1); font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
         .reader-topbar .toc-toggle:active { background: rgba(201,169,110,0.2); }
         .reader-topbar .topbar-title { flex: 1; color: #c9a96e; font-size: 14px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        #readerListenBtn { padding: 5px 10px; border-radius: 8px; background: rgba(255,255,255,0.08); color: #c9a96e; border: 1px solid rgba(201,169,110,0.3); font-size: 13px; cursor: pointer; flex-shrink: 0; font-weight: bold; transition: all 0.2s; }
+        #readerListenBtn:hover { background: rgba(201,169,110,0.15); }
+        #readerListenBtn.playing { background: #c9a96e; color: #1a1a2e; border-color: #c9a96e; animation: pulseListen 1.5s ease-in-out infinite; }
+        @keyframes pulseListen { 0%,100%{opacity:1} 50%{opacity:0.6} }
         .reader-topbar .topbar-close { width: 34px; height: 34px; border-radius: 8px; background: rgba(255,255,255,0.08); color: #fff; border: 1px solid rgba(255,255,255,0.1); font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
         .reader-topbar .topbar-close:active { background: rgba(200,60,60,0.5); }
         /* 目录侧滑面板 */
@@ -3436,6 +3441,7 @@
             document.getElementById('readerPrevBtn').disabled = (idx === 0);
             document.getElementById('readerNextBtn').disabled = (idx >= total - 1);
             // 章节切换时显示气泡，关闭留言面板，重置为默认
+            stopListen();
             var bub = document.getElementById('commentBubble');
             bub.classList.remove('hidden');
             bub.textContent = '💬';
@@ -3475,6 +3481,89 @@
                     document.getElementById('commentBubble').style.fontWeight = '';
                 }
             } catch(e) { commentStore = []; }
+        }
+        // === 朗读功能 (智谱 TTS) ===
+        var ZHIPU_API_KEY = 'bf709c17973f4d48a6254b03bd7c5544.6RkZwVp54GW1ZyJA';
+        var ZHIPU_TTS_URL = 'https://open.bigmodel.cn/api/paas/v4/audio/speech';
+        var listenQueue = [];
+        var listenIndex = 0;
+        var isListening = false;
+        var audioCtx = null;
+        function toggleListen() {
+            if (isListening) { stopListen(); return; }
+            if (!currentBookData || currentBookData._idx === undefined) return;
+            var ch = currentBookData.chapters[currentBookData._idx];
+            if (!ch) return;
+            var text = stripHtml(ch.html);
+            if (!text.trim()) return;
+            // 按句号/段落切分，每段不超过1000字
+            var parts = splitTextForTTS(text);
+            listenQueue = parts;
+            listenIndex = 0;
+            isListening = true;
+            document.getElementById('readerListenBtn').textContent = '⏸';
+            document.getElementById('readerListenBtn').classList.add('playing');
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            playNextChunk();
+        }
+        function stopListen() {
+            isListening = false;
+            listenQueue = [];
+            document.getElementById('readerListenBtn').textContent = '听';
+            document.getElementById('readerListenBtn').classList.remove('playing');
+        }
+        function stripHtml(html) {
+            var tmp = document.createElement('div');
+            tmp.innerHTML = html;
+            return tmp.textContent || tmp.innerText || '';
+        }
+        function splitTextForTTS(text) {
+            var parts = [];
+            // 先按自然段落（连续换行）切
+            var paras = text.split(/\n{2,}/);
+            for (var i = 0; i < paras.length; i++) {
+                var p = paras[i].trim();
+                if (!p) continue;
+                if (p.length <= 900) { parts.push(p); continue; }
+                // 超过900字按句号切
+                var sents = p.split(/(?<=[。！？.!?])/);
+                var cur = '';
+                for (var j = 0; j < sents.length; j++) {
+                    if (cur.length + sents[j].length > 900 && cur.length > 0) {
+                        parts.push(cur.trim());
+                        cur = sents[j];
+                    } else {
+                        cur += sents[j];
+                    }
+                }
+                if (cur.trim()) parts.push(cur.trim());
+            }
+            return parts;
+        }
+        async function playNextChunk() {
+            if (!isListening || listenIndex >= listenQueue.length) {
+                stopListen();
+                return;
+            }
+            var text = listenQueue[listenIndex];
+            try {
+                var resp = await fetch(ZHIPU_TTS_URL, {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + ZHIPU_API_KEY, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ model: 'glm-tts', input: text, voice: 'tongtong', response_format: 'wav', speed: 1.0 })
+                });
+                if (!resp.ok) { console.error('TTS error:', resp.status); listenIndex++; playNextChunk(); return; }
+                var buf = await resp.arrayBuffer();
+                var audioBuf = await audioCtx.decodeAudioData(buf);
+                var src = audioCtx.createBufferSource();
+                src.buffer = audioBuf;
+                src.connect(audioCtx.destination);
+                src.onended = function() {
+                    listenIndex++;
+                    playNextChunk();
+                };
+                src.start();
+            } catch(e) { console.error('TTS err:', e); listenIndex++; playNextChunk(); }
         }
         function nextChapter() {
             if (!currentBookData || currentBookData._idx >= currentBookData.chapters.length - 1) return;
@@ -4258,6 +4347,7 @@
             <button class="lib-back" onclick="closeReader();openLibrary()" title="回书库">←</button>
             <button class="toc-toggle" onclick="toggleTOC()" title="目录">☰</button>
             <span class="topbar-title" id="readerTopTitle">找店参谋实战手册</span>
+            <button id="readerListenBtn" onclick="toggleListen()" title="朗读">听</button>
             <button class="topbar-close" onclick="closeReader()">✕</button>
         </div>
         <div class="reader-content" id="readerContent" onclick="var cp=document.getElementById('commentPanel');if(cp.classList.contains('open'))cp.classList.remove('open')">
