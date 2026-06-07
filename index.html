@@ -1982,28 +1982,19 @@
             if (blob.size < 1000) { micBtn.textContent = '🎤'; showToast('⚠️ 没录到声音'); return; }
             showToast('🔍 识别中…');
             try {
-                // 读取为 base64
-                var reader = new FileReader();
-                var base64Promise = new Promise(function(resolve) {
-                    reader.onloadend = function() {
-                        var dataUrl = reader.result;
-                        var base64 = dataUrl.split(',')[1];
-                        resolve(base64);
-                    };
-                });
-                reader.readAsDataURL(blob);
-                var base64 = await base64Promise;
+                // 将 webm blob 转为 wav（智谱 ASR 需要 wav/mp3）
+                var wavBase64 = await convertToWavBase64(blob);
+                if (!wavBase64) { micBtn.textContent = '🎤'; showToast('⚠️ 音频转换失败'); return; }
                 var resp = await fetch(ZHIPU_ASR_URL, {
                     method: 'POST',
                     headers: { 'Authorization': 'Bearer ' + ZHIPU_API_KEY, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ model: 'glm-asr-2512', file_base64: base64 })
+                    body: JSON.stringify({ model: 'glm-asr-2512', file_base64: wavBase64 })
                 });
                 micBtn.textContent = '🎤';
                 if (!resp.ok) { showToast('⚠️ 识别失败，请重试'); return; }
                 var result = await resp.json();
                 var text = result.text || '';
                 if (!text.trim()) { showToast('⚠️ 没识别到内容'); return; }
-                // 填入输入框
                 var inp = document.getElementById('userInput');
                 var cur = inp.value;
                 if (cur && !cur.endsWith(' ')) cur += ' ';
@@ -2015,6 +2006,57 @@
                 micBtn.textContent = '🎤';
                 showToast('❌ 识别出错');
             }
+        }
+        // 将 webm/mp4 blob 解码后编码为 WAV (PCM 16-bit mono)，返回 base64
+        async function convertToWavBase64(blob) {
+            try {
+                var ab = await blob.arrayBuffer();
+                var actx = new (window.AudioContext || window.webkitAudioContext)();
+                var audioBuf = await actx.decodeAudioData(ab);
+                // 编码为 WAV
+                var numChannels = 1; // 转单声道
+                var sampleRate = Math.min(audioBuf.sampleRate, 16000); // 降采样到16kHz，省带宽
+                var offlineCtx = new OfflineAudioContext(numChannels, audioBuf.duration * sampleRate, sampleRate);
+                var src = offlineCtx.createBufferSource();
+                src.buffer = audioBuf;
+                src.connect(offlineCtx.destination);
+                src.start();
+                var rendered = await offlineCtx.startRendering();
+                // 取第一声道数据
+                var pcmData = rendered.getChannelData(0);
+                // 16-bit PCM 编码
+                var wavBuffer = new ArrayBuffer(44 + pcmData.length * 2);
+                var view = new DataView(wavBuffer);
+                writeString(view, 0, 'RIFF');
+                view.setUint32(4, 36 + pcmData.length * 2, true);
+                writeString(view, 8, 'WAVE');
+                writeString(view, 12, 'fmt ');
+                view.setUint32(16, 16, true);
+                view.setUint16(20, 1, true); // PCM
+                view.setUint16(22, numChannels, true);
+                view.setUint32(24, sampleRate, true);
+                view.setUint32(28, sampleRate * numChannels * 2, true);
+                view.setUint16(32, numChannels * 2, true);
+                view.setUint16(34, 16, true);
+                writeString(view, 36, 'data');
+                view.setUint32(40, pcmData.length * 2, true);
+                // 写入 PCM
+                var offset = 44;
+                for (var i = 0; i < pcmData.length; i++) {
+                    var s = Math.max(-1, Math.min(1, pcmData[i]));
+                    s = s < 0 ? s * 32768 : s * 32767;
+                    view.setInt16(offset, s | 0, true);
+                    offset += 2;
+                }
+                // 转 base64
+                var bytes = new Uint8Array(wavBuffer);
+                var binary = '';
+                for (var j = 0; j < bytes.length; j++) binary += String.fromCharCode(bytes[j]);
+                return btoa(binary);
+            } catch(e) { console.error('convertToWavBase64 err:', e); return null; }
+        }
+        function writeString(view, offset, str) {
+            for (var i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i));
         }
         function esc(t) { if (!t) return ''; const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
 
