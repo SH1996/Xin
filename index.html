@@ -2893,7 +2893,7 @@
             const bubbleHTML = fmt(mainText);
             const isAdvisor = currentMode === 'advisor';
             const tagHTML = isAdvisor ? '<div class="model-tag advisor">🏪</div>' : (advancedMode ? '<div class="model-tag pro">Pro</div>' : '<div class="model-tag flash">Flash</div>');
-            const speakHTML = isAdvisor ? '' : '<button class="speak-btn" id="' + bid + '" onclick="event.stopPropagation();handleSpeakClick(\'' + bid + '\')"><span>🌈</span> 听他说</button>';
+            const speakHTML = isAdvisor ? '' : '<button class="speak-btn" id="' + bid + '" onclick="event.stopPropagation();handleSpeakClick(\'' + bid + '\')"><span>🗣️</span> 听他喷</button>';
             const thinkHTML = steps.length > 0 ? '<div class="thinking-chain"><div class="thinking-header" id="thinking-header-' + msgId + '"><span class="arrow">▶</span> 🧠 思考过程（已完成）</div><div class="thinking-steps" id="ts-' + msgId + '">' + steps.map((s, i) => '<div class="step-item"><div class="step-num done">' + (i + 1) + '</div><div class="step-text"><strong>' + esc(s.label) + '</strong><br>' + esc(s.body) + '</div></div>').join('') + '</div></div>' : '';
             el.innerHTML = tagHTML + '<div class="bubble">' + bubbleHTML + '</div>' + speakHTML + thinkHTML;
             el.dataset.spkTxt = mainText; el.dataset.spkBid = bid; if (steps.length > 0) { bindTC(el);
@@ -2918,7 +2918,7 @@
             d.className = 'message ' + role; let h = ''; if (tag) { const isAdvisor = currentMode === 'advisor' || tag === 'advisor'; h += '<div class="model-tag ' + (isAdvisor ? 'advisor' : tag) + '">' + (isAdvisor ? '🏪' : (tag === 'pro' ? 'Pro' : 'Flash')) + '</div>'; }
             const bc = rolePlayEnabled ? fmt(content) : renderMarkdown(content);
             h += '<div class="bubble">' + bc + '</div>'; if (role === 'ai' && content?.length > 10) { const bid = 'spk-' + Date.now();
-                h += '<button class="speak-btn" id="' + bid + '" onclick="event.stopPropagation();handleSpeakClick(\'' + bid + '\')"><span>🎁</span> 听他说</button>'; d.dataset.spkTxt = content; d.dataset.spkBid = bid; }
+                h += '<button class="speak-btn" id="' + bid + '" onclick="event.stopPropagation();handleSpeakClick(\'' + bid + '\')"><span>🗣️</span> 听他喷</button>'; d.dataset.spkTxt = content; d.dataset.spkBid = bid; }
             d.innerHTML = h; chatEl.appendChild(d); scrollBottom(); }
 
         function handleSpeakClick(bid) {
