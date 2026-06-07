@@ -1994,12 +1994,7 @@
                     body: formData
                 });
                 micBtn.textContent = '🎤';
-                if (!resp.ok) {
-                    var errText = '';
-                    try { var errJson = await resp.json(); errText = resp.status + ': ' + (errJson.error?.message || JSON.stringify(errJson)); } catch(e) { errText = 'HTTP ' + resp.status; }
-                    showToast('⚠️ 识别失败: ' + errText.substring(0, 50));
-                    return;
-                }
+                if (!resp.ok) { showToast('⚠️ 识别失败，请重试'); return; }
                 var result = await resp.json();
                 var text = result.text || '';
                 if (!text.trim()) { showToast('⚠️ 没识别到内容'); return; }
