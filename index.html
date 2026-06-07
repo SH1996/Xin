@@ -1757,6 +1757,7 @@
             <button class="query-tab" id="tabVoice" onclick="switchQueryTab('voice')" style="flex:1;padding:10px;background:none;border:none;color:var(--text-light);font-size:14px;cursor:pointer;border-bottom:2px solid transparent;">🎤 语音库</button>
             <button class="query-tab" id="tabBooks" onclick="switchQueryTab('books')" style="flex:1;padding:10px;background:none;border:none;color:var(--text-light);font-size:14px;cursor:pointer;border-bottom:2px solid transparent;">📚 书库管理</button>
             <button class="query-tab" id="tabJournals" onclick="switchQueryTab('journals')" style="flex:1;padding:10px;background:none;border:none;color:var(--text-light);font-size:14px;cursor:pointer;border-bottom:2px solid transparent;">📰 周刊管理</button>
+            <button class="query-tab" id="tabVideos" onclick="switchQueryTab('videos')" style="flex:1;padding:10px;background:none;border:none;color:var(--text-light);font-size:14px;cursor:pointer;border-bottom:2px solid transparent;">📱 视频</button>
         </div>
         <!-- 聊天记录 -->
         <div id="queryContent" style="flex:1;display:flex;flex-direction:column;overflow:hidden;padding:0 12px;">
@@ -1793,6 +1794,16 @@
             </div>
             <div id="qpJournalList" style="flex:1;overflow-y:auto;"></div>
             <div class="admin-log" id="qpJournalLog" style="margin-top:8px;max-height:120px;"></div>
+        </div>
+        <!-- 视频收藏 -->
+        <div id="queryVideosContent" style="flex:1;display:none;flex-direction:column;overflow:hidden;background:#000;">
+            <!-- 添加视频 -->
+            <div style="display:flex;gap:6px;padding:10px 12px;background:#111;">
+                <input id="videoUrlInput" type="text" placeholder="粘贴视频链接…" style="flex:1;padding:8px 12px;border-radius:8px;border:1px solid #333;background:#1a1a1a;color:#fff;font-size:13px;outline:none;">
+                <button onclick="addVideo()" style="padding:8px 16px;border-radius:8px;border:none;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;font-weight:600;cursor:pointer;font-size:13px;">添加</button>
+            </div>
+            <!-- 视频流 -->
+            <div id="videoWall" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;align-items:center;gap:0;scroll-snap-type:y mandatory;"></div>
         </div>
     </div>
 
@@ -2634,12 +2645,14 @@
             var voice = document.getElementById('queryVoiceContent');
             var books = document.getElementById('queryBooksContent');
             var journals = document.getElementById('queryJournalsContent');
+            var videos = document.getElementById('queryVideosContent');
             var tabChat = document.getElementById('tabChat');
             var tabVoice = document.getElementById('tabVoice');
             var tabBooks = document.getElementById('tabBooks');
             var tabJournals = document.getElementById('tabJournals');
-            var allTabs = [tabChat, tabVoice, tabBooks, tabJournals];
-            var allPanels = [chat, voice, books, journals];
+            var tabVideos = document.getElementById('tabVideos');
+            var allTabs = [tabChat, tabVoice, tabBooks, tabJournals, tabVideos];
+            var allPanels = [chat, voice, books, journals, videos];
             allPanels.forEach(function(p) { p.style.display = 'none'; });
             allTabs.forEach(function(t) { t.style.color = 'var(--text-light)'; t.style.borderBottom = '2px solid transparent'; });
             if (tab === 'chat') {
@@ -2667,6 +2680,11 @@
                 tabJournals.style.color = 'var(--accent)'; tabJournals.style.borderBottom = '2px solid var(--accent)';
                 document.getElementById('queryTabTitle').textContent = '📰 周刊管理';
                 adminLoadJournals();
+            } else if (tab === 'videos') {
+                videos.style.display = 'flex';
+                tabVideos.style.color = 'var(--accent)'; tabVideos.style.borderBottom = '2px solid var(--accent)';
+                document.getElementById('queryTabTitle').textContent = '📱 视频收藏';
+                renderVideoWall();
             }
         }
 
@@ -4486,6 +4504,71 @@
                 showToast('❌ 删除失败: ' + e.message);
             }
         }
+
+        // ========== 视频收藏 (视频号风格) ==========
+        const VIDEO_STORAGE_KEY = 'xin_videos';
+        var videoList = []; // { url, title, time }
+
+        function loadVideos() {
+            try {
+                var raw = localStorage.getItem(VIDEO_STORAGE_KEY);
+                videoList = raw ? JSON.parse(raw) : [];
+                // 预置 SH哥的视频
+                if (videoList.length === 0) {
+                    videoList = [{ url: 'https://weixin.qq.com/sph/AyYuaFPj7S', title: '微信视频号', time: Date.now() }];
+                    saveVideos();
+                }
+            } catch(e) { videoList = []; }
+        }
+        function saveVideos() {
+            try { localStorage.setItem(VIDEO_STORAGE_KEY, JSON.stringify(videoList)); } catch(e) {}
+            renderVideoWall();
+        }
+        function addVideo() {
+            var inp = document.getElementById('videoUrlInput');
+            var url = inp.value.trim();
+            if (!url) return;
+            // 简单判微信视频号链接
+            var title = url.indexOf('weixin.qq.com/sph/') !== -1 ? '微信视频号' : '视频';
+            videoList.unshift({ url: url, title: title, time: Date.now() });
+            saveVideos();
+            inp.value = '';
+        }
+        function delVideo(idx) {
+            videoList.splice(idx, 1);
+            saveVideos();
+        }
+        function renderVideoWall() {
+            var wall = document.getElementById('videoWall');
+            if (!wall) return;
+            if (!videoList.length) {
+                wall.innerHTML = '<div style="color:#666;padding:60px 20px;text-align:center;font-size:14px;">📭 还没有收藏视频<br><span style="font-size:12px;color:#444;">粘贴链接添加</span></div>';
+                return;
+            }
+            var h = '';
+            for (var i = 0; i < videoList.length; i++) {
+                var v = videoList[i];
+                var isWeixin = v.url.indexOf('weixin.qq.com/sph/') !== -1;
+                var embedHTML;
+                if (isWeixin) {
+                    embedHTML = '<iframe src="' + escAttr(v.url) + '" style="width:100%;height:100%;border:none;" allow="autoplay;fullscreen" allowfullscreen></iframe>';
+                } else {
+                    // 普通视频直接 <video> 标签
+                    embedHTML = '<video src="' + escAttr(v.url) + '" style="width:100%;height:100%;object-fit:contain;background:#000;" controls playsinline></video>';
+                }
+                h += '<div class="video-card" style="position:relative;width:100%;max-width:400px;height:70vh;scroll-snap-align:start;margin:0 auto;background:#000;border-radius:0;">' +
+                    '<div style="position:absolute;top:8px;right:8px;z-index:10;">' +
+                        '<button onclick="delVideo(' + i + ')" style="background:rgba(0,0,0,0.6);color:#fff;border:none;border-radius:50%;width:28px;height:28px;font-size:14px;cursor:pointer;">✕</button>' +
+                    '</div>' +
+                    embedHTML +
+                    '<div style="position:absolute;bottom:0;left:0;right:0;padding:12px 16px 20px;background:linear-gradient(transparent,rgba(0,0,0,0.8));color:#fff;font-size:13px;font-weight:500;pointer-events:none;">' + esc(v.title) + '</div>' +
+                '</div>';
+            }
+            wall.innerHTML = h;
+        }
+        function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/'/g,'&#39;'); }
+
+        loadVideos();
 
         function escJs(s) { return s.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, '\\n'); }
         function escText(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>'); }
