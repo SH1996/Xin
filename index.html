@@ -1983,15 +1983,23 @@
             showToast('🔍 识别中…');
             try {
                 // 将 webm blob 转为 wav（智谱 ASR 需要 wav/mp3）
-                var wavBase64 = await convertToWavBase64(blob);
-                if (!wavBase64) { micBtn.textContent = '🎤'; showToast('⚠️ 音频转换失败'); return; }
+                var wavBlob = await convertToWavBlob(blob);
+                if (!wavBlob) { micBtn.textContent = '🎤'; showToast('⚠️ 音频转换失败'); return; }
+                var formData = new FormData();
+                formData.append('file', wavBlob, 'audio.wav');
+                formData.append('model', 'glm-asr-2512');
                 var resp = await fetch(ZHIPU_ASR_URL, {
                     method: 'POST',
-                    headers: { 'Authorization': 'Bearer ' + ZHIPU_API_KEY, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ model: 'glm-asr-2512', file_base64: wavBase64 })
+                    headers: { 'Authorization': 'Bearer ' + ZHIPU_API_KEY },
+                    body: formData
                 });
                 micBtn.textContent = '🎤';
-                if (!resp.ok) { showToast('⚠️ 识别失败，请重试'); return; }
+                if (!resp.ok) {
+                    var errText = '';
+                    try { var errJson = await resp.json(); errText = resp.status + ': ' + (errJson.error?.message || JSON.stringify(errJson)); } catch(e) { errText = 'HTTP ' + resp.status; }
+                    showToast('⚠️ 识别失败: ' + errText.substring(0, 50));
+                    return;
+                }
                 var result = await resp.json();
                 var text = result.text || '';
                 if (!text.trim()) { showToast('⚠️ 没识别到内容'); return; }
@@ -2007,8 +2015,8 @@
                 showToast('❌ 识别出错');
             }
         }
-        // 将 webm/mp4 blob 解码后编码为 WAV (PCM 16-bit mono)，返回 base64
-        async function convertToWavBase64(blob) {
+        // 将 webm/mp4 blob 解码后编码为 WAV (PCM 16-bit mono)，返回 wav blob
+        async function convertToWavBlob(blob) {
             try {
                 var ab = await blob.arrayBuffer();
                 var actx = new (window.AudioContext || window.webkitAudioContext)();
@@ -2048,12 +2056,9 @@
                     view.setInt16(offset, s | 0, true);
                     offset += 2;
                 }
-                // 转 base64
-                var bytes = new Uint8Array(wavBuffer);
-                var binary = '';
-                for (var j = 0; j < bytes.length; j++) binary += String.fromCharCode(bytes[j]);
-                return btoa(binary);
-            } catch(e) { console.error('convertToWavBase64 err:', e); return null; }
+                // 返回 WAV Blob
+                return new Blob([new Uint8Array(wavBuffer)], { type: 'audio/wav' });
+            } catch(e) { console.error('convertToWav err:', e); return null; }
         }
         function writeString(view, offset, str) {
             for (var i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i));
