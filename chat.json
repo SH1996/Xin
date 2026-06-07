@@ -16,5 +16,13 @@
     "rp": true,
     "type": "voice",
     "clientId": "cx7ljgq"
+  },
+  {
+    "date": "2026-06-07T14:04:58.120Z",
+    "user": "你好",
+    "reply": "就一句“你好”？这么客气，我差点以为你走错聊天室了。是怕说错话，还是等我先说？",
+    "mode": "warm",
+    "rp": true,
+    "clientId": "cx7ljgq"
   }
 ]
