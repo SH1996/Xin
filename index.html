@@ -4702,6 +4702,20 @@
         const SHOP_TRANSFER_KEY = 'xin_shop_transfers';
         var shopTransfers = [];
 
+        function loadShopTransfers() {
+            var list = document.getElementById('shopsWall');
+            if (!list) return;
+            list.innerHTML = '<div style="color:#8b949e;text-align:center;padding:20px;">⏳ 加载中…</div>';
+            try {
+                var cached = localStorage.getItem(SHOP_TRANSFER_KEY);
+                if (cached) {
+                    shopTransfers = JSON.parse(cached);
+                    renderShopTransfersV2(true);
+                }
+            } catch(e) { shopTransfers = []; }
+            fetchShopDataV2(true);
+        }
+
         function loadShopTransfersV2() {
             var list = document.getElementById('shopsWall');
             if (!list) return;
@@ -4717,7 +4731,7 @@
             // 再从 GitHub 加载最新
             fetchShopDataV2();
         }
-        function renderShopTransfersV2() {
+        function renderShopTransfersV2(showDel) {
             var list = document.getElementById('shopsWall');
             if (!list) return;
             if (!shopTransfers.length) {
@@ -4730,9 +4744,11 @@
                 var badge = s.top ? '<span style="background:#da3633;color:#fff;font-size:10px;padding:1px 5px;border-radius:3px;margin-right:4px;">顶</span>' : '';
                 var catBadge = '<span style="background:#21262d;color:#58a6ff;font-size:10px;padding:1px 6px;border-radius:3px;">' + esc(s.cat) + '</span>';
                 var telDisplay = s.tel ? ('<a href="tel:' + escAttr(s.tel) + '" style="color:#58a6ff;font-size:12px;text-decoration:none;">📞 ' + esc(s.tel) + '</a>') : '';
+                var delBtn = showDel ? ('<button onclick="shopTransfers.splice(' + i + ',1);localStorage.setItem(SHOP_TRANSFER_KEY,JSON.stringify(shopTransfers));renderShopTransfersV2(true)" style="background:none;color:#8b949e;border:none;padding:4px;font-size:14px;cursor:pointer;">🗑</button>') : '';
                 h += '<div style="background:#161b22;border:1px solid #21262d;border-radius:8px;padding:12px;margin-bottom:8px;">' +
                     '<div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:6px;">' +
                         '<div style="flex:1;">' + badge + catBadge + '</div>' +
+                        delBtn +
                     '</div>' +
                     '<div style="color:#c9d1d9;font-size:14px;line-height:1.5;margin-bottom:6px;">' + esc(s.desc || s.attrs || '') + '</div>' +
                     '<div style="color:#8b949e;font-size:12px;margin-bottom:4px;">' + esc(s.attrs || '') + '</div>' +
@@ -4744,7 +4760,7 @@
             }
             list.innerHTML = h;
         }
-        function fetchShopDataV2() {
+        function fetchShopDataV2(showDel) {
             var list = document.getElementById('shopsWall');
             if (!list) return;
             var cacheBuster = Date.now();
@@ -4758,11 +4774,11 @@
                     if (Array.isArray(data) && data.length > 0) {
                         shopTransfers = data;
                         try { localStorage.setItem(SHOP_TRANSFER_KEY, JSON.stringify(shopTransfers)); } catch(e) {}
-                        renderShopTransfersV2();
+                        renderShopTransfersV2(showDel);
                     }
                 })
                 .catch(function() {
-                    renderShopTransfersV2();
+                    renderShopTransfersV2(showDel);
                 });
         }
 
