@@ -4561,7 +4561,7 @@
         }
         function saveVideos() {
             try { localStorage.setItem(VIDEO_STORAGE_KEY, JSON.stringify(videoList)); } catch(e) {}
-            renderVideoWall();
+            renderVideosWall();
         }
         function addVideo() {
             var inp = document.getElementById('videoUrlInput');
