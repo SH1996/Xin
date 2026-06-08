@@ -4549,11 +4549,19 @@
             try {
                 var raw = localStorage.getItem(VIDEO_STORAGE_KEY);
                 videoList = raw ? JSON.parse(raw) : [];
-                // 首次空时预置示例视频
-                if (videoList.length === 0) {
+                // 首次空时或旧数据少于3条时预置多种风格B站视频
+                if (videoList.length < 3) {
                     videoList = [
-                        { url: 'https://www.bilibili.com/video/BV1GJ411x7h7/', title: '🎵 放松音乐 · 白噪音', time: Date.now() },
-                        { url: 'https://www.bilibili.com/video/BV1uT4y1P7CX/', title: '📖 TED演讲精选', time: Date.now() - 1000 }
+                        { url: 'https://www.bilibili.com/video/BV1uT4y1P7CX/', title: '🎵 学习专用 · α波专注纯音乐', time: Date.now() },
+                        { url: 'https://www.bilibili.com/video/BV1GJ411x7h7/', title: '☕ 咖啡馆爵士 · 慵懒午后', time: Date.now() - 1000 },
+                        { url: 'https://www.bilibili.com/video/BV1bJ411v7zK/', title: '🎹 钢琴曲 · 宫崎骏合集', time: Date.now() - 2000 },
+                        { url: 'https://www.bilibili.com/video/BV1Nt4y1D7cm/', title: '🎧 Lo-Fi HipHop · 深夜自习', time: Date.now() - 3000 },
+                        { url: 'https://www.bilibili.com/video/BV1Ls411T7xX/', title: '🌧️ 雨声白噪音 · 助眠放松', time: Date.now() - 4000 },
+                        { url: 'https://www.bilibili.com/video/BV1YJ411J7HN/', title: '🏯 中国风 · 古琴古筝', time: Date.now() - 5000 },
+                        { url: 'https://www.bilibili.com/video/BV1i4411g7nR/', title: '🎸 吉他指弹 · 精选集', time: Date.now() - 6000 },
+                        { url: 'https://www.bilibili.com/video/BV1R5411j76x/', title: '🔥 燃向电音 · 运动健身', time: Date.now() - 7000 },
+                        { url: 'https://www.bilibili.com/video/BV1qK4y1K7Bz/', title: '🍃 禅意冥想 · 空灵之音', time: Date.now() - 8000 },
+                        { url: 'https://www.bilibili.com/video/BV1aE411N7Md/', title: '🎤 华语经典 · 怀旧金曲', time: Date.now() - 9000 }
                     ];
                     saveVideos();
                 }
