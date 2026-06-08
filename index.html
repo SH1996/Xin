@@ -4587,7 +4587,8 @@
             inp.value = '';
         }
         function addVideoV2() {
-            var inp = document.getElementById('videoUrlInput');
+            var inp = document.getElementById('videoUrlInputV2');
+            if (!inp) inp = document.getElementById('videoUrlInput');
             var url = inp.value.trim();
             if (!url) return;
             var title = '视频';
@@ -4894,7 +4895,7 @@
         </div>
         <!-- 添加栏 -->
         <div style="display:flex;gap:8px;padding:10px 12px;background:#161b22;border-bottom:1px solid #21262d;">
-            <input id="videoUrlInput" type="text" placeholder="粘贴视频链接（微信视频号/MP4）" style="flex:1;background:#0d1117;border:1px solid #30363d;border-radius:8px;color:#c9d1d9;padding:8px 12px;font-size:13px;outline:none;" onkeydown="if(event.key==='Enter')addVideoV2()">
+            <input id="videoUrlInputV2" type="text" placeholder="粘贴视频链接（微信视频号/MP4）" style="flex:1;background:#0d1117;border:1px solid #30363d;border-radius:8px;color:#c9d1d9;padding:8px 12px;font-size:13px;outline:none;" onkeydown="if(event.key==='Enter')addVideoV2()">
             <button onclick="addVideoV2()" style="background:#238636;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:13px;cursor:pointer;white-space:nowrap;">➕ 添加</button>
         </div>
         <div class="weekly-body" style="padding:12px;overflow-y:auto;">
