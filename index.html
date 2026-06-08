@@ -2262,7 +2262,7 @@
                 '<div class="voice-clip-item">' +
                 '<button class="v-play" id="vlp-'+i+'" onclick="playVoiceClip(\''+esc(kw)+'\')">▶</button>' +
                 '<div class="v-info"><div class="v-label">🎤 '+esc(kw)+'</div></div>' +
-                '<button class="v-del" onclick="deleteVoiceClip(\''+esc(kw)+'\')">🗑</button></div>'
+                '</div>'
             ).join('');
         }
 
@@ -4679,19 +4679,15 @@
                         '<div style="position:relative;background:#0d1117;aspect-ratio:16/9;">' +
                             '<iframe id="' + vid + '" src="' + embedSrc + '" style="width:100%;height:100%;border:none;" allow="autoplay;fullscreen;encrypted-media" allowfullscreen></iframe>' +
                         '</div>' +
-                        '<div style="padding:10px 14px;display:flex;justify-content:space-between;align-items:center;">' +
-                            '<span style="color:#c9d1d9;font-size:13px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + esc(v.title) + '</span>' +
-                            '<button onclick="delVideo(' + i + ')" style="background:none;color:#8b949e;border:none;padding:4px 8px;font-size:14px;cursor:pointer;">🗑</button>' +
+                        '<div style="padding:10px 14px;">' +
+                            '<span style="color:#c9d1d9;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block;">' + esc(v.title) + '</span>' +
                         '</div>' +
                     '</div>';
                 } else {
                     // 无嵌套支持，显示为链接卡片
-                    h += '<div style="background:#161b22;border:1px solid #21262d;border-radius:12px;padding:16px 14px;display:flex;justify-content:space-between;align-items:center;">' +
-                        '<div style="flex:1;min-width:0;">' +
-                            '<div style="color:#c9d1d9;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">🎬 ' + esc(v.title) + '</div>' +
-                            '<a href="' + escAttr(v.url) + '" target="_blank" style="color:#58a6ff;font-size:11px;word-break:break-all;">🔗 打开观看</a>' +
-                        '</div>' +
-                        '<button onclick="delVideo(' + i + ')" style="background:none;color:#8b949e;border:none;padding:4px 8px;font-size:14px;cursor:pointer;">🗑</button>' +
+                    h += '<div style="background:#161b22;border:1px solid #21262d;border-radius:12px;padding:16px 14px;">' +
+                        '<div style="color:#c9d1d9;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">🎬 ' + esc(v.title) + '</div>' +
+                        '<a href="' + escAttr(v.url) + '" target="_blank" style="color:#58a6ff;font-size:11px;word-break:break-all;">🔗 打开观看</a>' +
                     '</div>';
                 }
             }
