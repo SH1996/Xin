@@ -4549,9 +4549,12 @@
             try {
                 var raw = localStorage.getItem(VIDEO_STORAGE_KEY);
                 videoList = raw ? JSON.parse(raw) : [];
-                // 预置 SH哥的视频
+                // 首次空时预置示例视频
                 if (videoList.length === 0) {
-                    videoList = [{ url: 'https://weixin.qq.com/sph/AyYuaFPj7S', title: '微信视频号', time: Date.now() }];
+                    videoList = [
+                        { url: 'https://www.bilibili.com/video/BV1GJ411x7h7/', title: '🎵 放松音乐 · 白噪音', time: Date.now() },
+                        { url: 'https://www.bilibili.com/video/BV1uT4y1P7CX/', title: '📖 TED演讲精选', time: Date.now() - 1000 }
+                    ];
                     saveVideos();
                 }
             } catch(e) { videoList = []; }
@@ -4570,6 +4573,18 @@
             saveVideos();
             inp.value = '';
         }
+        function addVideoV2() {
+            var inp = document.getElementById('videoUrlInput');
+            var url = inp.value.trim();
+            if (!url) return;
+            var title = '视频';
+            if (url.indexOf('weixin.qq.com/sph/') !== -1) title = '微信视频号';
+            else if (url.indexOf('bilibili.com/video/') !== -1) title = 'B站视频';
+            else if (url.indexOf('youtube.com/') !== -1 || url.indexOf('youtu.be/') !== -1) title = 'YouTube';
+            videoList.unshift({ url: url, title: title, time: Date.now() });
+            saveVideos();
+            inp.value = '';
+        }
         function delVideo(idx) {
             videoList.splice(idx, 1);
             saveVideos();
@@ -4578,19 +4593,34 @@
             var wall = document.getElementById('videosWall');
             if (!wall) return;
             if (!videoList.length) {
-                wall.innerHTML = '<div style="color:#8b949e;text-align:center;padding:60px 20px;font-size:13px;">📭 还没有收藏视频<br><span style="font-size:11px;color:#484f58;">在聊天中粘贴视频链接即可收藏</span></div>';
+                wall.innerHTML = '<div style="color:#8b949e;text-align:center;padding:60px 20px;font-size:13px;">📭 还没有收藏视频<br><span style="font-size:11px;color:#484f58;">在上方粘贴视频链接即可收藏</span></div>';
                 return;
             }
             var h = '';
             for (var i = 0; i < videoList.length; i++) {
                 var v = videoList[i];
-                var isWeixin = v.url.indexOf('weixin.qq.com/sph/') !== -1;
-                // 微信视频号用卡片预览，普通视频直接用video
                 var vid = 'vv-' + i;
-                if (isWeixin) {
+                var embedSrc = null;
+                // 判断来源并构造嵌入链接
+                if (v.url.indexOf('weixin.qq.com/sph/') !== -1) {
+                    embedSrc = v.url;
+                } else if (v.url.indexOf('bilibili.com/video/') !== -1) {
+                    // B站 embed: BV号提取
+                    var bv = v.url.match(/(BV[a-zA-Z0-9]+)/);
+                    if (bv) embedSrc = 'https://player.bilibili.com/player.html?bvid=' + bv[1] + '&page=1&high_quality=1';
+                } else if (v.url.indexOf('youtube.com/watch?v=') !== -1) {
+                    var yid = v.url.match(/v=([^&]+)/);
+                    if (yid) embedSrc = 'https://www.youtube.com/embed/' + yid[1];
+                } else if (v.url.indexOf('youtu.be/') !== -1) {
+                    var yid2 = v.url.match(/youtu\.be\/([^?&]+)/);
+                    if (yid2) embedSrc = 'https://www.youtube.com/embed/' + yid2[1];
+                }
+                
+                if (embedSrc) {
+                    // iframe 嵌入
                     h += '<div style="background:#161b22;border:1px solid #21262d;border-radius:12px;overflow:hidden;">' +
-                        '<div style="position:relative;background:#0d1117;">' +
-                            '<iframe id="' + vid + '" src="' + escAttr(v.url) + '" style="width:100%;height:360px;border:none;" allow="autoplay;fullscreen" allowfullscreen></iframe>' +
+                        '<div style="position:relative;background:#0d1117;aspect-ratio:16/9;">' +
+                            '<iframe id="' + vid + '" src="' + embedSrc + '" style="width:100%;height:100%;border:none;" allow="autoplay;fullscreen;encrypted-media" allowfullscreen></iframe>' +
                         '</div>' +
                         '<div style="padding:10px 14px;display:flex;justify-content:space-between;align-items:center;">' +
                             '<span style="color:#c9d1d9;font-size:13px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + esc(v.title) + '</span>' +
@@ -4598,14 +4628,13 @@
                         '</div>' +
                     '</div>';
                 } else {
-                    h += '<div style="background:#161b22;border:1px solid #21262d;border-radius:12px;overflow:hidden;">' +
-                        '<div style="position:relative;background:#000;">' +
-                            '<video id="' + vid + '" src="' + escAttr(v.url) + '" style="width:100%;max-height:360px;object-fit:contain;background:#000;" controls playsinline></video>' +
+                    // 无嵌套支持，显示为链接卡片
+                    h += '<div style="background:#161b22;border:1px solid #21262d;border-radius:12px;padding:16px 14px;display:flex;justify-content:space-between;align-items:center;">' +
+                        '<div style="flex:1;min-width:0;">' +
+                            '<div style="color:#c9d1d9;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">🎬 ' + esc(v.title) + '</div>' +
+                            '<a href="' + escAttr(v.url) + '" target="_blank" style="color:#58a6ff;font-size:11px;word-break:break-all;">🔗 打开观看</a>' +
                         '</div>' +
-                        '<div style="padding:10px 14px;display:flex;justify-content:space-between;align-items:center;">' +
-                            '<span style="color:#c9d1d9;font-size:13px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + esc(v.title) + '</span>' +
-                            '<button onclick="delVideo(' + i + ')" style="background:none;color:#8b949e;border:none;padding:4px 8px;font-size:14px;cursor:pointer;">🗑</button>' +
-                        '</div>' +
+                        '<button onclick="delVideo(' + i + ')" style="background:none;color:#8b949e;border:none;padding:4px 8px;font-size:14px;cursor:pointer;">🗑</button>' +
                     '</div>';
                 }
             }
@@ -4785,8 +4814,13 @@
     <div class="weekly-panel" id="videosPanel">
         <div class="weekly-topbar">
             <span>📱 视频收藏</span>
-            <span style="font-size:11px;color:#484f58;">下滑浏览 · 点击播放</span>
+            <span style="font-size:11px;color:#484f58;">粘贴链接收藏</span>
             <button class="weekly-close" onclick="closeVideosPanel()">✕</button>
+        </div>
+        <!-- 添加栏 -->
+        <div style="display:flex;gap:8px;padding:10px 12px;background:#161b22;border-bottom:1px solid #21262d;">
+            <input id="videoUrlInput" type="text" placeholder="粘贴视频链接（微信视频号/MP4）" style="flex:1;background:#0d1117;border:1px solid #30363d;border-radius:8px;color:#c9d1d9;padding:8px 12px;font-size:13px;outline:none;" onkeydown="if(event.key==='Enter')addVideoV2()">
+            <button onclick="addVideoV2()" style="background:#238636;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:13px;cursor:pointer;white-space:nowrap;">➕ 添加</button>
         </div>
         <div class="weekly-body" style="padding:12px;overflow-y:auto;">
             <div id="videosWall" style="display:flex;flex-direction:column;gap:12px;"></div>
