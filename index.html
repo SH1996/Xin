@@ -1813,6 +1813,7 @@
                 <button onclick="loadShopTransfers()" style="background:#238636;color:#fff;border:none;padding:4px 12px;border-radius:6px;font-size:11px;cursor:pointer;">刷新</button>
             </div>
             <div id="shopTransferList" style="flex:1;overflow-y:auto;padding:8px;"></div>
+            <div id="shopsWall_admin" style="flex:1;overflow-y:auto;padding:8px;display:none;"></div>
         </div>
     </div>
 
@@ -4573,6 +4574,7 @@
         function saveVideos() {
             try { localStorage.setItem(VIDEO_STORAGE_KEY, JSON.stringify(videoList)); } catch(e) {}
             renderVideosWall();
+            renderVideoWallAdmin();
         }
         function addVideo() {
             var inp = document.getElementById('videoUrlInput');
@@ -4595,10 +4597,12 @@
             videoList.unshift({ url: url, title: title, time: Date.now() });
             saveVideos();
             inp.value = '';
+            renderVideoWallAdmin();
         }
         function delVideo(idx) {
             videoList.splice(idx, 1);
             saveVideos();
+            renderVideoWallAdmin();
         }
         function renderVideoWallAdmin() {
             var wall = document.getElementById('videoWall');
@@ -4703,17 +4707,18 @@
         var shopTransfers = [];
 
         function loadShopTransfers() {
-            var list = document.getElementById('shopsWall');
+            // 管理员入口用 shopTransferList，外面面板用 shopsWall
+            var list = document.getElementById('shopTransferList') || document.getElementById('shopsWall');
             if (!list) return;
             list.innerHTML = '<div style="color:#8b949e;text-align:center;padding:20px;">⏳ 加载中…</div>';
             try {
                 var cached = localStorage.getItem(SHOP_TRANSFER_KEY);
                 if (cached) {
                     shopTransfers = JSON.parse(cached);
-                    renderShopTransfersV2(true);
+                    renderShopTransfersV2(true, list);
                 }
             } catch(e) { shopTransfers = []; }
-            fetchShopDataV2(true);
+            fetchShopDataV2(true, list);
         }
 
         function loadShopTransfersV2() {
@@ -4731,8 +4736,8 @@
             // 再从 GitHub 加载最新
             fetchShopDataV2();
         }
-        function renderShopTransfersV2(showDel) {
-            var list = document.getElementById('shopsWall');
+        function renderShopTransfersV2(showDel, listEl) {
+            var list = listEl || document.getElementById('shopsWall');
             if (!list) return;
             if (!shopTransfers.length) {
                 list.innerHTML = '<div style="color:#8b949e;text-align:center;padding:40px 20px;font-size:13px;">📭 暂无数据<br><span style="font-size:11px;color:#484f58;">点击"刷新"获取最新店铺转让信息</span></div>';
@@ -4760,8 +4765,8 @@
             }
             list.innerHTML = h;
         }
-        function fetchShopDataV2(showDel) {
-            var list = document.getElementById('shopsWall');
+        function fetchShopDataV2(showDel, listEl) {
+            var list = listEl || document.getElementById('shopsWall');
             if (!list) return;
             var cacheBuster = Date.now();
             var url = 'https://raw.githubusercontent.com/SH1996/Xin/main/shop_transfers.json?t=' + cacheBuster;
@@ -4774,11 +4779,11 @@
                     if (Array.isArray(data) && data.length > 0) {
                         shopTransfers = data;
                         try { localStorage.setItem(SHOP_TRANSFER_KEY, JSON.stringify(shopTransfers)); } catch(e) {}
-                        renderShopTransfersV2(showDel);
+                        renderShopTransfersV2(showDel, listEl);
                     }
                 })
                 .catch(function() {
-                    renderShopTransfersV2(showDel);
+                    renderShopTransfersV2(showDel, listEl);
                 });
         }
 
