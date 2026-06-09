@@ -3891,29 +3891,43 @@
             selectChapter(prev, document.querySelector('.reader-toc-item[data-idx="' + prev + '"]'));
         }
 
-        // 翻页：在当前章节内一屏一屏翻动，带动画
+        // 翻页：将当前章节按屏幕高度分页，整页翻动 + 翻书动画
+        var readerPageIndex = 0; // 当前章节内页码（切换章节时重置）
         function pageFlip(dir) {
             var el = document.getElementById('readerContent');
             if (!el) return;
-            var vh = el.clientHeight * 0.85; // 一屏85%
-            var cur = el.scrollTop;
-            var target = dir > 0 ? cur + vh : cur - vh;
-            target = Math.max(0, Math.min(target, el.scrollHeight - el.clientHeight));
-            if (Math.abs(target - cur) < 10) {
-                // 翻到边界，交给上一章/下一章
-                if (dir < 0) prevChapter();
-                else nextChapter();
+            var vh = el.clientHeight * 0.9; // 一页90%视口高度
+            var totalPages = Math.ceil(el.scrollHeight / vh);
+
+            // 根据当前滚动位置估算当前页码
+            var curPage = Math.round(el.scrollTop / vh);
+            var targetPage = curPage + dir;
+            if (targetPage < 0) {
+                // 已经是第一页，翻上一章
+                prevChapter();
                 return;
             }
+            if (targetPage >= totalPages) {
+                // 已经是最后一页，翻下一章
+                nextChapter();
+                return;
+            }
+            readerPageIndex = targetPage;
             // 翻书动画
             el.classList.remove('page-flip-left', 'page-flip-right');
             void el.offsetWidth;
             el.classList.add(dir > 0 ? 'page-flip-right' : 'page-flip-left');
-            el.scrollTo({ top: target, behavior: 'smooth' });
+            el.scrollTo({ top: targetPage * vh, behavior: 'smooth' });
             setTimeout(function() {
                 el.classList.remove('page-flip-left', 'page-flip-right');
             }, 400);
         }
+        // 章节切换时重置页码
+        var _origSelectChapter = selectChapter;
+        selectChapter = function(idx, btn) {
+            readerPageIndex = 0;
+            _origSelectChapter(idx, btn);
+        };
 
         // ===== 重生世界 =====
         var rebirthIdentities = [
