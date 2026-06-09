@@ -4674,17 +4674,20 @@
                 wall.innerHTML = '<div style="color:#8b949e;text-align:center;padding:60px 20px;font-size:13px;">📭 还没有收藏视频<br><span style="font-size:11px;color:#484f58;">在上方粘贴链接即可添加</span></div>';
                 return;
             }
-            var h = '';
+            var h = '<div style="display:flex;flex-direction:column;gap:4px;">';
             for (var i = 0; i < videoList.length; i++) {
                 var v = videoList[i];
-                h += '<div style="background:#161b22;border:1px solid #21262d;border-radius:8px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">' +
+                var no = String(i + 1).padStart(2, '0');
+                h += '<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#111;border-radius:8px;min-height:44px;">' +
+                    '<span style="color:#484f58;font-size:11px;flex-shrink:0;width:20px;text-align:center;">' + no + '</span>' +
                     '<div style="flex:1;min-width:0;">' +
-                        '<div style="color:#c9d1d9;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + esc(v.title) + '</div>' +
-                        '<a href="' + escAttr(v.url) + '" target="_blank" style="color:#58a6ff;font-size:11px;word-break:break-all;">🔗 打开</a>' +
+                        '<div style="color:#c9d1d9;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.4;">' + esc(v.title) + '</div>' +
+                        '<a href="' + escAttr(v.url) + '" target="_blank" style="color:#58a6ff;font-size:10px;word-break:break-all;">🔗 ' + v.url + '</a>' +
                     '</div>' +
-                    '<button onclick="delVideo(' + i + ')" style="flex-shrink:0;margin-left:10px;background:none;color:#f85149;border:1px solid #f8514966;border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;">🗑 删除</button>' +
+                    '<button onclick="delVideo(' + i + ')" style="flex-shrink:0;background:rgba(248,81,73,0.1);color:#f85149;border:1px solid rgba(248,81,73,0.3);border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;">🗑</button>' +
                 '</div>';
             }
+            h += '</div>';
             wall.innerHTML = h;
         }
 
@@ -4926,13 +4929,8 @@
     <div class="weekly-panel" id="videosPanel">
         <div class="weekly-topbar">
             <span>📱 视频收藏</span>
-            <span style="font-size:11px;color:#484f58;">粘贴链接收藏</span>
+            <span style="font-size:11px;color:#484f58;">下滑浏览更多</span>
             <button class="weekly-close" onclick="closeVideosPanel()">✕</button>
-        </div>
-        <!-- 添加栏 -->
-        <div style="display:flex;gap:8px;padding:10px 12px;background:#161b22;border-bottom:1px solid #21262d;">
-            <input id="videoUrlInputV2" type="text" placeholder="粘贴视频链接（微信视频号/MP4）" style="flex:1;background:#0d1117;border:1px solid #30363d;border-radius:8px;color:#c9d1d9;padding:8px 12px;font-size:13px;outline:none;" onkeydown="if(event.key==='Enter')addVideoV2()">
-            <button onclick="addVideoV2()" style="background:#238636;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:13px;cursor:pointer;white-space:nowrap;">➕ 添加</button>
         </div>
         <div class="weekly-body" style="padding:12px;overflow-y:auto;">
             <div id="videosWall" style="display:flex;flex-direction:column;gap:12px;"></div>
