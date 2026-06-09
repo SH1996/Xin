@@ -611,11 +611,11 @@
 
             function getAk(){return localStorage.getItem('_ak24')||'';}
             function setAk(k){localStorage.setItem('_ak24',k);}
-            function uw(d){if(!d)return d;if(d.code===0||d.code===-1){return d.data||d;}return d;}
+            function uw(d){if(!d)return d;if(d.status==='1')return d;if(d.code===0||d.code===-1){return d.data||d;}return d;}
             function getProvider(){var p=localStorage.getItem('_provider');return p||null;}
             function setProvider(p){localStorage.setItem('_provider',p);}
             function isAmap(){return (getProvider()||'amap')==='amap';}
-            function restBase(){return isAmap()?'https://restapi.amap.com/v3':'https://www.ibtmap.com/open/a/v3';}
+            function restBase(){return isAmap()?'https://restapi.amap.com/v3':'https://pass-api.ibtmap.com/a/v3';}
             function getRestKey(){return isAmap()?getAmapKey():getIbtRestKey();}
             function getAmapKey(){return localStorage.getItem('_ak24')||'';}
             function setAmapKey(k){localStorage.setItem('_ak24',k);}
@@ -623,7 +623,7 @@
             function setIbtRestKey(k){localStorage.setItem('_ibrk',k);}
             function getIbtJsKey(){return localStorage.getItem('_ibjk')||'';}
             function setIbtJsKey(k){localStorage.setItem('_ibjk',k);}
-            function jsapiUrl(){var k=isAmap()?getAmapKey():getIbtJsKey();return isAmap()?'https://webapi.amap.com/maps?v=2.0&key='+k:'https://www.ibtmap.com/js/a/webapi/maps?key='+k;}
+            function jsapiUrl(){var k=isAmap()?getAmapKey():getIbtJsKey();return isAmap()?'https://webapi.amap.com/maps?v=2.0&key='+k:'https://pass-api.ibtmap.com/a/webapi/maps?key='+k;}
 
             // 导出给扫店模块使用
             window.restBase=restBase;window.getRestKey=getRestKey;window.uw=uw;window.isAmap=isAmap;window.getProvider=getProvider;window.showConfigModal=showConfigModal;
