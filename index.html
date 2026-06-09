@@ -3666,6 +3666,7 @@
         }
         function selectChapter(idx, btn) {
             if (!currentBookData) return;
+            readerPageIndex = 0;
             const ch = currentBookData.chapters[idx];
             document.getElementById('readerContent').innerHTML = ch.html;
             document.getElementById('readerContent').scrollTop = 0;
@@ -3892,7 +3893,7 @@
         }
 
         // 翻页：将当前章节按屏幕高度分页，整页翻动 + 翻书动画
-        var readerPageIndex = 0; // 当前章节内页码（切换章节时重置）
+        var readerPageIndex = 0; // 当前章节内页码（切换章节时自动归零）
         function pageFlip(dir) {
             var el = document.getElementById('readerContent');
             if (!el) return;
@@ -3922,12 +3923,6 @@
                 el.classList.remove('page-flip-left', 'page-flip-right');
             }, 400);
         }
-        // 章节切换时重置页码
-        var _origSelectChapter = selectChapter;
-        selectChapter = function(idx, btn) {
-            readerPageIndex = 0;
-            _origSelectChapter(idx, btn);
-        };
 
         // ===== 重生世界 =====
         var rebirthIdentities = [
