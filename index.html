@@ -3743,7 +3743,7 @@
                 document.getElementById('listenPwInput').focus();
             }, 100);
         }
-        function doStartListen() {
+        async function doStartListen() {
             if (!currentBookData || currentBookData._idx === undefined) return;
             var ch = currentBookData.chapters[currentBookData._idx];
             if (!ch) return;
