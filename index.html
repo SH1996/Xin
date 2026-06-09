@@ -2232,7 +2232,7 @@
             closeLibrary(); closeWeekly(); closeVoicePanel();
             document.getElementById('videosOverlay').classList.add('active');
             document.getElementById('videosPanel').classList.add('active');
-            renderVideosWallAdmin();  // 管理员面板显示带删除按钮的管理视图
+            renderVideosWall();  // 汉堡菜单 → 播放器展示
         }
         function closeVideosPanel() {
             document.getElementById('videosOverlay').classList.remove('active');
@@ -4664,7 +4664,7 @@
             });
         }
         function renderVideosWallAdmin() {
-            var wall = document.getElementById('videosWall');
+            var wall = document.getElementById('videoWall');
             if (!wall) return;
             if (!videoListLoaded) {
                 wall.innerHTML = '<div style="color:#8b949e;text-align:center;padding:40px 20px;font-size:13px;">⏳ 加载中…</div>';
@@ -4689,7 +4689,7 @@
         }
 
         function renderVideosWall() {
-            var wall = document.getElementById('videoWall');
+            var wall = document.getElementById('videosWall');
             if (!wall) return;
             if (!videoList.length) {
                 wall.innerHTML = '<div style="color:#8b949e;text-align:center;padding:60px 20px;font-size:13px;">📭 还没有收藏视频</div>';
