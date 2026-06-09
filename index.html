@@ -1711,6 +1711,15 @@
         .sandbox-close { background: none; border: 1px solid rgba(255,255,255,0.1); color: #aaa; font-size: 18px; cursor: pointer; padding: 4px 12px; border-radius: 6px; transition: all 0.15s; line-height: 1; }
         .sandbox-close:hover { background: rgba(255,255,255,0.05); color: #fff; }
         .sandbox-iframe { flex: 1; width: 100%; border: none; background: #060a14; }
+
+        /* ═══ 地毯式扫店 Overlay ═══ */
+        .shoploc-overlay { position: fixed; inset: 0; z-index: 460; background: #f5f0e6; opacity: 0; pointer-events: none; transition: opacity 0.35s; display: flex; flex-direction: column; }
+        .shoploc-overlay.active { opacity: 1; pointer-events: auto; }
+        .shoploc-topbar { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; background: #fff; border-bottom: 1px solid #e0d5c0; flex-shrink: 0; }
+        .shoploc-topbar h3 { margin: 0; color: #5a3a2a; font-size: 14px; letter-spacing: 1px; }
+        .shoploc-close { background: none; border: 1px solid #d8c8a8; color: #8a6a4a; font-size: 18px; cursor: pointer; padding: 4px 12px; border-radius: 6px; transition: all 0.15s; line-height: 1; }
+        .shoploc-close:hover { background: #c9a96e; color: #fff; }
+        .shoploc-iframe { flex: 1; width: 100%; border: none; background: #fff; }
 </style>
 </head>
 <body>
@@ -5064,7 +5073,7 @@
         // ═══ 万象沙盘 ═══
         function openSandbox() {
             closeLibrary(); closeWeekly(); closeVoicePanel();
-            closeVideosPanel(); closeShopsPanel();
+            closeVideosPanel(); closeShopsPanel(); closeShopLocation();
             document.getElementById('sandboxOverlay').classList.add('active');
             var f = document.getElementById('sandboxFrame');
             if (!f.src || f.src === 'about:blank') f.src = 'sandbox.html';
@@ -5072,6 +5081,18 @@
         function closeSandbox() {
             document.getElementById('sandboxOverlay').classList.remove('active');
         }
+        // ═══ 地毯式扫店 ═══
+        function openShopLocation() {
+            closeLibrary(); closeWeekly(); closeVoicePanel();
+            closeVideosPanel(); closeShopsPanel(); closeShopLocation(); closeSandbox();
+            document.getElementById('shoplocOverlay').classList.add('active');
+            var f = document.getElementById('shoplocFrame');
+            if (!f.src || f.src === 'about:blank') f.src = 'shop-location.html';
+        }
+        function closeShopLocation() {
+            document.getElementById('shoplocOverlay').classList.remove('active');
+        }
+
 </script>
 
     <div class="voice-overlay" id="voiceOverlay" onclick="closeVoicePanel()"></div>
@@ -5208,6 +5229,7 @@
         <button class="hamburger-item" onclick="openShopsPanel();toggleHamburger()">🏪 店铺转让</button>
         <button class="hamburger-item" onclick="startRebirth();toggleHamburger()">🔄 重生世界</button>
         <button class="hamburger-item" onclick="openSandbox();toggleHamburger()">🌌 万象沙盘</button>
+        <button class="hamburger-item" onclick="openShopLocation();toggleHamburger()">📍 地毯式扫店</button>
         <button class="hamburger-item" onclick="openQueryPanel();toggleHamburger()">🔑 管理员入口</button></div>
     <!-- === 万象沙盘 === -->
     <div class="sandbox-overlay" id="sandboxOverlay">
@@ -5217,6 +5239,15 @@
         </div>
         <iframe class="sandbox-iframe" id="sandboxFrame" src="sandbox.html" allow="clipboard-write"></iframe>
     </div>
+    <!-- === 地毯式扫店 === -->
+    <div class="shoploc-overlay" id="shoplocOverlay">
+        <div class="shoploc-topbar">
+            <h3>📍 地毯式扫店 · AI选址</h3>
+            <button class="shoploc-close" onclick="closeShopLocation()">✕</button>
+        </div>
+        <iframe class="shoploc-iframe" id="shoplocFrame" src="shop-location.html" allow="clipboard-write;geolocation"></iframe>
+    </div>
+
 
 
     <!-- === 重生世界 === -->

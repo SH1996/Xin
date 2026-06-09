@@ -1,0 +1,1859 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>地毯式扫店 · AI选址</title>
+   <style>
+    :root {
+        --bg: #f5f6f8; --surface: #ffffff; --border: #e5e7eb; --border-light: #f3f4f6;
+        --primary: #2563eb; --primary-light: #eff6ff; --primary-soft: #dbeafe;
+        --success: #059669; --success-light: #ecfdf5; --warning: #d97706;
+        --warning-light: #fffbeb; --danger: #dc2626; --danger-light: #fef2f2;
+        --text: #111827; --text-secondary: #6b7280; --text-muted: #9ca3af;
+        --shadow: 0 1px 2px rgba(0,0,0,0.05); --radius: 12px; --radius-sm: 8px;
+    }
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{
+        font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;
+        background:var(--bg);color:var(--text);height:100vh;height:100dvh;display:flex;flex-direction:column;
+        overflow:hidden;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased;
+    }
+    .header{
+        background:var(--surface);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;
+        border-bottom:1px solid var(--border);flex-shrink:0;z-index:10;box-shadow:var(--shadow);
+    }
+    .header-title{font-size:16px;font-weight:700;white-space:nowrap;}
+    .header-actions{display:flex;gap:4px;align-items:center;flex-wrap:wrap;}
+    .btn{
+        padding:7px 12px;border-radius:18px;border:none;font-size:12px;font-weight:600;cursor:pointer;
+        transition:all 0.15s;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;
+        background:transparent;color:var(--text-secondary);
+    }
+    .btn:active{transform:scale(0.96);}
+    .btn-primary{background:var(--primary);color:#fff;box-shadow:0 2px 8px rgba(37,99,235,0.3);}
+    .btn-outline{border:1.5px solid var(--border);background:var(--surface);}
+    .btn-ghost{background:transparent;}
+    .btn-sm{padding:5px 10px;font-size:11px;border-radius:14px;}
+    .btn-xs{padding:3px 8px;font-size:10px;border-radius:10px;}
+    .btn-block{width:100%;justify-content:center;padding:12px;}
+    .btn:disabled{opacity:0.5;pointer-events:none;}
+    .btn-locate{background:var(--success);color:#fff;padding:8px 10px;border-radius:8px;font-size:11px;white-space:nowrap;flex-shrink:0;border:none;cursor:pointer;}
+
+    /* ===== 完美的进度条样式 ===== */
+    .steps-bar{display:flex;align-items:center;justify-content:center;gap:0;padding:8px 10px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap;}
+    .step-group{display:flex;flex-direction:column;align-items:center;flex-shrink:0;}
+    .step-dot{width:24px;height:24px;border-radius:50%;background:var(--border-light);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--text-muted);transition:all 0.3s;}
+    .step-dot.active{background:var(--primary);color:#fff;animation:pulse 1.5s infinite;}
+    .step-dot.done{background:var(--success);color:#fff;}
+    @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(37,99,235,0.4);}50%{box-shadow:0 0 0 8px rgba(37,99,235,0);}}
+    .step-line{flex:1;height:2px;min-width:10px;background:var(--border-light);border-radius:1px;transition:background 0.4s;margin:0 2px;margin-bottom:16px;}
+    .step-line.done{background:var(--success);}
+    .step-label{font-size:8px;color:var(--text-muted);margin-top:2px;text-align:center;min-width:38px;}
+    .step-label.active{color:var(--primary);font-weight:600;}
+
+    .main-content{flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:10px;-webkit-overflow-scrolling:touch;}
+    .main-content::-webkit-scrollbar{width:3px;}.main-content::-webkit-scrollbar-thumb{background:var(--border);border-radius:10px;}
+
+    .card{background:var(--surface);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow);border:1px solid var(--border-light);animation:slideUp 0.3s ease-out;}
+    @keyframes slideUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+    .card-title{font-size:14px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+
+    .form-group{margin-bottom:10px;}
+    .form-label{display:block;font-size:12px;font-weight:600;margin-bottom:4px;}
+    .form-sublabel{font-size:10px;color:var(--text-muted);font-weight:400;}
+    .form-input{width:100%;padding:9px 11px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-family:inherit;background:var(--surface);color:var(--text);outline:none;}
+    .form-input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(37,99,235,0.1);}
+    .input-with-btn{display:flex;gap:6px;align-items:flex-end;}
+    .input-with-btn .form-input{flex:1;}
+
+    .radius-selector{display:flex;gap:5px;flex-wrap:wrap;}
+    .radius-opt{padding:8px 14px;border:1.5px solid var(--border);border-radius:18px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;background:var(--surface);color:var(--text-secondary);user-select:none;}
+    .radius-opt.selected{background:var(--primary);color:#fff;border-color:var(--primary);box-shadow:0 2px 8px rgba(37,99,235,0.25);}
+    .radius-opt:active{transform:scale(0.95);}
+    .radius-tip{margin-top:6px;padding:6px 10px;background:#fffbeb;border-radius:6px;font-size:10px;color:#d97706;line-height:1.4;}
+
+    .weather-card{background:linear-gradient(135deg,#e8f5e9,#c8e6c9);border-radius:var(--radius);padding:12px;margin-bottom:8px;display:flex;align-items:center;gap:10px;font-size:12px;}
+    .weather-card .temp{font-size:28px;font-weight:700;color:#2e7d32;}
+
+    .poi-table-wrap{max-height:220px;overflow-y:auto;margin-top:4px;border:1px solid var(--border-light);border-radius:var(--radius-sm);}
+    .poi-table{width:100%;border-collapse:collapse;font-size:10px;}
+    .poi-table th{background:var(--bg);padding:6px 5px;text-align:left;font-weight:600;color:var(--text-secondary);position:sticky;top:0;border-bottom:2px solid var(--border);}
+    .poi-table td{padding:5px;border-bottom:1px solid var(--border-light);}
+    .poi-dist{font-weight:600;color:var(--primary);white-space:nowrap;}
+
+    .section-toggle{display:flex;align-items:center;gap:5px;cursor:pointer;user-select:none;padding:5px 0;font-size:11px;font-weight:600;color:var(--primary);}
+    .section-toggle .arrow{transition:transform 0.25s;font-size:8px;}
+    .section-toggle.expanded .arrow{transform:rotate(90deg);}
+    .section-content{display:none;}.section-content.show{display:block;}
+
+    .ai-block{border-radius:var(--radius-sm);padding:9px 12px;margin:6px 0;font-size:12px;line-height:1.6;border-left:3px solid var(--primary);background:linear-gradient(135deg,#f0f9ff,#eff6ff);}
+    .ai-block.warning{border-left-color:var(--warning);background:linear-gradient(135deg,#fffbeb,#fef3c7);}
+    .ai-block.success{border-left-color:var(--success);background:linear-gradient(135deg,#ecfdf5,#d1fae5);}
+    .ai-block.danger{border-left-color:var(--danger);background:linear-gradient(135deg,#fef2f2,#fee2e2);}
+
+    .checklist-item{border:1.5px solid var(--border);border-radius:var(--radius);padding:10px;margin-bottom:8px;}
+    .checklist-item.answered{border-color:var(--primary);background:var(--primary-light);}
+    .checklist-q{font-size:11px;font-weight:600;margin-bottom:6px;line-height:1.4;}
+    .checklist-options{display:flex;flex-direction:column;gap:5px;}
+    .checklist-options label{display:flex;align-items:center;gap:6px;font-size:10px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;cursor:pointer;background:var(--surface);}
+    .checklist-options label:hover{background:var(--primary-light);}
+    .checklist-options input[type="radio"]{accent-color:var(--primary);}
+    .checklist-note{font-size:9px;color:var(--text-muted);margin-top:5px;padding:5px 8px;background:var(--bg);border-radius:4px;}
+
+    .summary-card{background:linear-gradient(135deg,#1e40af,#1d4ed8);color:#fff;border-radius:var(--radius);padding:16px;margin-bottom:10px;}
+    .summary-score{font-size:36px;font-weight:800;line-height:1;}
+    .summary-label{font-size:10px;opacity:0.8;}
+    .summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px;}
+    .summary-item{background:rgba(255,255,255,0.15);border-radius:var(--radius-sm);padding:7px;}
+    .summary-item-label{font-size:9px;opacity:0.7;}.summary-item-value{font-size:14px;font-weight:700;margin-top:1px;}
+    .score-bar{height:6px;background:rgba(255,255,255,0.2);border-radius:3px;overflow:hidden;margin:4px 0 2px;width:100%;}
+    .score-bar-fill{height:100%;border-radius:3px;transition:width 0.6s ease;}
+    .score-label{font-size:8px;font-weight:600;margin-top:1px;}
+    .main-score-bar{height:10px;background:rgba(255,255,255,0.2);border-radius:5px;overflow:hidden;margin:8px auto 4px;max-width:240px;width:100%;}
+    .main-score-bar .score-bar-fill{height:100%;border-radius:5px;transition:width 0.8s ease;}
+    .main-score-label{font-size:11px;font-weight:600;text-align:center;margin-bottom:6px;}
+    .layer-score-row{display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--bg);border-radius:6px;margin:4px 0;}
+    .layer-score-row .layer-num{font-weight:800;font-size:16px;min-width:32px;text-align:center;}
+    .layer-score-row .layer-name{font-size:10px;font-weight:600;min-width:48px;}
+    .layer-score-row .layer-bar-wrap{flex:1;display:flex;flex-direction:column;gap:2px;}
+    .layer-score-row .layer-bar{height:8px;background:#e5e7eb;border-radius:4px;overflow:hidden;}
+    .layer-score-row .layer-bar-fill{height:100%;border-radius:4px;transition:width 0.6s ease;}
+    .layer-score-row .layer-desc{font-size:8px;color:var(--text-muted);}
+    .adjusted-score-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px;}
+    .adj-score-item{background:var(--bg);border-radius:8px;padding:8px;text-align:center;border:1px solid var(--border-light);}
+    .adj-score-num{font-size:22px;font-weight:800;margin:2px 0;}
+    .adj-score-label{font-size:9px;font-weight:600;color:var(--text-secondary);}
+    .adj-score-bar{height:5px;background:#e5e7eb;border-radius:3px;overflow:hidden;margin-top:4px;}
+    .adj-score-bar-fill{height:100%;border-radius:3px;transition:width 0.6s ease;}
+    .adj-score-text{font-size:8px;margin-top:2px;font-weight:600;}
+
+    .chat-panel{border:1.5px solid var(--primary-soft);border-radius:var(--radius);overflow:hidden;margin-top:5px;}
+    .chat-header-bar{background:var(--primary-light);padding:6px 8px;font-weight:700;font-size:11px;color:var(--primary);cursor:pointer;}
+    .chat-body{display:none;flex-direction:column;max-height:250px;}
+    .chat-body.show{display:flex;}
+    .chat-messages{flex:1;overflow-y:auto;padding:5px;display:flex;flex-direction:column;gap:4px;max-height:160px;}
+    .chat-msg{max-width:88%;padding:5px 7px;border-radius:10px;font-size:9px;line-height:1.4;}
+    .chat-msg.user{align-self:flex-end;background:#eff6ff;border-bottom-right-radius:3px;}
+    .chat-msg.ai{align-self:flex-start;background:#f9fafb;border:1px solid var(--border-light);border-bottom-left-radius:3px;}
+    .chat-input-row{display:flex;gap:3px;padding:5px 6px;border-top:1px solid var(--border-light);}
+    .chat-input-row input{flex:1;padding:5px 7px;border:1px solid var(--border);border-radius:12px;font-size:9px;outline:none;}
+    .chat-send-btn{width:24px;height:24px;border-radius:50%;border:none;background:var(--primary);color:#fff;font-size:11px;cursor:pointer;}
+
+    .history-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:10px;margin-bottom:6px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;}
+    .toast{position:fixed;top:65px;left:50%;transform:translateX(-50%);background:#1f2937;color:#fff;padding:9px 18px;border-radius:18px;font-size:12px;z-index:200;opacity:0;transition:all 0.3s;pointer-events:none;}
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(3px);}
+    .empty-state{text-align:center;padding:30px 16px;color:var(--text-muted);}
+    .spinner{width:18px;height:18px;border:3px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin 0.8s linear infinite;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+    .spinner-wrap{display:flex;align-items:center;gap:6px;padding:14px;color:var(--text-secondary);font-size:13px;}
+
+    .query-panel,.msg-panel{position:fixed;top:0;right:-100%;width:100%;max-width:420px;height:100%;height:100dvh;background:var(--surface);z-index:150;transition:right 0.35s;box-shadow:-4px 0 30px rgba(0,0,0,0.15);display:flex;flex-direction:column;border-left:2px solid var(--border);}
+    .query-panel.open,.msg-panel.open{right:0;}
+    .query-overlay,.msg-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.3);backdrop-filter:blur(2px);z-index:149;opacity:0;pointer-events:none;transition:opacity 0.35s;}
+    .query-overlay.active,.msg-overlay.active{opacity:1;pointer-events:auto;}
+    .query-header{padding:16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;font-weight:700;}
+    .query-list{flex:1;overflow-y:auto;padding:12px;}
+    .query-item{background:var(--bg);border:1px solid var(--border-light);border-radius:14px;padding:12px;margin-bottom:10px;font-size:13px;}
+    .query-item .q-actions{display:flex;gap:4px;margin-top:6px;}
+    .query-item .q-actions button{font-size:9px;padding:3px 8px;border-radius:8px;border:1px solid var(--border);background:var(--surface);cursor:pointer;}
+
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:300;display:flex;align-items:center;justify-content:center;}
+    .modal-box{background:var(--surface);border-radius:12px;padding:14px;width:90%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,0.3);}
+    .modal-box h3{font-size:14px;margin-bottom:6px;}
+    .modal-box input{width:100%;padding:8px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;outline:none;margin-bottom:5px;}
+    .modal-btns{display:flex;gap:5px;justify-content:flex-end;}
+    .modal-btns button{padding:5px 12px;border-radius:12px;border:none;font-size:11px;font-weight:600;cursor:pointer;}
+    .modal-btns .btn-cancel{background:var(--bg);}
+    .modal-btns .btn-ok{background:var(--primary);color:#fff;}
+    .modal-btns .btn-danger{background:var(--danger);color:#fff;}
+
+    #mapContainer{width:100%;height:300px;border-radius:8px;overflow:hidden;border:2px solid var(--border);margin:6px 0;position:relative;}
+    .map-legend-overlay{position:absolute;bottom:8px;left:8px;background:rgba(0,0,0,0.82);color:#fff;padding:7px 9px;border-radius:7px;font-size:9px;z-index:10;display:flex;flex-direction:column;gap:2px;pointer-events:none;max-width:78%;}
+    .map-legend-overlay span{display:flex;align-items:center;gap:4px;white-space:nowrap;}
+    .map-legend-overlay .ldot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+
+    .flow-meter{display:flex;align-items:center;gap:6px;padding:6px 10px;background:var(--bg);border-radius:6px;margin:4px 0;}
+    .flow-bar-outer{flex:1;height:10px;background:#e5e7eb;border-radius:5px;overflow:hidden;}
+    .flow-bar-inner{height:100%;border-radius:5px;transition:width 0.5s;}
+    .flow-label{font-weight:700;font-size:14px;min-width:40px;text-align:center;}
+    .density-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin:5px 0;}
+    .density-item{background:var(--bg);padding:6px;border-radius:6px;text-align:center;}
+    .density-item .val{font-size:16px;font-weight:700;}
+    .density-item .lbl{font-size:8px;color:var(--text-muted);}
+    .mini-table{width:100%;border-collapse:collapse;font-size:9px;margin:4px 0;}
+    .mini-table th{background:var(--bg);padding:3px;text-align:left;font-weight:600;}
+    .mini-table td{padding:3px;border-bottom:1px solid var(--border-light);}
+    .tag{margin:1px;padding:2px 6px;border-radius:4px;font-size:9px;display:inline-block;background:var(--primary-light);color:var(--primary);}
+    .checklist-entry-card{background:linear-gradient(135deg,#1e40af,#1d4ed8);color:#fff;border-radius:var(--radius);padding:16px;margin:10px 0;text-align:center;}
+    .checklist-entry-card .title{font-size:15px;font-weight:700;margin-bottom:5px;}
+    .checklist-entry-card .sub{font-size:10px;opacity:0.85;margin-bottom:10px;}
+    .btn-checklist{background:#fff;color:var(--primary);padding:12px;border-radius:var(--radius);font-size:14px;font-weight:700;width:100%;border:none;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.2);}
+    .key-link{font-size:10px;color:var(--primary);text-decoration:underline;cursor:pointer;font-weight:600;}
+    .custom-radius{font-size:10px;color:var(--primary);text-decoration:underline;cursor:pointer;font-weight:600;}
+    .wait-tip{background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:10px 12px;margin-top:8px;font-size:10px;color:#92400e;text-align:center;line-height:1.5;}
+
+    /* 扫店补充样式 */
+    .region-item{border:1.5px solid var(--border);border-radius:8px;padding:10px;margin:6px 0;cursor:pointer;transition:0.2s;background:var(--surface);}
+    .region-item:hover{border-color:var(--primary);background:var(--primary-light);}
+    .region-name{font-weight:600;font-size:13px;}
+    .region-meta{font-size:10px;color:var(--text-secondary);margin-top:4px;}
+    .region-reason{font-size:9px;color:var(--text-muted);margin-top:4px;font-style:italic;}
+    .region-analysis{margin-top:8px;border-left:3px solid var(--success);padding-left:10px;background:var(--success-light);border-radius:0 8px 8px 0;font-size:11px;}
+    .suggested-loc{cursor:pointer;padding:6px 8px;border-radius:6px;margin:4px 0;background:#f9fafb;border:1px solid var(--border);transition:0.2s;}
+    .suggested-loc:hover{background:var(--primary-light);border-color:var(--primary);}
+    .map-hint{font-size:8px;color:var(--primary);margin-top:2px;}
+
+    /* ===== 作者感慨样式 - 淡雅星光渐变 ===== */
+    .author-note{
+        text-align:center;
+        padding:18px 16px 12px;
+        margin-top:8px;
+        font-size:12px;
+        line-height:2.0;
+        letter-spacing:0.8px;
+        user-select:none;
+        background:linear-gradient(135deg,rgba(37,99,235,0.03),rgba(5,150,105,0.04),rgba(217,119,6,0.03));
+        border-radius:18px;
+        color:transparent;
+        background-clip:text;
+        -webkit-background-clip:text;
+        background-image:linear-gradient(135deg,#94a3b8,#64748b,#94a3b8,#475569);
+        background-size:300% 300%;
+        animation:authorShimmer 6s ease-in-out infinite;
+        border:1px dashed rgba(148,163,184,0.2);
+    }
+    @keyframes authorShimmer{
+        0%,100%{background-position:0% 50%;opacity:0.75;}
+        25%{background-position:100% 0%;opacity:0.9;}
+        50%{background-position:100% 100%;opacity:1;}
+        75%{background-position:0% 100%;opacity:0.85;}
+    }
+    .msg-link{
+        font-size:13px;font-weight:700;cursor:pointer;
+        background:linear-gradient(135deg,#f59e0b,#ef4444,#ec4899,#8b5cf6);
+        background-clip:text;-webkit-background-clip:text;color:transparent;
+        display:inline-block;pointer-events:auto;
+        animation:msgPulse 1s ease-in-out infinite;
+    }
+    @keyframes msgPulse{
+        0%,100%{transform:scale(1);opacity:0.35;}
+        50%{transform:scale(1.2);opacity:1;}
+    }
+
+    /* ===== 扫店地址级别标签 - 醒目区分 ===== */
+    .level-tag{
+        display:inline-block;
+        padding:4px 10px;
+        border-radius:14px;
+        font-size:11px;
+        font-weight:700;
+        letter-spacing:0.5px;
+        animation:levelPopIn 0.4s ease-out;
+    }
+    .level-tag.city{
+        background:linear-gradient(135deg,#dbeafe,#bfdbfe);
+        color:#1e40af;
+        border:2px solid #3b82f6;
+        box-shadow:0 0 12px rgba(59,130,246,0.3);
+    }
+    .level-tag.district{
+        background:linear-gradient(135deg,#fef3c7,#fde68a);
+        color:#92400e;
+        border:2px solid #f59e0b;
+        box-shadow:0 0 12px rgba(245,158,11,0.3);
+    }
+    .level-tag.town{
+        background:linear-gradient(135deg,#ecfdf5,#d1fae5);
+        color:#065f46;
+        border:2px solid #10b981;
+        box-shadow:0 0 12px rgba(16,185,129,0.3);
+    }
+    @keyframes levelPopIn{
+        0%{transform:scale(0.5);opacity:0;}
+        70%{transform:scale(1.1);}
+        100%{transform:scale(1);opacity:1;}
+    }
+    .level-indicator{
+        display:flex;
+        align-items:center;
+        gap:8px;
+        padding:10px 14px;
+        background:var(--surface);
+        border-radius:12px;
+        border:2px solid var(--border-light);
+        margin:6px 0;
+    }
+    .level-indicator .icon{font-size:28px;}
+    .level-indicator .info{flex:1;}
+    .level-indicator .info .name{font-weight:700;font-size:14px;}
+    .level-indicator .info .detail{font-size:10px;color:var(--text-muted);margin-top:2px;}
+
+    /* ===== 霸气拦截页 ===== */
+    .splash-screen{position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;font-family:'PingFang SC','Microsoft YaHei',sans-serif;}
+    .splash-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 30%,#1a0a2e,#0a0010 60%,#000);}
+    .splash-bg::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(255,255,255,0.008) 2px,rgba(255,255,255,0.008) 4px);animation:scanLines 8s linear infinite;}
+    @keyframes scanLines{0%{transform:translateY(0);}100%{transform:translateY(4px);}}
+    .splash-particles{position:absolute;inset:0;overflow:hidden;}
+    .splash-particles span{position:absolute;width:3px;height:3px;background:#fff;border-radius:50%;animation:floatUp linear infinite;opacity:0;}
+    @keyframes floatUp{0%{transform:translateY(100vh) scale(0);opacity:0;}10%{opacity:0.8;}90%{opacity:0.3;}100%{transform:translateY(-10vh) scale(1.5);opacity:0;}}
+    .splash-particles span:nth-child(3n){background:#f59e0b;width:4px;height:4px;}
+    .splash-particles span:nth-child(5n){background:#ef4444;}
+    .splash-particles span:nth-child(7n){background:#8b5cf6;width:2px;height:2px;}
+    .splash-inner{position:relative;z-index:2;text-align:center;max-width:380px;width:90%;padding:40px 24px;border-radius:24px;background:rgba(255,255,255,0.03);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.08);box-shadow:0 0 80px rgba(139,92,246,0.15),0 0 120px rgba(0,0,0,0.5);}
+    .splash-icon{font-size:60px;margin-bottom:8px;animation:splashFloat 2s ease-in-out infinite;display:inline-block;}
+    @keyframes splashFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-12px);}}
+    .splash-title{font-size:38px;font-weight:900;letter-spacing:6px;background:linear-gradient(180deg,#fbbf24 0%,#f59e0b 40%,#d97706 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-shadow:none;filter:drop-shadow(0 0 20px rgba(245,158,11,0.5));margin:0 0 6px;}
+    .splash-subtitle{font-size:12px;color:rgba(255,255,255,0.5);letter-spacing:4px;margin-bottom:28px;}
+    .splash-q{transition:all 0.4s ease;}
+    .splash-q-label{font-size:16px;color:#cbd5e1;margin-bottom:18px;letter-spacing:1px;}
+    .splash-q-label em{font-style:normal;color:#fbbf24;font-weight:700;}
+    .splash-btns{display:flex;flex-direction:column;gap:12px;}
+    .splash-btn{display:block;width:100%;padding:16px 20px;font-size:17px;font-weight:700;border-radius:14px;border:2px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.04);color:#e2e8f0;cursor:pointer;transition:all 0.25s;letter-spacing:2px;position:relative;overflow:hidden;}
+    .splash-btn:hover{border-color:rgba(245,158,11,0.5);background:rgba(245,158,11,0.1);transform:scale(1.02);box-shadow:0 0 30px rgba(245,158,11,0.2);}
+    .splash-btn.wrong{animation:shake 0.5s ease;border-color:#ef4444!important;background:rgba(239,68,68,0.15)!important;color:#ef4444!important;}
+    .splash-btn.correct{animation:btnPop 0.5s ease;border-color:#22c55e!important;background:rgba(34,197,94,0.15)!important;color:#22c55e!important;box-shadow:0 0 30px rgba(34,197,94,0.4)!important;}
+    .splash-btn.correct::after{content:' ✓';font-size:22px;animation:checkBounce 0.4s ease 0.1s both;display:inline-block;}
+    @keyframes btnPop{0%{transform:scale(1);}30%{transform:scale(1.08);}100%{transform:scale(1);}}
+    @keyframes checkBounce{0%{transform:scale(0);}60%{transform:scale(1.4);}100%{transform:scale(1);}}
+    @keyframes shake{0%,100%{transform:translateX(0);}20%{transform:translateX(-8px);}40%{transform:translateX(8px);}60%{transform:translateX(-5px);}80%{transform:translateX(5px);}}
+    .splash-input{width:100%;padding:14px 16px;font-size:16px;border-radius:14px;border:2px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.05);color:#fff;text-align:center;letter-spacing:2px;outline:none;transition:all 0.3s;box-sizing:border-box;}
+    .splash-input:focus{border-color:rgba(245,158,11,0.6);box-shadow:0 0 25px rgba(245,158,11,0.2);}
+    .splash-input.error{border-color:#ef4444;animation:shake 0.5s ease;}
+    .splash-input.success{border-color:#22c55e!important;box-shadow:0 0 25px rgba(34,197,94,0.4)!important;color:#22c55e!important;font-weight:700;}
+    .splash-enter{animation:splashAppear 0.6s ease-out;}
+    @keyframes splashAppear{0%{opacity:0;transform:translateY(30px) scale(0.9);}100%{opacity:1;transform:translateY(0) scale(1);}}
+    .splash-entered{display:none!important;}
+
+    /* 开门特效 */
+    .splash-door-wrap{position:absolute;inset:0;z-index:100;pointer-events:none;overflow:hidden;opacity:0;transition:opacity 0.6s;}
+    .splash-door-wrap.show{opacity:1;}
+    .splash-door-l,.splash-door-r{position:absolute;top:0;width:50%;height:100%;transition:transform 0.6s cubic-bezier(0.7,0,0.3,1);}
+    .splash-door-l{left:0;background:linear-gradient(135deg,#0d0520,#1a0a30 40%,#1a0a2e);box-shadow:inset -4px 0 30px rgba(0,0,0,0.7);transform-origin:left center;}
+    .splash-door-r{right:0;background:linear-gradient(225deg,#0d0520,#1a0a30 40%,#1a0a2e);box-shadow:inset 4px 0 30px rgba(0,0,0,0.7);transform-origin:right center;}
+    .splash-door-l.open{transform:perspective(1000px) rotateY(-70deg) translateX(-80%);}
+    .splash-door-r.open{transform:perspective(1000px) rotateY(70deg) translateX(80%);}
+    /* 门缝金光 */
+    .splash-crack{position:absolute;top:0;left:50%;transform:translateX(-50%);width:0;height:100%;z-index:99;pointer-events:none;
+        background:linear-gradient(180deg,transparent 0%,rgba(255,215,0,0.1) 10%,rgba(255,255,200,0.7) 30%,rgba(255,255,255,0.95) 50%,rgba(255,255,200,0.7) 70%,rgba(255,215,0,0.1) 90%,transparent 100%);
+        box-shadow:0 0 20px rgba(255,215,0,0.6),0 0 60px rgba(255,200,50,0.4),0 0 120px rgba(255,180,0,0.2);
+        transition:width 2.5s cubic-bezier(0.25,0.1,0.25,1);}
+    .splash-crack.glow{width:45vw;}
+    .splash-crack.fade{opacity:0;transition:opacity 1.5s ease-out 1s;}
+    /* 金色光芒射线 */
+    .splash-rays{position:absolute;inset:0;z-index:98;pointer-events:none;opacity:0;transition:opacity 0.8s ease-out 0.4s;
+        background:
+            radial-gradient(ellipse at 50% 50%,rgba(255,255,255,0.3) 0%,transparent 40%),
+            radial-gradient(ellipse at 50% 50%,rgba(255,215,0,0.25) 0%,transparent 55%),
+            radial-gradient(ellipse at 50% 50%,rgba(255,180,0,0.15) 0%,transparent 70%);}
+    .splash-rays.spread{opacity:1;transition:opacity 0.6s ease-out;}
+    /* 光芒消退 */
+    .splash-fadeout{position:absolute;inset:0;z-index:97;pointer-events:none;opacity:0;transition:opacity 2s ease-in;
+        background:radial-gradient(ellipse at 50% 50%,rgba(255,255,255,0.9) 0%,rgba(255,240,200,0.6) 20%,rgba(255,200,100,0.2) 50%,transparent 80%);}
+    .splash-fadeout.dissolve{opacity:1;}
+
+    /* ===== 📱 响应式适配 ===== */
+    @media(max-width:768px){
+        .header{padding:8px 10px;}
+        .header-title{font-size:14px;}
+        .btn{padding:5px 10px;font-size:10px;gap:3px;}
+        .btn-sm{padding:4px 8px;font-size:9px;}
+        .main-content{padding:6px;gap:6px;}
+        .card{padding:10px;}
+        .card-title{font-size:12px;}
+        .steps-bar{padding:6px 6px;gap:0;}
+        .step-dot{width:20px;height:20px;font-size:8px;}
+        .step-line{min-width:6px;margin-bottom:12px;}
+        .step-label{font-size:7px;min-width:30px;}
+        .form-input{padding:8px 10px;font-size:14px;}
+        .radius-opt{padding:6px 10px;font-size:10px;}
+        .radius-selector{gap:3px;}
+        .summary-score{font-size:28px;}
+        .summary-grid{grid-template-columns:1fr;}
+        .ai-block{font-size:10px;padding:7px 10px;}
+        .checklist-item{padding:8px;}
+        .checklist-q{font-size:10px;}
+        .checklist-options label{font-size:9px;padding:5px 8px;}
+        .checklist-entry-card{padding:12px;}
+        .checklist-entry-card .title{font-size:13px;}
+        .btn-checklist{font-size:12px;padding:10px;}
+        .density-grid{grid-template-columns:1fr;}
+        .flow-label{font-size:12px;min-width:32px;}
+        #mapContainer{height:220px;}
+        .toast{font-size:10px;padding:7px 14px;top:55px;}
+        .spinner-wrap{padding:10px;font-size:11px;}
+        .query-panel,.msg-panel{max-width:100%;}
+        .modal-box{width:94%;max-width:340px;padding:10px;}
+        .splash-title{font-size:28px;}
+        .splash-q-label{font-size:14px;}
+        .poi-table{font-size:9px;}
+        .poi-table th{font-size:8px;padding:4px 3px;}
+        .poi-table td{font-size:8px;padding:3px;}
+        .input-with-btn{flex-wrap:wrap;}
+        .input-with-btn .form-input{min-width:120px;}
+    }
+    @media(max-width:480px){
+        .header-title{font-size:13px;}
+        .header-actions{gap:2px;}
+        .btn{padding:4px 8px;font-size:9px;}
+        .btn-sm{padding:3px 6px;font-size:8px;}
+        .btn-xs{padding:2px 6px;font-size:8px;}
+        .steps-bar{padding:5px 3px;}
+        .step-dot{width:18px;height:18px;font-size:7px;}
+        .step-label{font-size:6px;min-width:26px;}
+        .step-line{min-width:4px;margin-bottom:10px;}
+        .main-content{padding:4px;gap:4px;}
+        .card{padding:8px;border-radius:8px;}
+        .card-title{font-size:11px;margin-bottom:6px;}
+        .form-input{font-size:16px;padding:7px 9px;}
+        .form-label{font-size:10px;}
+        .radius-opt{padding:5px 8px;font-size:9px;border-radius:14px;}
+        .summary-card{padding:12px;}
+        .summary-score{font-size:24px;}
+        .summary-item{padding:5px;}
+        .summary-item-value{font-size:12px;}
+        .summary-item-label{font-size:7px;}
+        .ai-block{font-size:9px;padding:6px 8px;line-height:1.5;}
+        .checklist-item{padding:6px;margin-bottom:5px;}
+        .checklist-q{font-size:9px;}
+        .checklist-options label{font-size:8px;padding:4px 6px;gap:4px;}
+        .checklist-entry-card{padding:10px;}
+        .checklist-entry-card .title{font-size:12px;}
+        .btn-checklist{font-size:11px;padding:8px;border-radius:10px;}
+        #mapContainer{height:180px;}
+        .poi-table{font-size:8px;}
+        .poi-table th{padding:3px 2px;font-size:7px;}
+        .poi-table td{padding:2px;font-size:7px;}
+        .poi-table-wrap{max-height:160px;}
+        .spinner-wrap{padding:8px;font-size:10px;}
+        .spinner{width:14px;height:14px;border-width:2px;}
+        .empty-state{padding:20px 10px;font-size:11px;}
+        .section-toggle{font-size:10px;}
+        .history-item{padding:8px;font-size:10px;}
+        .wait-tip{font-size:8px;padding:7px 9px;}
+        .splash-title{font-size:22px;letter-spacing:3px;}
+        .splash-q-label{font-size:12px;}
+        .splash-inner{padding:28px 16px;max-width:320px;}
+    }
+</style>
+</head>
+<body>
+<div class="splash-screen" id="splashScreen">
+    <div class="splash-bg"></div>
+    <div class="splash-particles" id="splashParticles"></div>
+    <div class="splash-crack" id="splashCrack"></div>
+    <div class="splash-rays" id="splashRays"></div>
+    <div class="splash-fadeout" id="splashFadeout"></div>
+    <div class="splash-door-wrap" id="splashDoors">
+        <div class="splash-door-l" id="splashDoorL"></div>
+        <div class="splash-door-r" id="splashDoorR"></div>
+    </div>
+    <div class="splash-inner">
+        <div class="splash-icon">⚔️</div>
+        <div class="splash-title">来者何人</div>
+        <div class="splash-subtitle">· WHO COMES HERE ·</div>
+        <div class="splash-q" id="sq1">
+            <div class="splash-q-label">🔰 <em>第一关</em> · 作者是？</div>
+            <div class="splash-btns">
+                <button class="splash-btn" id="sq1a" onclick="splashPick('阳光大男孩',this)">☀️ 阳光大男孩</button>
+                <button class="splash-btn" id="sq1b" onclick="splashPick('油腻大叔',this)">🤷 油腻大叔</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+    <div class="toast" id="toast"></div>
+    <div class="query-overlay" id="queryOverlay"></div>
+    <div class="msg-overlay" id="msgOverlay"></div>
+    <div class="msg-panel" id="msgPanel">
+        <div class="query-header"><span>💬 留言面板</span><button class="query-close-btn" id="msgCloseBtn" onclick="App.closeMsgPanel()">✕</button></div>
+        <div id="msgContent" style="flex:1;overflow-y:auto;padding:8px;"></div>
+        <div style="padding:8px;border-top:1px solid var(--border);display:flex;gap:6px;">
+            <input type="text" id="msgInput" placeholder="写下你的留言..." style="flex:1;padding:8px;border-radius:6px;border:1px solid var(--border);font-size:13px;">
+            <button class="btn btn-primary btn-sm" id="btnSendMsg">发送</button>
+        </div>
+    </div>
+    <div class="query-panel" id="queryPanel">
+        <div class="query-header"><span>📋 云端记录</span><button class="query-close-btn" id="queryCloseBtn" onclick="App.closeQueryPanel()">✕</button></div>
+        <div style="padding:6px 10px;display:flex;gap:4px;border-bottom:1px solid var(--border-light);">
+            <button class="btn btn-ghost btn-xs" id="btnDeleteAllCloud">🗑全部删除</button>
+        </div>
+        <div id="queryContent" style="flex:1;overflow-y:auto;padding:8px;"></div>
+    </div>
+    <div id="modalContainer"></div>
+
+    <div class="header">
+        <div class="header-title" id="headerTitle">📍 商铺选址分析</div>
+        <div class="header-actions">
+            <button class="btn btn-ghost btn-sm" id="btnScanToggle" onclick="ScanApp.toggle()">🔍 扫店</button>
+            <button class="btn btn-ghost btn-sm" onclick="App.startNew()">🆕 新建</button>
+            <button class="btn btn-ghost btn-sm" onclick="App.showHistory()">📂 历史</button>
+            <button class="btn btn-ghost btn-sm" onclick="App.openQueryPanel()">☁️ 云端</button>
+        </div>
+    </div>
+    <div class="steps-bar" id="stepsBar">
+        <div class="step-group"><div class="step-dot" id="stepDot1">1</div><div class="step-label" id="stepLabel1">输入</div></div>
+        <div class="step-line" id="stepLine1"></div>
+        <div class="step-group"><div class="step-dot" id="stepDot2">2</div><div class="step-label" id="stepLabel2">采集</div></div>
+        <div class="step-line" id="stepLine2"></div>
+        <div class="step-group"><div class="step-dot" id="stepDot3">3</div><div class="step-label" id="stepLabel3">初步报告</div></div>
+        <div class="step-line" id="stepLine3"></div>
+        <div class="step-group"><div class="step-dot" id="stepDot4">4</div><div class="step-label" id="stepLabel4">实地清单</div></div>
+        <div class="step-line" id="stepLine4"></div>
+        <div class="step-group"><div class="step-dot" id="stepDot5">5</div><div class="step-label" id="stepLabel5">最终报告</div></div>
+    </div>
+    <div class="main-content" id="mainContent"></div>
+
+    <div id="scanRoot" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
+        <div style="padding:8px 10px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;background:var(--surface);border-bottom:1px solid var(--border);">
+            <button class="btn btn-primary btn-sm" onclick="ScanApp.start()" id="scanStartBtn">🔍 开始扫描</button>
+            <button class="btn btn-ghost btn-sm" onclick="ScanApp.cancelScan()" id="scanCancelBtn" style="display:none;">✕ 取消</button>
+            <input type="text" id="scanIndustry" placeholder="行业" value="包子店" style="width:60px;padding:6px;border-radius:6px;border:1px solid var(--border);">
+            <input type="text" id="scanAddrInput" placeholder="输入大范围地址，例如：成都市锦江区" style="flex:1;min-width:120px;padding:6px;border-radius:6px;border:1px solid var(--border);">
+        </div>
+        <div id="scanKeyBar" style="padding:3px 10px;font-size:10px;background:var(--surface);border-bottom:1px dashed var(--border);display:flex;justify-content:space-between;align-items:center;"></div>
+        <div id="scanStatusArea" style="padding:10px;"></div>
+        <div id="scanResultArea" style="flex:1;overflow-y:auto;padding:10px;"></div>
+    </div>
+
+    <div class="modal-overlay" id="scanMapModal" style="display:none;align-items:flex-end;">
+        <div style="width:100%;max-width:520px;height:60vh;background:#fff;border-radius:14px 14px 0 0;display:flex;flex-direction:column;overflow:hidden;animation:slideUp 0.3s ease;">
+            <div style="padding:12px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);">
+                <span style="font-weight:700;">📍 位置详情</span>
+                <div style="display:flex;gap:6px;">
+                    <button class="btn btn-primary btn-xs" onclick="ScanApp.importToMain()">📋 导入分析</button>
+                    <button class="btn btn-xs" style="background:#eee;" onclick="ScanApp.closeMap()">✕</button>
+                </div>
+            </div>
+            <div id="scanMapContainer" style="flex:1;"></div>
+            <div id="scanMapLabel" style="padding:8px;font-size:10px;color:#555;"></div>
+        </div>
+    </div>
+
+    <script>
+        // ===== 拦截验证 =====
+        (function splashGate(){
+            var sc=document.getElementById('splashScreen');
+            // 生成粒子
+            var pc=document.getElementById('splashParticles');
+            for(var i=0;i<80;i++){
+                var s=document.createElement('span');
+                s.style.left=Math.random()*100+'%';
+                s.style.animationDuration=4+Math.random()*8+'s';
+                s.style.animationDelay=Math.random()*6+'s';
+                pc.appendChild(s);
+            }
+            window.splashPick=function(choice,btn){
+                if(choice==='阳光大男孩'){
+                    btn.classList.add('correct');
+                    var o=(btn.id==='sq1a')?document.getElementById('sq1b'):document.getElementById('sq1a');
+                    if(o){o.disabled=true;o.style.opacity='0.4';}
+                    // 答对 → 快速开门动画（总计~3.6s）
+                    setTimeout(function(){
+                        var inner=sc.querySelector('.splash-inner');
+                        if(inner){inner.style.opacity='0';inner.style.transform='scale(0.9)';inner.style.transition='all 0.4s ease';}
+                    },400);
+                    setTimeout(function(){document.getElementById('splashDoors').classList.add('show');},550);
+                    setTimeout(function(){document.getElementById('splashCrack').classList.add('glow');},700);
+                    setTimeout(function(){document.getElementById('splashRays').classList.add('spread');},850);
+                    setTimeout(function(){document.getElementById('splashCrack').classList.add('fade');},1250);
+                    setTimeout(function(){document.getElementById('splashFadeout').classList.add('dissolve');},1450);
+                    setTimeout(function(){document.getElementById('splashDoorL').classList.add('open');document.getElementById('splashDoorR').classList.add('open');},1000);
+                    setTimeout(function(){sc.style.display='none';},3200);
+                }else{
+                    btn.classList.add('shake');
+                    setTimeout(function(){btn.classList.remove('shake');},600);
+                }
+            };
+
+
+        })();
+
+        // ========== App 主模块 ==========
+        window.App = (function(){
+            var _k1='sk-079eb73',_k2='ca6b944f6a3ee',_k3='479c2cacff51';
+            function renderMD(t){
+                if(!t)return'';
+                var h=esc(t);
+                // 标题
+                h=h.replace(/^### (.+)$/gm,'<h4 style="margin:8px 0 4px;font-size:11px;">$1</h4>');
+                h=h.replace(/^## (.+)$/gm,'<h3 style="margin:10px 0 4px;font-size:12px;">$1</h3>');
+                h=h.replace(/^# (.+)$/gm,'<h2 style="margin:12px 0 4px;font-size:13px;">$1</h2>');
+                // 粗体 **text**
+                h=h.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+                // 分隔线
+                h=h.replace(/^---$/gm,'<hr style="border:none;border-top:1px dashed var(--border);margin:6px 0;">');
+                // 无序列表 - item
+                h=h.replace(/^- (.+)$/gm,'<li style="margin-left:16px;font-size:10px;">$1</li>');
+                // 有序列表 1. item
+                h=h.replace(/^\d+\. (.+)$/gm,'<li style="margin-left:16px;font-size:10px;">$1</li>');
+                // 连续 <li> 包裹 <ul>
+                h=h.replace(/(<li[^>]*>[\s\S]*?<\/li>)(\s*(?=<li|$))+/g,function(m){return'<ul style="margin:4px 0;padding:0;">'+m+'</ul>';});
+                // 段落：双换行 → <p>
+                h=h.replace(/\n\n/g,'</p><p style="margin:4px 0;font-size:10px;line-height:1.6;">');
+                h='<p style="margin:4px 0;font-size:10px;line-height:1.6;">'+h+'</p>';
+                // 单换行 → <br>
+                h=h.replace(/\n/g,'<br>');
+                // 清理空 <p>
+                h=h.replace(/<p[^>]*><\/p>/g,'');
+                // 清理空 <br> 在标签前
+                h=h.replace(/<br>\s*<\/p>/g,'</p>');
+                h=h.replace(/<br>\s*<li/g,'<li');
+                return h;
+            }
+            function scoreBar(s,w,h,bg){w=w||100;h=h||6;bg=bg||'#e5e7eb';var c=s>=80?'#059669':s>=60?'#2563eb':s>=40?'#d97706':'#dc2626';var p=Math.min(100,Math.max(0,s));return'<div style="height:'+h+'px;background:'+bg+';border-radius:'+(h/2)+'px;overflow:hidden;width:100%;"><div style="width:'+p+'%;height:100%;background:'+c+';border-radius:'+(h/2)+'px;transition:width 0.6s ease;"></div></div>';}
+            function scoreLabel(s){return s>=80?'优秀 🟢':s>=60?'良好 🔵':s>=40?'一般 🟡':s>=0?'较弱 🔴':'--';}
+            function scoreColor(s){return s>=80?'#059669':s>=60?'#2563eb':s>=40?'#d97706':'#dc2626';}
+            function adjScoreItem(name,n){var c=n>=80?'#059669':n>=60?'#2563eb':n>=40?'#d97706':'#dc2626';return'<div class="adj-score-item"><div class="adj-score-label">'+name+'</div><div class="adj-score-num" style="color:'+c+';">'+n+'</div><div class="adj-score-bar"><div class="adj-score-bar-fill" style="width:'+Math.min(100,Math.max(0,n))+'%;background:'+c+';"></div></div><div class="adj-score-text" style="color:'+c+';">'+scoreLabel(n)+'</div></div>';}
+
+            var DS_KEY=_k1+_k2+_k3,DS_URL='https://api.deepseek.com/v1/chat/completions',DS_MODEL='deepseek-v4-flash';
+            var QUERY_PASSWORD='jinxi2026';
+
+            function getAk(){return localStorage.getItem('_ak24')||'';}
+            function setAk(k){localStorage.setItem('_ak24',k);}
+            function uw(d){if(!d)return d;if(d.code===0||d.code===-1){return d.data||d;}return d;}
+            function getProvider(){var p=localStorage.getItem('_provider');return p||null;}
+            function setProvider(p){localStorage.setItem('_provider',p);}
+            function isAmap(){return (getProvider()||'amap')==='amap';}
+            function restBase(){return isAmap()?'https://restapi.amap.com/v3':'https://www.ibtmap.com/open/a/v3';}
+            function getRestKey(){return isAmap()?getAmapKey():getIbtRestKey();}
+            function getAmapKey(){return localStorage.getItem('_ak24')||'';}
+            function setAmapKey(k){localStorage.setItem('_ak24',k);}
+            function getIbtRestKey(){return localStorage.getItem('_ibrk')||'';}
+            function setIbtRestKey(k){localStorage.setItem('_ibrk',k);}
+            function getIbtJsKey(){return localStorage.getItem('_ibjk')||'';}
+            function setIbtJsKey(k){localStorage.setItem('_ibjk',k);}
+            function jsapiUrl(){var k=isAmap()?getAmapKey():getIbtJsKey();return isAmap()?'https://webapi.amap.com/maps?v=2.0&key='+k:'https://www.ibtmap.com/js/a/webapi/maps?key='+k;}
+
+            // 导出给扫店模块使用
+            window.restBase=restBase;window.getRestKey=getRestKey;window.uw=uw;window.isAmap=isAmap;window.getProvider=getProvider;window.showConfigModal=showConfigModal;
+
+            function getGt(){return localStorage.getItem('_gt24')||'';}
+            function setGt(t){localStorage.setItem('_gt24',t);}
+            function hasGt(){return !!getGt();}
+            function getGhCfg(){return{token:getGt(),owner:'SH1996',repo:'CC',file:'chats.json',api:function(){return'https://api.github.com/repos/'+this.owner+'/'+this.repo+'/contents/'+this.file;}};}
+
+            function safeBtoa(str){try{var e=new TextEncoder();var b=e.encode(str);var bin='';for(var i=0;i<b.length;i++)bin+=String.fromCharCode(b[i]);return btoa(bin);}catch(e){return btoa(unescape(encodeURIComponent(str)));}}
+            function safeAtob(b64){try{var bin=atob(b64);var b=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)b[i]=bin.charCodeAt(i);return new TextDecoder().decode(b);}catch(e){return decodeURIComponent(escape(atob(b64)));}}
+
+            var currentEval=null,step4Chat=[],step5Chat=[],selectedRadius=1000,toastTimer=null;
+            var weatherData=null,compareList=[],mapObj=null,_lastLoc='';
+            var $m=document.getElementById('mainContent'),$t=document.getElementById('toast');
+            var $qPanel=document.getElementById('queryPanel'),$qOverlay=document.getElementById('queryOverlay');
+
+            function toast(m){clearTimeout(toastTimer);$t.textContent=m;$t.classList.add('show');toastTimer=setTimeout(function(){$t.classList.remove('show');},2500);}
+            function sleep(ms){return new Promise(function(r){setTimeout(r,ms);});}
+            function genId(){return'e_'+Date.now()+'_'+Math.random().toString(36).slice(2,8);}
+            function esc(s){if(!s)return'';var d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+            function fmtDist(m){if(!m&&m!==0)return'?';m=parseInt(m);return m<1000?m+'m':(m/1000).toFixed(1)+'km';}
+            function updateSteps(s){for(var i=1;i<=5;i++){var d=document.getElementById('stepDot'+i),l=document.getElementById('stepLabel'+i),ln=document.getElementById('stepLine'+i);if(!d)continue;d.classList.remove('active','done');if(l)l.classList.remove('active');if(ln)ln.classList.remove('done');if(i<s){d.classList.add('done');if(ln)ln.classList.add('done');}else if(i===s){d.classList.add('active');if(l)l.classList.add('active');}}}
+            function render(h){$m.innerHTML=h;$m.scrollTop=0;}
+            var _lt=null,_ls=0;
+            function startLoadTimer(){_ls=Date.now();stopLoadTimer();_lt=setInterval(function(){var e=document.getElementById('loadTimer');if(e){var s=Math.floor((Date.now()-_ls)/1000);e.textContent='⏱️ 已运行 '+s+' 秒';if(s>60){e.style.color='var(--warning)';}}},1000);}
+            function stopLoadTimer(){if(_lt){clearInterval(_lt);_lt=null;}}
+            function setLoadMsg(m){var e=document.getElementById('loadMsg');if(e)e.innerHTML=m;}
+            function setLoadStep(n,m){var e=document.getElementById('loadStep'+n);if(e){e.innerHTML=m;e.style.color='var(--primary)';e.style.fontWeight='700';}}
+            function clearLoadSteps(){for(var i=1;i<=3;i++){var e=document.getElementById('loadStep'+i);if(e){e.style.color='var(--text-muted)';e.style.fontWeight='400';}}}
+
+            async function callDS(msgs,temp,mt){temp=temp||0.7;mt=mt||2000;var r=await fetch(DS_URL,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+DS_KEY},body:JSON.stringify({model:DS_MODEL,messages:msgs,temperature:temp,max_tokens:mt,stream:false})});if(!r.ok)throw new Error('API '+r.status);var d=await r.json();return d.choices[0].message.content;}
+
+            async function amapGeocode(addr){var k=getRestKey();if(!k)throw new Error('请先配置密钥');var city='';var m=addr.match(/^([\u4e00-\u9fa5]{2,}(?:市|省|自治区))/);if(m)city=m[1];var u=window.restBase()+'/geocode/geo?key='+encodeURIComponent(k)+'&address='+encodeURIComponent(addr);if(city)u+='&city='+encodeURIComponent(city)+'&citylimit=true';var r=await fetch(u);var d=await r.json();var data=uw(d);if(data.status==='1'&&data.geocodes&&data.geocodes.length>0){var l=data.geocodes[0].location.split(',');return{lng:parseFloat(l[0]),lat:parseFloat(l[1]),fmt:data.geocodes[0].formatted_address||addr};}if(city){var u2=window.restBase()+'/geocode/geo?key='+encodeURIComponent(k)+'&address='+encodeURIComponent(addr);var r2=await fetch(u2);var d2=await r2.json();var data2=uw(d2);if(data2.status==='1'&&data2.geocodes&&d2.geocodes.length>0){var l2=data2.geocodes[0].location.split(',');return{lng:parseFloat(l2[0]),lat:parseFloat(l2[1]),fmt:data2.geocodes[0].formatted_address||addr};}}throw new Error('地址解析失败: '+(data.info||data.msg||'无详细错误'));}
+            async function amapRegeo(lng,lat){var k=getRestKey();if(!k)throw new Error('NO_KEY');var u=window.restBase()+'/geocode/regeo?key='+encodeURIComponent(k)+'&location='+lng+','+lat;var r=await fetch(u);var d=await r.json();var data=uw(d);if(data.status==='1'&&data.regeocode)return data.regeocode.formatted_address;throw new Error('逆地理失败: '+(data.info||data.msg||'无详细错误'));}
+            async function amapWeather(city){var k=getRestKey();if(!k)throw new Error('NO_KEY');var u=window.restBase()+'/weather/weatherInfo?key='+encodeURIComponent(k)+'&city='+encodeURIComponent(city)+'&extensions=all';var r=await fetch(u);var d=await r.json();var data=uw(d);if(data.status==='1'&&data.forecasts&&data.forecasts.length>0)return data.forecasts[0];throw new Error('天气失败: '+(data.info||data.msg||'无详细错误'));}
+            async function amapPOISearch(loc,kw,rad,types){rad=rad||3000;var k=getRestKey();if(!k)throw new Error('NO_KEY');var all=[],seen=new Set();for(var p=1;p<=5;p++){var u=window.restBase()+'/place/around?key='+encodeURIComponent(k)+'&location='+loc+'&radius='+rad+'&offset=25&page='+p;if(types)u+='&types='+types;if(kw)u+='&keywords='+encodeURIComponent(kw);var r=await fetch(u);var d=await r.json();var data=uw(d);if(data.status==='1'&&data.pois&&data.pois.length>0){for(var i=0;i<data.pois.length;i++){if(!seen.has(data.pois[i].id)){seen.add(data.pois[i].id);all.push(data.pois[i]);}}if(data.pois.length<25)break;}else break;await sleep(150);}return all;}
+            async function searchSchools(loc,rad){var all=[],seen=new Set();var kw=['学校','大学','中学','小学','幼儿园'];for(var i=0;i<kw.length;i++){try{var r=await amapPOISearch(loc,kw[i],rad,'141201|141202|141203');for(var j=0;j<r.length;j++){if(!seen.has(r[j].id)){seen.add(r[j].id);all.push(r[j]);}}}catch(e){}await sleep(100);}all.sort(function(a,b){return(parseInt(a.distance)||99999)-(parseInt(b.distance)||99999);});return all;}
+
+            function getCityLevel(addr){
+                if(!addr)return{level:'地级市',factor:1.0};
+                if(/北京|上海|广州|深圳/.test(addr))return{level:'一线城市',factor:1.8};
+                if(/成都|杭州|武汉|南京|重庆|天津|苏州|西安|长沙|郑州|东莞|青岛|沈阳|宁波|昆明|合肥|佛山|无锡|厦门|济南|福州|温州|大连|哈尔滨|长春|泉州|石家庄|贵阳|南昌|南宁|太原|烟台|嘉兴|南通|金华|珠海|惠州|徐州|海口|乌鲁木齐|兰州|呼和浩特|银川|西宁|拉萨/.test(addr))return{level:'省会/新一线',factor:1.4};
+                if(/县/.test(addr)&&!/市/.test(addr))return{level:'县城',factor:0.6};
+                if(/镇|乡|村/.test(addr))return{level:'乡镇',factor:0.4};
+                return{level:'地级市',factor:1.0};
+            }
+
+            var industryTemplates={
+                '奶茶店':{r:500,m:['学生','竞品数'],ex:[{id:'x1',t:'午间人流量',o:['<100人/h','100-200','200-300','300-500','>500']},{id:'x2',t:'最近竞品距离',o:['<50m','50-100m','100-200m','>200m']}]},
+                '火锅店':{r:2000,m:['停车位','家庭客群'],ex:[{id:'x1',t:'停车位数',o:['<10个','10-30','30-50','>50']},{id:'x2',t:'可用面积',o:['<100㎡','100-200㎡','200-400㎡','>400㎡']}]},
+                '便利店':{r:300,m:['小区户数'],ex:[{id:'x1',t:'周边户数',o:['<300户','300-500','500-1000','>1000']}]},
+                '咖啡店':{r:800,m:['白领人数'],ex:[{id:'x1',t:'写字楼人数',o:['<1000人','1000-2000','2000-5000','>5000']}]},
+                '快餐店':{r:1000,m:['午间人流'],ex:[{id:'x1',t:'午间1h人流',o:['<100人','100-200','200-300','300-500','>500']}]},
+                '烘焙店':{r:800,m:['学生数'],ex:[{id:'x1',t:'学生总数',o:['<500','500-1000','1000-2000','>2000']}]},
+                '药店':{r:500,m:['老龄人口'],ex:[{id:'x1',t:'入住率',o:['<50%','50%-70%','70%-90%','>90%']}]},
+                '健身房':{r:2000,m:['年轻客群'],ex:[{id:'x1',t:'年轻人口',o:['<3000','3000-5000','5000-10000','>10000']}]}
+            };
+            function detectTpl(ind){ind=(ind||'').toLowerCase();for(var k in industryTemplates){if(ind.includes(k))return industryTemplates[k];}return null;}
+            var amapTypes={'住宅小区':'120300','写字楼':'120200','公司企业':'170000','学校':'141201|141202|141203','医院':'090100|090200','商场':'060100','地铁站':'150500','公交站':'150700','停车场':'150900','餐饮':'050000','竞品':''};
+            function createEmpty(){return{id:'',address:'',industry:'',radius:3000,coordinates:null,rawData:{},weatherData:null,aiAnalysis:{},fieldChecklist:[],fieldData:{},finalReport:null,chatHistory4:[],chatHistory5:[],status:'draft',createdAt:'',updatedAt:'',deepChecklist:null,cityLevel:null};}
+
+            function getLocalEvals(){try{return JSON.parse(localStorage.getItem('_ev24')||'[]');}catch(e){return[];}}
+            function saveLocalEvals(evals){if(evals.length>100)evals=evals.slice(-100);localStorage.setItem('_ev24',JSON.stringify(evals));}
+            async function saveCurrent(){currentEval.updatedAt=new Date().toISOString();currentEval.chatHistory4=JSON.parse(JSON.stringify(step4Chat));currentEval.chatHistory5=JSON.parse(JSON.stringify(step5Chat));currentEval.weatherData=weatherData;var evals=getLocalEvals();var idx=-1;for(var i=0;i<evals.length;i++){if(evals[i].id===currentEval.id){idx=i;break;}}if(idx>=0)evals[idx]=JSON.parse(JSON.stringify(currentEval));else evals.push(JSON.parse(JSON.stringify(currentEval)));saveLocalEvals(evals);localStorage.setItem('_lastEvalId',currentEval.id);}
+
+            async function getChatJson(){if(!hasGt())return[];try{var cfg=getGhCfg();var r=await fetch(cfg.api(),{headers:{'Authorization':'token '+cfg.token,'Accept':'application/vnd.github.v3+json'}});if(r.status===404)return[];if(!r.ok)return[];var d=await r.json();if(!d.content)return[];return JSON.parse(safeAtob(d.content));}catch(e){return[];}}
+            async function saveChatJson(records){if(!hasGt())return false;try{var cfg=getGhCfg();var json=JSON.stringify(records,null,2);var content=safeBtoa(json);var sha=null;try{var ck=await fetch(cfg.api(),{headers:{'Authorization':'token '+cfg.token}});if(ck.ok){var cd=await ck.json();sha=cd.sha;}}catch(e){}var body={message:'update',content:content,branch:'main'};if(sha)body.sha=sha;var r=await fetch(cfg.api(),{method:'PUT',headers:{'Authorization':'token '+cfg.token,'Content-Type':'application/json'},body:JSON.stringify(body)});return r.ok;}catch(e){return false;}}
+            async function saveToCloud(){if(!hasGt())return;try{var records=await getChatJson();var score=(currentEval.aiAnalysis&&currentEval.aiAnalysis.overall_score)||(currentEval.finalReport&&currentEval.finalReport.finalScore)||'--';var record={id:currentEval.id,date:new Date().toISOString(),address:currentEval.address,industry:currentEval.industry,score:score};var idx=-1;for(var i=0;i<records.length;i++){if(records[i].id===currentEval.id){idx=i;break;}}if(idx>=0)records[idx]=record;else records.push(record);if(records.length>200)records.splice(0,records.length-200);await saveChatJson(records);}catch(e){}}
+
+            // ===== 留言面板 =====
+            function getMsgCfg(){return{token:getGt(),owner:'SH1996',repo:'CC',file:'messages.json',api:function(){return'https://api.github.com/repos/'+this.owner+'/'+this.repo+'/contents/'+this.file;}};}
+            async function getMessages(){if(!hasGt())return[];try{var cfg=getMsgCfg();var r=await fetch(cfg.api(),{headers:{'Authorization':'token '+cfg.token,'Accept':'application/vnd.github.v3+json'}});if(r.status===404)return[];if(!r.ok)return[];var d=await r.json();if(!d.content)return[];return JSON.parse(safeAtob(d.content));}catch(e){return[];}}
+            async function saveMessages(msgs){if(!hasGt())return false;try{var cfg=getMsgCfg();var json=JSON.stringify(msgs,null,2);var content=safeBtoa(json);var sha=null;try{var ck=await fetch(cfg.api(),{headers:{'Authorization':'token '+cfg.token}});if(ck.ok){var cd=await ck.json();sha=cd.sha;}}catch(e){}var body={message:'new message',content:content,branch:'main'};if(sha)body.sha=sha;var r=await fetch(cfg.api(),{method:'PUT',headers:{'Authorization':'token '+cfg.token,'Content-Type':'application/json'},body:JSON.stringify(body)});return r.ok;}catch(e){return false;}}
+            async function loadMessages(){
+                var c=document.getElementById('msgContent');
+                c.innerHTML='<div style="padding:15px;text-align:center;font-size:11px;">加载中...</div>';
+                try{
+                    var msgs=await getMessages();
+                    if(!msgs.length){c.innerHTML='<div style="padding:20px;text-align:center;font-size:10px;color:var(--text-muted);">暂无留言，来说点什么吧 💬</div>';return;}
+                    var html='<div class="query-list">';
+                    msgs.slice().reverse().forEach(function(m){
+                        var d=m.date?new Date(m.date).toLocaleString('zh-CN'):'';
+                        html+='<div class="query-item"><div style="font-size:9px;color:var(--text-muted);margin-bottom:4px;">🕐 '+esc(d)+'</div><div style="font-size:13px;line-height:1.5;">'+esc(m.text||'')+'</div></div>';
+                    });
+                    html+='</div>';
+                    c.innerHTML=html;
+                    c.scrollTop=c.scrollHeight;
+                }catch(e){c.innerHTML='<div style="padding:15px;text-align:center;color:var(--danger);">加载失败</div>';}
+            }
+            async function sendMessage(){
+                var input=document.getElementById('msgInput');
+                var text=input.value.trim();
+                if(!text){toast('请输入留言内容');return;}
+                if(!hasGt()){toast('请先配置GT');return;}
+                var btn=document.getElementById('btnSendMsg');
+                btn.disabled=true;btn.textContent='发送中...';
+                try{
+                    var msgs=await getMessages();
+                    msgs.push({id:genId(),text:text,date:new Date().toISOString()});
+                    if(msgs.length>500)msgs=msgs.slice(-500);
+                    await saveMessages(msgs);
+                    input.value='';
+                    toast('✅留言成功');
+                    await loadMessages();
+                }catch(e){toast('发送失败');}
+                btn.disabled=false;btn.textContent='发送';
+            }
+            function openMsgPanel(){
+                document.getElementById('msgPanel').classList.add('open');
+                document.getElementById('msgOverlay').classList.add('active');
+                loadMessages();
+            }
+            function closeMsgPanel(){
+                document.getElementById('msgPanel').classList.remove('open');
+                document.getElementById('msgOverlay').classList.remove('active');
+            }
+            document.getElementById('msgOverlay').addEventListener('click',closeMsgPanel);
+            (function _bindMsg(){
+                var btn=document.getElementById('btnSendMsg');
+                if(btn)btn.addEventListener('click',sendMessage);
+                var input=document.getElementById('msgInput');
+                if(input)input.addEventListener('keydown',function(e){if(e.key==='Enter')sendMessage();});
+            })();
+
+            function showModal(title,placeholder,hint,isPw,cb){
+                var mc=document.getElementById('modalContainer');
+                mc.innerHTML='<div class="modal-overlay" id="mo"><div class="modal-box"><h3>'+esc(title)+'</h3>'+(hint?'<div class="hint" style="font-size:10px;color:var(--text-muted);margin-bottom:6px;">'+hint+'</div>':'')+'<input type="'+(isPw?'password':'text')+'" id="mi" placeholder="'+(placeholder||'')+'"><div class="modal-btns"><button class="btn-cancel" id="mc">取消</button><button class="btn-ok" id="mok">确定</button></div></div></div>';
+                document.getElementById('mok').addEventListener('click',function(){var v=document.getElementById('mi').value.trim();mc.innerHTML='';if(cb)cb(v);});
+                document.getElementById('mc').addEventListener('click',function(){mc.innerHTML='';if(cb)cb(null);});
+                document.getElementById('mo').addEventListener('click',function(e){if(e.target===this){mc.innerHTML='';if(cb)cb(null);}});
+                setTimeout(function(){document.getElementById('mi').focus();},300);
+            }
+            function showConfirm(title,msg,cb){
+                var mc=document.getElementById('modalContainer');
+                mc.innerHTML='<div class="modal-overlay" id="mo"><div class="modal-box"><h3>'+esc(title)+'</h3><p style="font-size:11px;margin-bottom:6px;">'+esc(msg)+'</p><div class="modal-btns"><button class="btn-cancel" id="mc">取消</button><button class="btn-danger" id="mok">确认</button></div></div></div>';
+                document.getElementById('mok').addEventListener('click',function(){mc.innerHTML='';if(cb)cb(true);});
+                document.getElementById('mc').addEventListener('click',function(){mc.innerHTML='';if(cb)cb(false);});
+                document.getElementById('mo').addEventListener('click',function(e){if(e.target===this){mc.innerHTML='';if(cb)cb(false);}});
+            }
+
+            function showKeyModal(){showConfigModal();}
+            function showConfigModal(){
+                var mc=document.getElementById('modalContainer');
+                var p=getProvider();
+                var ak=getAmapKey();
+                var rk=getIbtRestKey();
+                var jk=getIbtJsKey();
+                var gt=getGt();
+                function esc(s){if(!s)return'';return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+                function pickUI(prov){
+                    var hi=document.getElementById('cfgProviderInput');
+                    if(hi)hi.value=prov||'';
+                    var ca=document.getElementById('cfCardA'),ci=document.getElementById('cfCardI');
+                    var cA=document.getElementById('cfgA'),cI=document.getElementById('cfgI');
+                    var hp=document.getElementById('cfgHint');
+                    if(prov===null||prov===undefined){
+                        if(ca)ca.style.cssText='text-align:center;padding:14px 8px;border-radius:10px;cursor:pointer;font-size:13px;font-weight:600;border:2px solid var(--border);background:var(--bg);transition:all 0.2s;';
+                        if(ci)ci.style.cssText='text-align:center;padding:14px 8px;border-radius:10px;cursor:pointer;font-size:13px;font-weight:600;border:2px solid var(--border);background:var(--bg);transition:all 0.2s;';
+                        if(cA)cA.style.display='none';
+                        if(cI)cI.style.display='none';
+                        if(hp)hp.style.display='block';
+                        return;
+                    }
+                    if(hp)hp.style.display='none';
+                    var isA=prov==='amap';
+                    if(ca)ca.style.cssText='text-align:center;padding:14px 8px;border-radius:10px;cursor:pointer;font-size:13px;font-weight:600;border:2px solid '+(isA?'#22c55e':'var(--border)')+';background:'+(isA?'#f0fdf4':'var(--bg)')+';transition:all 0.2s;';
+                    if(ci)ci.style.cssText='text-align:center;padding:14px 8px;border-radius:10px;cursor:pointer;font-size:13px;font-weight:600;border:2px solid '+(isA?'var(--border)':'#22c55e')+';background:'+(isA?'var(--bg)':'#f0fdf4')+';transition:all 0.2s;';
+                    if(cA)cA.style.display=isA?'block':'none';
+                    if(cI)cI.style.display=isA?'none':'block';
+                }
+                var h='';
+                h+='<div class="modal-overlay" id="mo"><div class="modal-box" style="max-width:500px;max-height:85vh;overflow-y:auto;padding:24px;">';
+                h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:20px;"><span style="font-size:22px;">⚙️</span><span style="font-size:16px;font-weight:700;">全局配置</span></div>';
+                h+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px;">';
+                h+='<div style="display:flex;align-items:center;gap:6px;margin-bottom:12px;"><span style="font-size:15px;">🗺️</span><span style="font-size:13px;font-weight:600;">地图服务</span></div>';
+                h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">';
+                h+='<div id="cfCardA" style="text-align:center;padding:14px 8px;border-radius:10px;cursor:pointer;font-size:13px;font-weight:600;border:2px solid var(--border);background:var(--bg);transition:all 0.2s;">🔴 高德地图</div>';
+                h+='<div id="cfCardI" style="text-align:center;padding:14px 8px;border-radius:10px;cursor:pointer;font-size:13px;font-weight:600;border:2px solid var(--border);background:var(--bg);transition:all 0.2s;">🟢 其他地图</div>';
+                h+='</div>';
+                h+='<div id="cfgHint" style="text-align:center;font-size:11px;color:var(--text-muted);margin-top:10px;'+(p?'display:none;':'')+'">👆 请先选择地图服务</div>';
+                h+='<div id="cfgA" style="margin-top:12px;display:none;">';
+                h+='<div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">高德 Key <span style="color:var(--text-tertiary);">（Web端 + JS端 共用）</span></div>';
+                h+='<input type="text" id="fi_ak" placeholder="输入高德地图 Key" value="'+esc(ak)+'" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;box-sizing:border-box;" autocomplete="off">';
+                h+='</div>';
+                h+='<div id="cfgI" style="margin-top:12px;display:none;">';
+                h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">';
+                h+='<div><div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">🌐 Web端</div><input type="text" id="fi_rk" placeholder="留空=内置密钥" value="'+esc(rk)+'" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;box-sizing:border-box;" autocomplete="off"><div style="font-size:9px;color:var(--text-tertiary);margin-top:2px;">地理编码/POI/天气</div></div>';
+                h+='<div><div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">🗺️ JS端</div><input type="text" id="fi_jk" placeholder="留空=内置密钥" value="'+esc(jk)+'" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;box-sizing:border-box;" autocomplete="off"><div style="font-size:9px;color:var(--text-tertiary);margin-top:2px;">地图显示加载</div></div>';
+                h+='</div></div></div>';
+                h+='<div style="background:linear-gradient(135deg,#faf5ff,#f0e6ff);border:1px solid #d8b4fe;border-radius:12px;padding:16px;margin-bottom:14px;">';
+                h+='<div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;"><span style="font-size:15px;">🔐</span><span style="font-size:13px;font-weight:600;">GH TOKEN</span></div>';
+                h+='<div style="font-size:11px;color:var(--text-muted);margin-bottom:10px;">不填写可能无法使用部分新功能</div>';
+                h+='<input type="text" id="fi_gt" placeholder="输入 GH TOKEN" value="'+esc(gt)+'" style="width:100%;padding:10px 12px;border:1px solid #d8b4fe;border-radius:8px;font-size:13px;box-sizing:border-box;" autocomplete="off">';
+                h+='</div>';
+                h+='<div id="cfgMsg" style="display:none;text-align:center;font-size:12px;margin-bottom:8px;padding:6px;border-radius:6px;"></div>';
+                h+='<div style="display:flex;gap:10px;justify-content:center;margin-top:4px;">';
+                h+='<button id="mok" style="padding:12px 32px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;">💾 保存并关闭</button>';
+                h+='</div></div></div>';
+                h+='<input type="hidden" id="cfgProviderInput" value="'+(p||'')+'">';
+                mc.innerHTML=h;
+                mc.style.display='';
+                // 绑定卡片点击
+                (function(pk,pkA){document.getElementById('cfCardA').onclick=function(){pk('amap');};document.getElementById('cfCardI').onclick=function(){pk('ibtmap');};})(pickUI);
+                // 保存按钮：用 addEventListener 绑定，不走 onclick，避免闭包变量丢失
+                document.getElementById('mok').addEventListener('click',function(){
+                    var btn=document.getElementById('mok');
+                    var msgEl=document.getElementById('cfgMsg');
+                    if(!btn){return;}
+                    btn.textContent='⏳ 保存中...';btn.disabled=true;btn.style.opacity='0.6';btn.style.cursor='not-allowed';
+                    if(msgEl){msgEl.style.display='none';}
+                    try{
+                        var selProv=document.getElementById('cfgProviderInput').value;
+                        if(!selProv){
+                            if(msgEl){msgEl.textContent='⚠️ 请先选择地图服务';msgEl.style.display='block';msgEl.style.cssText='text-align:center;font-size:12px;margin-bottom:8px;padding:6px;border-radius:6px;background:#fff3cd;color:#856404;border:1px solid #ffc107;';}
+                            btn.textContent='💾 保存并关闭';btn.disabled=false;btn.style.opacity='1';btn.style.cursor='pointer';
+                            return;
+                        }
+                        var oldP=getProvider()||'amap';
+                        // 读取所有输入框的值
+                        var akVal=document.getElementById('fi_ak').value.trim();
+                        var rkVal=document.getElementById('fi_rk').value.trim();
+                        var jkVal=document.getElementById('fi_jk').value.trim();
+                        var gtVal=document.getElementById('fi_gt').value.trim();
+                        // 写入 localStorage，如果满则自动清缓存重试
+                        function doSave(){
+                            setProvider(selProv);
+                            setAmapKey(akVal);
+                            setIbtRestKey(rkVal);
+                            setIbtJsKey(jkVal);
+                            setGt(gtVal);
+                        }
+                        try{
+                            doSave();
+                        }catch(e1){
+                            if(e1.name==='QuotaExceededError'||(e1.message||'').indexOf('quota')!==-1||(e1.message||'').indexOf('exceeded')!==-1){
+                                // 全自动清理：先把缓存和历史都清了腾空间
+                                var keepKeys={_cfgdone:1};
+                                var keys=Object.keys(localStorage);
+                                for(var ki=0;ki<keys.length;ki++){
+                                    if(!keepKeys[keys[ki]]){localStorage.removeItem(keys[ki]);}
+                                }
+                                // 清完后重试保存
+                                var saved=false;
+                                try{doSave();saved=true;}catch(ee2){}
+                                if(!saved){
+                                    if(msgEl){msgEl.textContent='❌ 存储异常，请刷新页面后重试';msgEl.style.display='block';msgEl.style.cssText='text-align:center;font-size:12px;margin-bottom:8px;padding:6px;border-radius:6px;background:#fce4ec;color:#c62828;border:1px solid #ef5350;';}
+                                    btn.textContent='💾 保存并关闭';btn.disabled=false;btn.style.opacity='1';btn.style.cursor='pointer';
+                                    return;
+                                }
+                            }else{
+                                throw e1;
+                            }
+                        }
+                        // 立即读出验证写入是否成功
+                        var finalP=getProvider();
+                        var finalK=getRestKey();
+                        mc.innerHTML='';mc.style.display='none';
+                        if(finalK){
+                            toast('✅ 配置已保存 ('+(finalP==='amap'?'高德':'IBT')+' Key: '+finalK.substring(0,6)+'...)');
+                        }else{
+                            toast('⚠️ 配置已保存，但 Key 为空');
+                        }
+                    }catch(e){
+                        if(msgEl){msgEl.textContent='❌ 保存失败: '+e.message;msgEl.style.display='block';msgEl.style.cssText='text-align:center;font-size:12px;margin-bottom:8px;padding:6px;border-radius:6px;background:#fce4ec;color:#c62828;border:1px solid #ef5350;';}
+                        btn.textContent='💾 保存并关闭';btn.disabled=false;btn.style.opacity='1';btn.style.cursor='pointer';
+                        return;
+                    }
+                    // 判断当前在哪个页面，只刷新对应视图，不破坏当前页面
+                    var scanRoot=document.getElementById('scanRoot');
+                    var onScanPage=scanRoot&&scanRoot.style.display==='flex';
+                    if(onScanPage){
+                        try{if(window.ScanApp&&window.ScanApp.refreshKeyBar)window.ScanApp.refreshKeyBar();}catch(e4){}
+                    }else{
+                        try{renderStep1();}catch(e2){console.error('页面刷新失败:',e2);}
+                    }
+                    if(selProv!==oldP&&typeof reloadMapProvider==='function'){setTimeout(function(){try{reloadMapProvider();}catch(e3){console.error('地图切换失败:',e3);}},300);}
+                });
+                pickUI(p);
+                document.getElementById('mo').addEventListener('click',function(e){if(e.target===this)mc.innerHTML='';});
+            }
+
+            function showCustomRadius(){
+                showModal('自定义半径','输入半径（米）','请输入50-10000之间的数字',false,function(val){
+                    if(!val)return;
+                    var r=parseInt(val);
+                    if(isNaN(r)||r<50||r>10000){toast('请输入50-10000之间的数字');return;}
+                    selectedRadius=r;
+                    toast('✅ 半径已设为'+r+'m');
+                    renderStep1();
+                });
+            }
+
+            function refreshView(){
+                if(currentEval&&currentEval.status==='final')renderStep5();
+                else if(currentEval&&currentEval.status==='deep_checklist')renderDeepChecklist();
+                else if(currentEval&&currentEval.status==='ai_analyzed'){updateSteps(3);renderStep3Result();}
+                else if(currentEval&&currentEval.status==='data_collected'){updateSteps(3);renderStep3Loading();}
+                else renderStep1();
+            }
+
+            function openQueryPanel(){if(!hasGt()){toast('请先配置GT');return;}showModal('查询密码','输入密码','',true,function(pw){if(pw===QUERY_PASSWORD){$qPanel.classList.add('open');$qOverlay.classList.add('active');loadCloudRecords();}else if(pw!==null){toast('密码错误');}});}
+            function closeQueryPanel(){$qPanel.classList.remove('open');$qOverlay.classList.remove('active');}
+            async function loadCloudRecords(){
+                var c=document.getElementById('queryContent');c.innerHTML='<div style="padding:15px;text-align:center;font-size:11px;">加载中...</div>';
+                try{var records=await getChatJson();if(!records.length){c.innerHTML='<div style="padding:20px;text-align:center;font-size:10px;color:var(--text-muted);">暂无云端记录</div>';return;}var html='<div class="query-list">';var rev=records.slice().reverse();for(var i=0;i<rev.length;i++){var r=rev[i],idx=records.length-1-i,date=r.date?new Date(r.date).toLocaleString('zh-CN'):'',addr=(r.address||'').slice(0,30),ind=r.industry||'',score=r.score||'--';html+='<div class="query-item"><div style="display:flex;justify-content:space-between;"><span><b>📍'+esc(addr)+'</b></span><span>'+esc(ind)+'·'+score+'分</span></div><div class="q-actions"><button class="btn-import" data-import="'+idx+'">📥导入</button><button class="btn-del" data-delete="'+idx+'" style="color:var(--danger);">🗑删除</button></div></div>';}html+='</div>';c.innerHTML=html;
+                c.addEventListener('click',async function(e){
+                    var target=e.target;
+                    if(target.classList.contains('btn-import')){
+                        e.stopPropagation();
+                        var idx=parseInt(target.getAttribute('data-import'));
+                        var records=await getChatJson();
+                        if(idx>=0&&idx<records.length){
+                            importFromCloud(records[idx]);
+                            closeQueryPanel();
+                        }
+                    }else if(target.classList.contains('btn-del')){
+                        e.stopPropagation();
+                        var idx=parseInt(target.getAttribute('data-delete'));
+                        showConfirm('删除','确定删除？',async function(ok){
+                            if(ok){
+                                var records=await getChatJson();
+                                if(idx>=0&&idx<records.length){
+                                    records.splice(idx,1);
+                                    await saveChatJson(records);
+                                    toast('✅已删除');
+                                    loadCloudRecords();
+                                }
+                            }
+                        });
+                    }
+                });}catch(e){c.innerHTML='<div style="padding:15px;text-align:center;color:var(--danger);">加载失败</div>';}}
+            function importFromCloud(cr){var imp=createEmpty();imp.id=cr.id||genId();imp.address=cr.address||'';imp.industry=cr.industry||'';imp.createdAt=cr.date||new Date().toISOString();var evals=getLocalEvals();var ei=-1;for(var i=0;i<evals.length;i++){if(evals[i].id===imp.id){ei=i;break;}}if(ei>=0)evals[ei]=imp;else evals.push(imp);saveLocalEvals(evals);currentEval=JSON.parse(JSON.stringify(imp));step4Chat=[];step5Chat=[];weatherData=null;renderStep1();toast('✅已导入（云端仅摘要，需要重新分析）');}
+            async function deleteAllCloud(){showConfirm('清空','清空所有云端记录？',async function(ok){if(ok){await saveChatJson([]);toast('已清空');loadCloudRecords();}});}
+            document.getElementById('btnDeleteAllCloud').addEventListener('click',deleteAllCloud);
+
+            function renderPOITable(data,mx){mx=mx||30;if(!data||!data.length)return'<div style="font-size:9px;padding:4px;">未搜索到</div>';var s=data.slice(0,mx);var h='<div class="poi-table-wrap"><table class="poi-table"><thead><tr><th>#</th><th>名称</th><th>距离</th></tr></thead><tbody>';for(var i=0;i<s.length;i++){var p=s[i];h+='<tr><td>'+(i+1)+'</td><td><strong>'+esc(p.name||'?')+'</strong></td><td class="poi-dist">'+fmtDist(p.distance)+'</td></tr>';}if(data.length>mx)h+='<tr><td colspan="3" style="text-align:center;">共'+data.length+'条</td></tr>';h+='</tbody></table></div>';return h;}
+            function renderCollapsible(title,content,defOpen){var id='sc_'+Math.random().toString(36).slice(2,8);return'<div class="section-toggle'+(defOpen?' expanded':'')+'" data-sid="'+id+'"><span class="arrow">▶</span> '+esc(title)+'</div><div class="section-content'+(defOpen?' show':'')+'" id="'+id+'">'+content+'</div>';}
+            function renderChat(){var arr=step5Chat;var h='<div class="chat-panel"><div class="chat-header-bar" data-cid="chat5">💬AI问答<span class="chat-arrow">▶</span></div><div class="chat-body" id="chat5"><div class="chat-messages" id="chat5_msgs">';for(var i=0;i<arr.length;i++)h+='<div class="chat-msg '+arr[i].role+'">'+esc(arr[i].content).replace(/\n/g,'<br>')+'</div>';if(!arr.length)h+='<div style="text-align:center;font-size:9px;padding:10px;">有疑问直接问AI</div>';h+='</div><div class="chat-input-row"><input id="chat5_inp" placeholder="问AI..."><button class="chat-send-btn" id="chat5_btn">➤</button></div></div></div>';return h;}
+            async function sendChat(){
+                var inp=document.getElementById('chat5_inp'),btn=document.getElementById('chat5_btn'),msgs=document.getElementById('chat5_msgs');
+                if(!inp||!btn||!msgs)return;var txt=inp.value.trim();if(!txt)return;
+                step5Chat.push({role:'user',content:txt});inp.value='';btn.disabled=true;renderChatMsgs();
+                var ctxStr='完整数据：'+JSON.stringify({ai:currentEval.aiAnalysis,deep:currentEval.deepChecklist,field:currentEval.fieldData,final:currentEval.finalReport});
+                var lid='ld_'+Date.now();msgs.insertAdjacentHTML('beforeend','<div class="chat-msg ai" id="'+lid+'">思考中...</div>');
+                try{var reply=await callDS([{role:'system',content:'选址专家。基于完整数据回答。'},{role:'user',content:ctxStr}].concat(step5Chat.slice(-6).map(function(m){return{role:m.role,content:m.content};})),0.7,1500);var le=document.getElementById(lid);if(le)le.remove();step5Chat.push({role:'assistant',content:reply});saveCurrent();renderChatMsgs();}catch(e){var le2=document.getElementById(lid);if(le2)le2.remove();step5Chat.push({role:'assistant',content:'失败：'+e.message});renderChatMsgs();}
+                btn.disabled=false;inp.focus();
+            }
+            function renderChatMsgs(){var msgs=document.getElementById('chat5_msgs');if(!msgs)return;msgs.innerHTML=step5Chat.map(function(m){return'<div class="chat-msg '+m.role+'">'+esc(m.content).replace(/\n/g,'<br>')+'</div>';}).join('')||'<div style="text-align:center;font-size:9px;padding:10px;">有疑问直接问AI</div>';msgs.scrollTop=msgs.scrollHeight;}
+
+            $m.addEventListener('click',function(e){
+                var st=e.target.closest('.section-toggle');if(st){var sc=document.getElementById(st.getAttribute('data-sid'));if(sc){st.classList.toggle('expanded');sc.classList.toggle('show');}return;}
+                var ch=e.target.closest('.chat-header-bar');if(ch){var cid=ch.getAttribute('data-cid'),b=document.getElementById(cid);if(b){ch.classList.toggle('expanded');b.classList.toggle('show');}return;}
+                var sb=e.target.closest('.chat-send-btn');if(sb&&sb.id==='chat5_btn'){sendChat();return;}
+                var radio=e.target.closest('.checklist-options input[type="radio"]');if(radio){var item=radio.closest('.checklist-item');if(item)item.classList.add('answered');return;}
+            });
+            $m.addEventListener('keydown',function(e){if(e.key==='Enter'){var inp=e.target;if(inp.id==='chat5_inp'){e.preventDefault();sendChat();}}});
+
+            function localEstimate(name){name=(name||'').toLowerCase();if(name.includes('别墅')||name.includes('山庄')||name.includes('豪庭'))return 60;if(name.includes('公寓')||name.includes('soho'))return 450;if(name.includes('大厦')||name.includes('大楼'))return 180;if(name.includes('城')||name.includes('国际')||name.includes('世纪'))return 1800;if(name.includes('花园')||name.includes('苑')||name.includes('庭'))return 400;if(name.includes('村')||name.includes('新村'))return 350;if(name.includes('邸')||name.includes('府')||name.includes('湾'))return 500;if(name.includes('园'))return 600;return 300;}
+            function getTimeFactor(){var h=new Date().getHours(),d=new Date().getDay(),we=(d===0||d===6);if(!we){if(h>=7&&h<=9)return{l:'早高峰',f:1.8};if(h>=11&&h<=13)return{l:'午高峰',f:2.0};if(h>=17&&h<=19)return{l:'晚高峰',f:1.9};if(h>=20&&h<=22)return{l:'晚间',f:1.2};if(h>=0&&h<=6)return{l:'深夜',f:0.1};return{l:'工作时段',f:0.8};}else{if(h>=10&&h<=14)return{l:'周末午间',f:2.2};if(h>=15&&h<=21)return{l:'周末晚间',f:2.5};if(h>=0&&h<=8)return{l:'周末清晨',f:0.3};return{l:'周末白天',f:1.5};}}
+
+            function renderStep1(){
+                updateSteps(1);var hk=!!getRestKey();var addr='',ind='',rad=selectedRadius||1000;if(currentEval){addr=esc(currentEval.address||'');ind=esc(currentEval.industry||'');rad=currentEval.radius||1000;}var tpl=detectTpl(ind);if(tpl&&tpl.r&&!currentEval){rad=tpl.r;selectedRadius=rad;}
+                var h='<div class="card"><div class="card-title" style="font-size:16px;">🎯 输入选址信息</div>';
+                h+='<div class="form-group"><label class="form-label">📍 意向地址 <span class="form-sublabel">（越详细越好）</span></label>';
+                h+='<div class="input-with-btn"><input type="text" class="form-input" id="evalAddress" placeholder="例如：成都市锦江区" value="'+addr+'" style="font-size:14px;"><button class="btn-locate" id="btnLocate">📍 定位</button></div></div>';
+                h+='<div class="form-group"><label class="form-label">🏪 经营行业</label><input type="text" class="form-input" id="evalIndustry" placeholder="例如：奶茶店、火锅店" value="'+ind+'" style="font-size:14px;max-width:60%;">';
+                if(tpl)h+='<div style="display:flex;align-items:center;gap:4px;padding:8px 10px;background:var(--success-light);border-radius:6px;font-size:10px;color:var(--success);margin-top:6px;">✅ 已匹配行业模板 · 推荐半径<b>'+tpl.r+'m</b> · 关键指标：'+(tpl.m||[]).join('、')+'</div>';
+                h+='</div>';
+                h+='<div class="form-group"><label class="form-label">📏 搜索半径 <span class="form-sublabel">（<span class="custom-radius" id="customRadiusLink">点击自定义输入</span>）</span></label>';
+                h+='<div class="radius-selector" id="radiusSelector" style="gap:5px;">';
+                [500,1000,2000,3000,5000].forEach(function(v){h+='<div class="radius-opt'+(rad===v?' selected':'')+'" data-r="'+v+'">'+(v<1000?v+'m':(v/1000)+'km')+'</div>';});
+                h+='</div>';
+                h+='<div class="radius-tip">💡 半径越小数据越精准，建议500m-2km最佳。</div></div>';
+                h+='<div class="form-group"><label class="form-label">🌤️ 天气查询 <span class="form-sublabel">（可选）</span></label>';
+                h+='<div class="input-with-btn"><input type="text" class="form-input" id="weatherCity" placeholder="输入城市名，如：成都" style="max-width:160px;font-size:13px;"><button class="btn btn-sm btn-outline" id="btnWeather">查询天气</button></div><div id="weatherResult"></div></div>';
+                if(!hk){
+                    h+='<div class="form-group"><label class="form-label">🔑 密钥配置</label><div style="font-size:10px;color:var(--text-secondary);cursor:pointer;text-decoration:underline;" id="keyTrigger">点击配置密钥</div></div>';
+                }else{
+                    h+='<div style="font-size:10px;color:var(--success);margin-bottom:8px;">✅ 密钥已配置 <span style="color:var(--primary);font-weight:600;">('+getRestKey().substring(0,8)+'...)</span> <span class="key-link" id="keyTrigger">🔄重新配置</span></div>';
+                }
+                h+='<button class="btn btn-primary btn-block" id="btnStart"'+(hk?'':' disabled')+' style="padding:12px;font-size:14px;">🚀 开始采集数据</button></div>';
+
+                // ========== 作者创作感慨 - 淡雅星光渐变 ==========
+                h+='<div class="author-note">✨ 永远不能心急，永远不要发脾气，生活需要浪漫，浪漫是慢慢的慢，永远不可能有八门夜凯，既是火花诞生的一刻，永远要留住这张生命色彩的底牌！<br><span class="msg-link" onclick="App.openMsgPanel()">💬 留言面板</span></div>';
+
+                render(h);
+
+                document.getElementById('btnLocate').addEventListener('click',function(){if(!navigator.geolocation){toast('浏览器不支持定位');return;}var b=this;b.disabled=true;b.textContent='⏳定位中...';navigator.geolocation.getCurrentPosition(async function(p){try{var a=await amapRegeo(p.coords.longitude,p.coords.latitude);document.getElementById('evalAddress').value=a;toast('✅已定位');}catch(e){document.getElementById('evalAddress').value=p.coords.longitude+','+p.coords.latitude;}b.disabled=false;b.textContent='📍定位';},function(){toast('❌定位失败');b.disabled=false;b.textContent='📍定位';},{enableHighAccuracy:true,timeout:10000});});
+                document.getElementById('btnWeather').addEventListener('click',async function(){var c=document.getElementById('weatherCity').value.trim();if(!c){toast('请输入城市名');return;}var b=this;b.disabled=true;b.textContent='查询中...';try{var w=await amapWeather(c);weatherData=w;var t=w.casts[0];document.getElementById('weatherResult').innerHTML='<div class="weather-card"><div class="temp">'+t.daytemp+'°</div><div><div>'+esc(w.city)+' · '+esc(t.date)+'</div><div>☀️ '+esc(t.dayweather)+' | 🌙 '+esc(t.nightweather)+'</div><div>🌡 '+esc(t.nighttemp)+'° ~ '+esc(t.daytemp)+'° | 💧 '+esc(t.dayhumidity)+'%</div></div></div>';toast('✅天气已查询');}catch(e){document.getElementById('weatherResult').innerHTML='<div style="color:var(--danger);font-size:10px;">❌ '+esc(e.message)+'</div>';}b.disabled=false;b.textContent='查询天气';});
+                document.querySelectorAll('#radiusSelector .radius-opt').forEach(function(el){el.addEventListener('click',function(){document.querySelectorAll('#radiusSelector .radius-opt').forEach(function(a){a.classList.remove('selected');});this.classList.add('selected');selectedRadius=parseInt(this.getAttribute('data-r'));});});
+                document.getElementById('btnStart').addEventListener('click',startCollection);
+                document.getElementById('keyTrigger').addEventListener('click',showKeyModal);
+                var _ps=document.querySelector('#keyTrigger');
+                if(_ps&&_ps.parentElement){
+                    var _pel=_ps.parentElement;
+                    var _pv=getProvider();
+                    _pel.innerHTML=(_pv?'<span style="color:'+(getRestKey()?'var(--success)':'var(--warning)')+';font-size:10px;">'+(getRestKey()?'✅':'⚠️')+' '+(isAmap()?'高德地图':'ibtmap')+(getRestKey()?' ('+getRestKey().substring(0,6)+'...)':' 缺Key')+'</span>':'<span style="color:var(--text-muted);font-size:10px;">⚙️ 未配置地图</span>')+(hasGt()?' <span style="color:var(--primary);font-size:10px;">🔐 GT</span>':'')+' ';
+                    _pel.appendChild(_ps);
+                }
+                document.getElementById('customRadiusLink').addEventListener('click',showCustomRadius);
+            }
+
+            async function startCollection(){
+                var addr=document.getElementById('evalAddress').value.trim(),ind=document.getElementById('evalIndustry').value.trim();
+                if(!addr||!ind){toast('填完信息');return;}if(!getRestKey()){toast('请先配置密钥');return;}
+                currentEval=createEmpty();currentEval.id=genId();currentEval.address=addr;currentEval.industry=ind;currentEval.radius=selectedRadius;currentEval.createdAt=new Date().toISOString();currentEval.weatherData=weatherData;
+                step4Chat=[];step5Chat=[];updateSteps(2);
+                render('<div class="card"><div class="spinner-wrap"><div class="spinner"></div><span id="st">解析地址...</span></div><div id="lg" style="font-size:9px;margin-top:4px;"></div></div>');
+                var $lg=document.getElementById('lg'),$st=document.getElementById('st');function lg(m){$lg.innerHTML+='<div>'+m+'</div>';$st.textContent=m;}
+                try{
+                    // ===== 如果输入是坐标格式，直接解析，不走 geocode =====
+                    var coordMatch = addr.match(/^(-?\d+\.?\d*)\s*[,，\s]+\s*(-?\d+\.?\d*)$/);
+                    var coords;
+                    if (coordMatch) {
+                        coords = { lng: parseFloat(coordMatch[1]), lat: parseFloat(coordMatch[2]), fmt: addr };
+                        lg('📍直接使用坐标：'+coords.lng.toFixed(4)+', '+coords.lat.toFixed(4));
+                    } else {
+                        lg('📍解析地址...');coords=await amapGeocode(addr);
+                    }
+                    currentEval.coordinates=[coords.lng,coords.lat];currentEval.rawData.fmtAddr=coords.fmt;currentEval.cityLevel=getCityLevel(coords.fmt);lg(' ✅'+coords.fmt+' | '+currentEval.cityLevel.level+'（系数'+currentEval.cityLevel.factor+'）');
+                    var loc=coords.lng+','+coords.lat,rad=selectedRadius;
+                    var tasks=[{k:'住宅小区',l:'🏠小区',kw:'住宅小区',types:'120300'},{k:'写字楼',l:'🏢写字楼',kw:'写字楼',types:'120200'},{k:'公司企业',l:'🏭公司',kw:'公司|企业',types:'170000'},{k:'学校',l:'🏫学校',kw:'',types:''},{k:'医院',l:'🏥医院',kw:'医院',types:'090100|090200'},{k:'商场',l:'🛍️商场',kw:'购物中心',types:'060100'},{k:'地铁站',l:'🚇地铁',kw:'地铁站',types:'150500'},{k:'公交站',l:'🚌公交',kw:'公交站',types:'150700'},{k:'停车场',l:'🅿️停车',kw:'停车场',types:'150900'},{k:'餐饮',l:'🍽️餐饮',kw:'餐饮',types:'050000'},{k:'竞品',l:'⚔️竞品',kw:ind,types:''}];
+                    for(var t=0;t<tasks.length;t++){lg(tasks[t].l+'...');try{if(tasks[t].k==='学校'){var r=await searchSchools(loc,rad);currentEval.rawData[tasks[t].k]=r;lg(' →'+r.length+'个');}else{var r=await amapPOISearch(loc,tasks[t].kw,rad,tasks[t].types);currentEval.rawData[tasks[t].k]=r;lg(' →'+r.length+'个');}}catch(e){currentEval.rawData[tasks[t].k]=[];}await sleep(200);}
+                    currentEval.status='data_collected';saveCurrent();updateSteps(3);
+                    renderStep3Loading();
+                }catch(e){lg('❌'+e.message);}
+            }
+
+            function renderStep3Loading(){
+                render('<div class="card" style="text-align:center;padding:24px 16px;">'+
+                '<div class="spinner-wrap" style="justify-content:center;"><div class="spinner"></div></div>'+
+                '<div id="loadTimer" style="font-size:14px;font-weight:700;color:var(--primary);margin:12px 0;transition:color 0.5s;">⏱️ 已运行 0 秒</div>'+
+                '<div id="loadMsg" style="font-size:11px;color:var(--text-secondary);line-height:1.8;">🔍 AI初步分析启动...</div>'+
+                '<div style="margin-top:14px;display:flex;justify-content:center;gap:12px;font-size:10px;">'+
+                '<span id="loadStep1" style="color:var(--text-muted);">① 范围判断+四层分析</span>'+
+                '<span style="color:var(--border);">▸</span>'+
+                '<span id="loadStep3" style="color:var(--text-muted);">② 生成评分</span>'+
+                '</div><div style="margin-top:10px;font-size:9px;color:var(--text-muted);">⏳ 预计20~60秒，请勿离开页面</div></div>');
+                startLoadTimer();
+                runStep3AI();
+            }
+
+                        async function runStep3AI(){
+                var d=currentEval.rawData;function c(k){return(d[k]||[]).length;}
+                var communities=d['住宅小区']||[],competitors=d['竞品']||[],schools=d['学校']||[],offices=d['写字楼']||[];
+                var restaurants=d['餐饮']||[],malls=d['商场']||[],subways=d['地铁站']||[];
+                var localHouseholds=communities.reduce(function(s,c){return s+localEstimate(c.name);},0);
+                var cityFactor=currentEval.cityLevel?currentEval.cityLevel.factor:1.0;
+                var population=localHouseholds*2.8*cityFactor;
+                var rad=currentEval.radius;
+                var area_km2=Math.PI*(rad/1000)*(rad/1000);
+                var compDensity=area_km2>0?competitors.length/area_km2:0;
+                var commActivity=(restaurants.length+malls.length+offices.length)/Math.max(1,communities.length);
+                var satRatio=competitors.length/Math.max(1,Math.round(population/1000));
+                var subwayDist=99999;for(var si=0;si<subways.length;si++){var sd=parseInt(subways[si].distance||99999);if(sd<subwayDist)subwayDist=sd;}
+                var transitScore=subwayDist<=200?100:subwayDist<=500?80:subwayDist<=1000?60:subwayDist<=2000?40:20;
+                var richData={基本:{地址:currentEval.address,行业:currentEval.industry,半径:currentEval.radius+'m',城市等级:currentEval.cityLevel?currentEval.cityLevel.level:'未知',城市系数:cityFactor},POI统计:{小区:c('住宅小区'),写字楼:c('写字楼'),公司:c('公司企业'),学校:schools.length,医院:c('医院'),商场:c('商场'),餐饮:c('餐饮'),地铁:c('地铁站'),公交:c('公交站'),停车场:c('停车场'),竞品:competitors.length},空间密度:{搜索面积:area_km2.toFixed(2)+'km²',竞品密度:compDensity.toFixed(2)+'家/km²',商业活性:commActivity.toFixed(2),竞争饱和度:satRatio.toFixed(2)+'家/千人',最近地铁:subwayDist>=99999?'无地铁':subwayDist+'m',通勤评分:transitScore+'/100'},人口:{估算人口:Math.round(population)+'人',估算户数:localHouseholds+'户',城市系数:cityFactor}};
+                if(currentEval.weatherData)richData.天气=currentEval.weatherData;
+                try{
+                    var sp='你是一位顶尖商业选址分析师。请对以下数据进行四层逐步推理分析，给出详细的文字判断。\n\n';
+                    sp+='选址数据：'+JSON.stringify(richData)+'\n\n';
+                    sp+='【第零层：搜索半径合理性检验】\n核心规则：不同行业的有效辐射范围完全不同，大范围搜索对小型店铺没有意义。请先判断当前搜索半径是否合理：\n';
+                    sp+='• 贴身社区型（便利店、药店、烘焙店、包子店、早餐店）：有效范围500m，超出500m的数据参考价值大幅下降\n';
+                    sp+='• 步行可达型（奶茶店、咖啡店、快餐店、水果店）：有效范围800m，>1.5km意义不大\n';
+                    sp+='• 短途目的地型（火锅店、正餐、烧烤店）：有效范围1-2km\n';
+                    sp+='• 区域目的地型（健身房、大型餐饮、KTV）：有效范围2-3km\n';
+                    sp+='当前行业为"'+currentEval.industry+'"，搜索半径'+currentEval.radius+'m。请明确判断：该半径是否合理？如果半径过大，后续四层分析必须重点依赖合理范围内的数据，超范围数据仅作参考。\n\n';
+                    sp+='【第一层：整体客群评估（基于合理半径）】\n- 人口基数够大吗？消费力如何？（小区名含别墅/花园/村可判断消费力）\n- 城市等级加成效应\n\n';
+                    sp+='【第二层：有效客群匹配】\n- 针对"'+currentEval.industry+'"这个行业，谁是核心客群？\n- 写字楼/学校/住宅配比是否合理？\n\n';
+                    sp+='【第三层：地形垄断性】\n- 交通可达性（地铁'+transitScore+'分，最近'+subwayDist+'m）\n- 商业浓度（餐饮'+restaurants.length+'家+商场'+malls.length+'家）\n\n';
+                    sp+='【第四层：竞争格局】\n- 竞品密度：'+compDensity.toFixed(2)+'家/km²\n- 竞争饱和度：每千人'+satRatio.toFixed(2)+'家\n\n';
+                    sp+='最后列出3-5个具体风险和3-5个具体机会。不要生成实地清单。';
+                    clearLoadSteps();setLoadStep(1,'① 范围判断+四层分析 ⏳');setLoadMsg('🔍 正在检验搜索半径合理性并进行四层链式推理...');
+                    var step1=await callDS([{role:'system',content:'你是顶尖商业选址分析师。逐层推理，用数据和事实说话。'},{role:'user',content:sp}],0.7,4000);
+                    setLoadStep(1,'① 分析完成 ✅');setLoadStep(3,'② 生成评分 ⏳');setLoadMsg('✅ 四层链式推理已完成，正在生成结构化评分报告...');
+                    var sp2='基于上述分析，给出结构化评分JSON。\n\n分析全文：\n'+step1+'\n\n评分标准（使用全范围0-100，好给高分差给低分，不要集中在中间）：\n- layer1整体客群：合理半径内的人口规模×消费力\n- layer2有效客群：合理半径内的目标人群占比\n- layer3地形垄断：合理半径内的交通+商业浓度\n- layer4竞争态势：合理半径内的竞品密度，竞品少/差异化大则高分\n\n重要提醒：如果原始搜索半径超出行业合理范围，评分必须基于合理半径内的数据，不能因大范围数据稀释而虚高或虚低。\n\n输出JSON：{"populationEstimate":"一句话人口描述","crowdProfile":"一句话客群画像","layer1_score":N,"layer1_analysis":"关键结论","layer2_score":N,"layer2_analysis":"...","layer3_score":N,"layer3_analysis":"...","layer4_score":N,"layer4_analysis":"...","overall_score":N,"overall_summary":"一句话总结","weatherNote":"天气影响分析","risks":["风险1","风险2"],"opportunities":["机会1","机会2"]}';
+                    var step2=await callDS([{role:'system',content:'只输出JSON。用全范围评分。'},{role:'user',content:sp2}],0.3,3000);
+                    setLoadStep(3,'② 评分完成 ✅');setLoadMsg('✅ 评分报告生成完毕，正在整理展示...');
+                    var m=step2.match(/\{[\s\S]*\}/);
+                    if(m){var a=JSON.parse(m[0]);a._population=population;a._step1Analysis=step1;currentEval.aiAnalysis=a;}else{stopLoadTimer();render('<div class="card" style="text-align:center;"><p style="color:var(--danger);">❌ AI返回数据异常，无法解析评分</p><p style="font-size:10px;">可能原因：AI未按JSON格式返回，或网络波动导致数据截断</p><button class="btn btn-primary" id="btnRetry3">🔄 重新生成</button></div>');document.getElementById('btnRetry3').addEventListener('click',function(){renderStep3Loading();});return;}
+                }catch(e){stopLoadTimer();render('<div class="card" style="text-align:center;"><p style="color:var(--danger);">❌ AI分析失败：'+esc(e.message)+'</p><p style="font-size:10px;">可能原因：网络不稳定、API配额用尽或服务器繁忙</p><button class="btn btn-primary" id="btnRetry3">🔄 重新生成</button></div>');document.getElementById('btnRetry3').addEventListener('click',function(){renderStep3Loading();});return;}
+                stopLoadTimer();currentEval.status='ai_analyzed';saveCurrent();renderStep3Result();
+            }
+            function renderStep3Result(){
+                updateSteps(3);var a=currentEval.aiAnalysis||{},d=currentEval.rawData;var loc=currentEval.coordinates?currentEval.coordinates.join(','):'';
+                var cats=[{k:'竞品',t:'⚔️竞品',def:true},{k:'住宅小区',t:'🏠小区',def:true},{k:'写字楼',t:'🏢写字楼',def:true},{k:'学校',t:'🏫学校',def:false},{k:'餐饮',t:'🍽️餐饮',def:false},{k:'商场',t:'🛍️商场',def:false},{k:'地铁站',t:'🚇地铁',def:false},{k:'公司企业',t:'🏭公司',def:false},{k:'停车场',t:'🅿️停车',def:false},{k:'医院',t:'🏥医院',def:false}];
+                var tables='';for(var c=0;c<cats.length;c++){var cd=d[cats[c].k]||[];if(cd.length>0)tables+=renderCollapsible(cats[c].t+'('+cd.length+')',renderPOITable(cd,30),cats[c].def);}
+                var allActivePOIs=[];
+                ['餐饮','商场','写字楼','公司企业'].forEach(function(k){var items=d[k]||[];items.forEach(function(p){p._category=k;allActivePOIs.push(p);});});
+                var coreCount=allActivePOIs.filter(function(p){return parseInt(p.distance||9999)<=50;}).length;
+                var midCount=allActivePOIs.filter(function(p){var dist=parseInt(p.distance||9999);return dist>50&&dist<=800;}).length;
+                var farCount=allActivePOIs.filter(function(p){var dist=parseInt(p.distance||9999);return dist>800;}).length;
+                var coreDensityScore=Math.min(100,coreCount*3);
+                var midDensityScore=Math.min(100,midCount*1.5);
+                var communities=d['住宅小区']||[];
+                var cityFactor=currentEval.cityLevel?currentEval.cityLevel.factor:1.0;
+                var pop=(communities.reduce(function(s,c){return s+localEstimate(c.name);},0)*2.8*cityFactor);
+                var popScore=Math.min(100,Math.round(pop/100));
+                var tm=getTimeFactor();
+                var timeScore=Math.round(tm.f*50);
+                var finalScore=Math.round(coreDensityScore*0.5+midDensityScore*0.2+timeScore*0.15+popScore*0.15);
+                finalScore=Math.min(100,Math.max(0,finalScore));
+                var level=finalScore>=80?'🔥高人流':finalScore>=60?'👍中等':finalScore>=40?'👌一般':'❄️低人流';
+                var barColor=finalScore>=80?'#059669':finalScore>=50?'#d97706':'#dc2626';
+
+                var h='<div class="summary-card"><div class="summary-label">📊初步评估（'+currentEval.radius+'m）</div><div class="summary-score">'+(a.overall_score||'--')+'</div><div style="font-size:10px;">'+esc(a.overall_summary||'')+'</div><div style="text-align:center;margin-top:4px;">'+scoreBar(a.overall_score,100,10,'rgba(255,255,255,0.2)')+'<div style="font-size:9px;margin-top:3px;font-weight:600;color:'+scoreColor(a.overall_score)+';">'+scoreLabel(a.overall_score)+' — '+esc(a.overall_summary||'')+'</div></div><div class="summary-grid">'+adjScoreItem('整体客群',a.layer1_score)+adjScoreItem('有效客群',a.layer2_score)+adjScoreItem('地形垄断',a.layer3_score)+adjScoreItem('竞争对手',a.layer4_score)+'</div></div></div>';
+                if(a.weatherNote)h+='<div class="card"><div class="card-title">🌤️天气分析</div><div class="ai-block success">'+esc(a.weatherNote)+'</div></div>';
+                h+='<div class="card"><div class="card-title">👥区域人流评估（基于50m核心区）</div>';
+                h+='<div style="font-size:9px;color:var(--text-muted);margin-bottom:4px;">城市等级：'+(currentEval.cityLevel?currentEval.cityLevel.level:'未知')+'（人口系数×'+cityFactor+'）| 当前时段：'+tm.l+'（×'+tm.f+'）</div>';
+                h+='<div class="flow-meter"><span style="font-weight:700;">综合</span><div class="flow-bar-outer"><div class="flow-bar-inner" style="width:'+finalScore+'%;background:'+barColor+';"></div></div><span class="flow-label">'+finalScore+'</span></div>';
+                h+='<div class="density-grid"><div class="density-item"><div class="val">'+coreCount+'</div><div class="lbl">📍核心区<50m('+coreDensityScore+'分)</div></div><div class="density-item"><div class="val">'+midCount+'</div><div class="lbl">📍中间区50-800m('+midDensityScore+'分)</div></div><div class="density-item"><div class="val">'+(pop/10000).toFixed(1)+'万</div><div class="lbl">👥估算人口('+popScore+'分)</div></div><div class="density-item"><div class="val">'+tm.l+'</div><div class="lbl">🕐时段系数('+timeScore+'分)</div></div></div><div style="text-align:center;font-size:15px;font-weight:700;color:'+barColor+';">'+level+'</div>';
+                                var _s1=a._step1Analysis||'';var cotToggle=_s1?'<div class="card"><div class="card-title">🔍 完整链式推理（AI分析全文）</div><div class="section-toggle expanded" data-sid="cot1"><span class="arrow">▶</span> 链式推理过程（点击可收起）</div><div class="section-content show" id="cot1"><div class="ai-block" style="font-size:10px;line-height:1.6;white-space:normal;">'+renderMD(_s1)+'</div></div></div>':'';
+                h+=cotToggle;
+                h+='<div class="card"><div class="card-title"><span class="layer-badge badge-layer1">一</span>整体客户</div><div class="ai-block">'+esc(a.layer1_analysis||'')+'</div><div style="font-size:9px;">👥'+esc(a.crowdProfile||'')+' 📊'+esc(a.populationEstimate||'')+'</div></div>';
+                h+='<div class="card"><div class="card-title"><span class="layer-badge badge-layer2">二</span>有效客户</div><div class="ai-block">'+esc(a.layer2_analysis||'')+'</div></div>';
+                h+='<div class="card"><div class="card-title"><span class="layer-badge badge-layer3">三</span>地形垄断</div><div class="ai-block">'+esc(a.layer3_analysis||'')+'</div></div>';
+                h+='<div class="card"><div class="card-title"><span class="layer-badge badge-layer4">四</span>竞争对手</div><div class="ai-block">'+esc(a.layer4_analysis||'')+'</div></div>';
+                h+='<div class="card"><div class="card-title">⚠️风险&💡机会</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;"><div style="background:var(--danger-light);padding:8px;border-radius:6px;"><strong>⚠️风险</strong>'+(a.risks||[]).map(function(r){return'<div style="font-size:9px;">•'+esc(r)+'</div>';}).join('')+'</div><div style="background:var(--success-light);padding:8px;border-radius:6px;"><strong>💡机会</strong>'+(a.opportunities||[]).map(function(o){return'<div style="font-size:9px;">•'+esc(o)+'</div>';}).join('')+'</div></div></div>';
+                h+='<div class="card"><div class="card-title">📊POI原始数据</div>'+tables+'</div>';
+                if(loc)h+='<div class="card"><div class="card-title">🗺️POI分布图</div><div id="mapContainer"></div></div>';
+                h+='<div class="checklist-entry-card"><div class="title">📋 生成出报告</div><div class="sub">点击下方按钮，AI将基于初步报告和高德原始数据，生成深度实地考察报告</div><button class="btn-checklist" id="btnGenReport">📋 生成出报告 →</button></div>';
+                h+='<div style="display:flex;gap:6px;margin-bottom:40px;"><button class="btn btn-outline btn-sm" id="btnSave4">💾暂存</button><button class="btn btn-ghost btn-sm" id="btnNew4">🆕新建</button></div>';
+                render(h);
+                document.getElementById('btnGenReport').addEventListener('click',function(){currentEval.status='ai_analyzed';saveCurrent();renderDeepChecklistLoading();});
+                document.getElementById('btnSave4').addEventListener('click',function(){saveCurrent();toast('已保存');});
+                document.getElementById('btnNew4').addEventListener('click',startNew);
+                saveToCloud();
+                if(loc)setTimeout(function(){try{loadMap(loc,d);}catch(e){}},500);
+            }
+
+            function renderDeepChecklistLoading(){
+                render('<div class="card" style="text-align:center;padding:24px 16px;">'+
+                '<div class="spinner-wrap" style="justify-content:center;"><div class="spinner"></div></div>'+
+                '<div id="loadTimer" style="font-size:14px;font-weight:700;color:var(--primary);margin:12px 0;transition:color 0.5s;">⏱️ 已运行 0 秒</div>'+
+                '<div id="loadMsg" style="font-size:11px;color:var(--text-secondary);line-height:1.8;">📋 AI正在深度分析，生成实地洞察清单...</div>'+
+                '<div style="margin-top:14px;display:flex;justify-content:center;gap:12px;font-size:10px;">'+
+                '<span id="loadStep1" style="color:var(--text-muted);">① 数据整理</span>'+
+                '<span style="color:var(--border);">▸</span>'+
+                '<span id="loadStep2" style="color:var(--text-muted);">② 疑点挖掘</span>'+
+                '<span style="color:var(--border);">▸</span>'+
+                '<span id="loadStep3" style="color:var(--text-muted);">③ 题目生成</span>'+
+                '</div><div style="margin-top:10px;font-size:9px;color:var(--text-muted);">⏳ 预计30~120秒，请勿离开页面</div></div>');
+                startLoadTimer();
+                generateDeepChecklist();
+            }
+
+            async function generateDeepChecklist(){
+                var d=currentEval.rawData;function c(k){return(d[k]||[]).length;}
+                var communities=d['住宅小区']||[],competitors=d['竞品']||[],subways=d['地铁站']||[];
+                var localHouseholds=communities.reduce(function(s,c){return s+localEstimate(c.name);},0);
+                var cityFactor=currentEval.cityLevel?currentEval.cityLevel.factor:1.0;
+                var population=localHouseholds*2.8*cityFactor;
+                var rad=currentEval.radius;
+                var area_km2=Math.PI*(rad/1000)*(rad/1000);
+                var compDensity=area_km2>0?competitors.length/area_km2:0;
+                var subwayDist=99999;for(var si=0;si<subways.length;si++){var sd=parseInt(subways[si].distance||99999);if(sd<subwayDist)subwayDist=sd;}
+                var radiusContext=rad<=500?'步行可达核心范围':rad<=1000?'骑行短途范围':rad<=3000?'车行范围':'大区域范围';
+                var sum={地址:currentEval.address,行业:currentEval.industry,半径:currentEval.radius+'m',搜索范围说明:radiusContext,城市等级:currentEval.cityLevel?currentEval.cityLevel.level:'未知',城市系数:cityFactor,统计:{小区:c('住宅小区'),写字楼:c('写字楼'),公司:c('公司企业'),学校:c('学校'),医院:c('医院'),商场:c('商场'),地铁:c('地铁站'),公交:c('公交站'),停车场:c('停车场'),餐饮:c('餐饮'),竞品:competitors.length,竞品密度:compDensity.toFixed(2)+'家/km²'},人口估算:{估算人口:population.toFixed(0)+'人',最近地铁:subwayDist>=99999?'无地铁':subwayDist+'m'},初步分析:currentEval.aiAnalysis};
+                if(currentEval.weatherData)sum.天气=currentEval.weatherData;
+                var checklistPrompt='你是资深商业选址顾问。高德POI数据可能存在偏差，请基于数据的疑点来设计考察题，帮助用户实地验证数据真伪。\n\n数据：'+JSON.stringify(sum)+'\n\n请生成20-25个实地考察选择题。要求：\n1. 重点设计"数据真实性检验"类题目\n 例如：实地考察入住率如何？（选项：偏大，偏小，差不多，不清楚）\n2. 深度挖掘隐含真相：空置率、竞品实际经营状况、人流走向\n3. 加入风险识别题（数据中未暴露的隐性风险）\n4. 加入机会识别题（数据中未体现的潜在机会）\n5. 每个选择题提供4个有信息量的选项，拒绝"是/否"等简单二元选项\n6. 结合初步报告结果查找实地可考察进行纠正的问题\n7. 如果原始搜索范围超出本行业的合理辐射半径，超范围数据不应丢弃。将其视为「通过性人群」和「跨区域引流」线索，设计考察题验证：此处是否处于交通要道/路口，能否截留远处人流？超范围竞品是否构成实际跨区域威胁？停车场/地铁站是否起到远程客流导入作用？\n8. 输出JSON数组：[{"id":"q1","category":"深层洞察/人口真相/竞品实况/风险识别/机会识别/环境信号/数据核验/行业定制","question":"具体问题","options":["A.xxx","B.xxx","C.xxx","D.xxx"],"aiNote":"AI信号分析，指出如果用户选某个选项可能意味着什么"}]';
+                try{clearLoadSteps();setLoadStep(1,'① 数据整理 ✓');setLoadStep(2,'② 疑点挖掘 ⏳');setLoadMsg('🔬 正在分析数据疑点，识别潜在风险与机会...');
+                var r2=await callDS([{role:'system',content:'只输出JSON数组。题目要有深度，选项要有信息量。'},{role:'user',content:checklistPrompt}],0.5,8000);
+                setLoadStep(2,'② 疑点挖掘 ✓');setLoadStep(3,'③ 题目生成 ✅');setLoadMsg('📝 考察题目生成完毕，正在整理展示...');
+                var m2=r2.match(/\[[\s\S]*\]/);if(m2){var deepList=JSON.parse(m2[0]);var tpl=detectTpl(currentEval.industry);if(tpl&&tpl.ex){tpl.ex.forEach(function(e){deepList.push({id:e.id,category:'行业定制',question:e.t,options:e.o,aiNote:'行业模板推荐考察项'});});}var added=0;for(var ci=0;ci<deepList.length;ci++){if(deepList[ci].id&&deepList[ci].id.indexOf('x')===0)continue;deepList[ci].id='q'+(++added);}currentEval.deepChecklist=deepList;}}catch(e){stopLoadTimer();render('<div class="card" style="text-align:center;"><p style="color:var(--danger);">❌ AI深度清单生成失败：'+esc(e.message)+'</p><p style="font-size:10px;">可能原因：网络不稳定或API繁忙</p><button class="btn btn-primary" id="btnRetry4">🔄 重新生成清单</button></div>');document.getElementById('btnRetry4').addEventListener('click',function(){renderDeepChecklistLoading();});return;}
+                stopLoadTimer();currentEval.status='deep_checklist';saveCurrent();renderDeepChecklist();
+            }
+            function renderDeepChecklist(){
+                updateSteps(4);var cl=currentEval.deepChecklist||[],fd=currentEval.fieldData||{};
+                var categories=['深层洞察','人口真相','竞品实况','风险识别','机会识别','环境信号','行业定制'];
+                var h='<div class="card"><div class="card-title">📋 AI深度洞察清单</div>';
+                h+='<div style="font-size:10px;color:var(--text-muted);margin-bottom:10px;">AI基于初步报告和高德原始数据单独生成'+(cl.length)+'道选择题</div>';
+                categories.forEach(function(cat){
+                    var items=cl.filter(function(q){return q.category===cat;});
+                    if(items.length===0)return;
+                    h+='<div style="margin-bottom:12px;"><div style="font-weight:700;font-size:12px;margin-bottom:5px;color:var(--primary);">━━━ '+esc(cat)+'（'+items.length+'题）━━━</div>';
+                    items.forEach(function(q,idx){
+                        var sel=fd[q.id]||'',done=sel!=='';
+                        h+='<div class="checklist-item'+(done?' answered':'')+'"><div class="checklist-q">'+(idx+1)+'. '+esc(q.question)+'</div>';
+                        if(q.aiNote)h+='<div class="checklist-note">💡 AI分析: '+esc(q.aiNote)+'</div>';
+                        h+='<div class="checklist-options">';
+                        (q.options||[]).forEach(function(opt){h+='<label><input type="radio" name="'+q.id+'" value="'+esc(opt)+'"'+(sel===opt?' checked':'')+'> '+esc(opt)+'</label>';});
+                        h+='</div></div>';
+                    });h+='</div>';
+                });
+                h+='<div style="display:flex;gap:6px;margin-bottom:40px;"><button class="btn btn-primary" id="btnSubmitCL" style="flex:1;">✅ 提交→AI深度挖掘</button><button class="btn btn-outline btn-sm" id="btnSaveCL">💾暂存</button><button class="btn btn-outline btn-sm" id="btnBackCL">🔙返回报告</button></div></div>';
+                render(h);
+                document.getElementById('btnSubmitCL').addEventListener('click',function(){var radios=document.querySelectorAll('.checklist-options input[type="radio"]:checked');var data={};radios.forEach(function(r){data[r.name]=r.value;});currentEval.fieldData=data;saveCurrent();renderStep5();});
+                document.getElementById('btnSaveCL').addEventListener('click',function(){var radios=document.querySelectorAll('.checklist-options input[type="radio"]:checked');var data={};radios.forEach(function(r){data[r.name]=r.value;});currentEval.fieldData=data;saveCurrent();toast('已保存');});
+                document.getElementById('btnBackCL').addEventListener('click',function(){updateSteps(3);renderStep3Result();});
+            }
+
+            async function loadMap(loc,d){
+                _lastLoc=loc;
+                var k=getRestKey();if(!k)return;
+                try{
+                    var ct=document.getElementById('mapContainer');
+                    if(!ct){return;}
+                    for(var retry=0;retry<30;retry++){
+                        if(ct.offsetWidth>0&&ct.offsetHeight>0)break;
+                        await new Promise(function(r){setTimeout(r,100);});
+                    }
+                    if(!window.AMap){var script=document.createElement('script');var jsurl=jsapiUrl();script.src=jsurl;script.crossOrigin='anonymous';document.head.appendChild(script);await new Promise(function(r,reject){script.onload=r;script.onerror=reject;setTimeout(function(){reject(new Error('超时'));},12000);});}
+                    if(mapObj){mapObj.destroy();mapObj=null;}
+                    var l=loc.split(',');mapObj=new AMap.Map('mapContainer',{center:[parseFloat(l[0]),parseFloat(l[1])],zoom:17,touchZoom:true,dragEnable:true,resizeEnable:true});
+                    mapObj.add(new AMap.Marker({position:[parseFloat(l[0]),parseFloat(l[1])],icon:new AMap.Icon({size:new AMap.Size(36,36),image:'https://webapi.amap.com/theme/v1.3/markers/n/mark_r.png',imageSize:new AMap.Size(36,36)}),zIndex:300,label:{content:'📍选址',offset:new AMap.Pixel(0,-28)}}));
+                    var allPois=[],types=[{k:'竞品',c:'#FF4444',label:'竞品'},{k:'住宅小区',c:'#44CC44',label:'小区'},{k:'写字楼',c:'#4488FF',label:'写字楼'},{k:'学校',c:'#FF8800',label:'学校'},{k:'地铁站',c:'#FF44FF',label:'地铁'},{k:'公司企业',c:'#AA66FF',label:'公司'}];
+                    types.forEach(function(tp){var items=d[tp.k]||[];items.slice(0,25).forEach(function(p){var pl=p.location?p.location.split(','):null;if(pl)allPois.push({lng:parseFloat(pl[0]),lat:parseFloat(pl[1]),name:p.name,color:tp.c,label:tp.label,distance:parseInt(p.distance)||9999});});});
+                    var maxM=Math.min(allPois.length,60),count=0;
+                    for(var j=0;j<maxM;j++){var p=allPois[j],sz=p.distance<=300?16:(p.distance<=700?13:10);var mkUrl=null;
+                        try{
+                            var canvas=document.createElement('canvas');canvas.width=sz;canvas.height=sz;
+                            var ctx=canvas.getContext('2d');ctx.beginPath();ctx.arc(sz/2,sz/2,sz/2-1,0,2*Math.PI);
+                            ctx.fillStyle=p.color;ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();
+                            mkUrl=canvas.toDataURL('image/png',1.0);
+                        }catch(ce){}
+                        var mkIcon=mkUrl?new AMap.Icon({size:new AMap.Size(sz,sz),image:mkUrl,imageSize:new AMap.Size(sz,sz)}):
+                            new AMap.Icon({size:new AMap.Size(sz,sz),image:'data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="'+sz+'" height="'+sz+'"><circle cx="'+(sz/2)+'" cy="'+(sz/2)+'" r="'+(sz/2-1)+'" fill="'+p.color.replace('#','%23')+'" stroke="white" stroke-width="2"/></svg>'),imageSize:new AMap.Size(sz,sz)});
+                        try{var mk=new AMap.Marker({position:[p.lng,p.lat],title:p.label+':'+p.name+'('+p.distance+'m)',icon:mkIcon,offset:new AMap.Pixel(-sz/2,-sz/2),zIndex:100});mk.setMap(mapObj);count++;}catch(e){}}
+                    var legend='';var ltypes=[{k:'竞品',c:'#FF4444',label:'竞品'},{k:'住宅小区',c:'#44CC44',label:'小区'},{k:'写字楼',c:'#4488FF',label:'写字楼'},{k:'学校',c:'#FF8800',label:'学校'},{k:'地铁站',c:'#FF44FF',label:'地铁'},{k:'公司企业',c:'#AA66FF',label:'公司'}];
+                    ltypes.forEach(function(tp){var cnt=(d[tp.k]||[]).length;if(cnt>0)legend+='<span><span class="ldot" style="background:'+tp.c+';"></span>'+tp.label+'('+cnt+')</span>';});
+                    var overlay=document.createElement('div');overlay.className='map-legend-overlay';overlay.innerHTML=legend+'<span style="font-size:8px;opacity:0.7;">共'+count+'个</span>';document.getElementById('mapContainer').appendChild(overlay);
+                }catch(e){console.log('地图失败:',e.message);}
+            }
+            function reloadMapProvider(){
+                if(!mapObj||!_lastLoc)return;
+                try{mapObj.destroy();}catch(e){}
+                mapObj=null;
+                var loc=_lastLoc,ct=document.getElementById('mapContainer');
+                if(!ct)return;
+                delete window.AMap;
+                var script=document.createElement('script');
+                script.src=jsapiUrl();script.crossOrigin='anonymous';
+                script.onload=function(){
+                    var l=loc.split(',');
+                    mapObj=new AMap.Map('mapContainer',{center:[parseFloat(l[0]),parseFloat(l[1])],zoom:17,touchZoom:true,dragEnable:true,resizeEnable:true});
+                };
+                script.onerror=function(){console.log('地图切换加载失败');};
+                document.head.appendChild(script);
+            }
+
+            function addToCompare(id){var evals=getLocalEvals(),f=null;for(var i=0;i<evals.length;i++){if(evals[i].id===id){f=evals[i];break;}}if(!f){toast('未找到');return;}if(compareList.some(function(e){return e.id===id;})){toast('已在列表');return;}compareList.push(f);if(compareList.length>3)compareList.shift();toast('已加入('+compareList.length+'/3)');renderCompare();}
+            function renderCompare(){var ex=document.getElementById('comparePanel');if(ex)ex.remove();if(compareList.length===0)return;var h='<div class="card" id="comparePanel"><div class="card-title">📊对比('+compareList.length+'/3)<button class="btn btn-ghost btn-xs" id="btnClearCp">清空</button></div><table class="mini-table"><thead><tr><th>地址</th><th>行业</th><th>总评</th><th>客群</th><th>竞品</th></tr></thead><tbody>';compareList.forEach(function(e){h+='<tr><td>'+esc((e.address||'').slice(0,10))+'</td><td>'+esc(e.industry||'')+'</td><td>'+(e.finalReport?e.finalReport.finalScore:(e.aiAnalysis?e.aiAnalysis.overall_score:'--'))+'</td><td>'+(e.aiAnalysis?e.aiAnalysis.layer1_score:'--')+'</td><td>'+(e.aiAnalysis?e.aiAnalysis.layer4_score:'--')+'</td></tr>';});h+='</tbody></table></div>';$m.insertAdjacentHTML('afterbegin',h);document.getElementById('btnClearCp').addEventListener('click',function(){compareList=[];var el=document.getElementById('comparePanel');if(el)el.remove();});}
+
+            async function renderStep5(){
+                updateSteps(5);var fd=currentEval.fieldData||{},cl=currentEval.deepChecklist||[];
+                if(Object.keys(fd).length===0){toast('请先完成清单');renderDeepChecklist();return;}
+                render('<div class="card" style="text-align:center;padding:24px 16px;">'+
+                '<div class="spinner-wrap" style="justify-content:center;"><div class="spinner"></div></div>'+
+                '<div id="loadTimer" style="font-size:14px;font-weight:700;color:var(--primary);margin:12px 0;transition:color 0.5s;">⏱️ 已运行 0 秒</div>'+
+                '<div id="loadMsg" style="font-size:11px;color:var(--text-secondary);line-height:1.8;">📊 AI正在挖掘实地数据，校验假设真伪...</div>'+
+                '<div style="margin-top:14px;display:flex;justify-content:center;gap:12px;font-size:10px;">'+
+                '<span id="loadStep1" style="color:var(--text-muted);">① 校验假设</span>'+
+                '<span style="color:var(--border);">▸</span>'+
+                '<span id="loadStep2" style="color:var(--text-muted);">② 重新评分</span>'+
+                '<span style="color:var(--border);">▸</span>'+
+                '<span id="loadStep3" style="color:var(--text-muted);">③ 生成结论</span>'+
+                '</div><div style="margin-top:10px;font-size:9px;color:var(--text-muted);">⏳ 预计30~90秒，请勿离开页面</div></div>');
+                startLoadTimer();
+                var userAnswers=cl.map(function(q){return{题号:q.id,问题:q.question,用户选择:fd[q.id]||'未答',AI疑点:q.aiNote||''};});
+                var p='根据用户实地考察回答做深度数据挖掘。\n初始数据：'+JSON.stringify(currentEval.aiAnalysis)+'\n用户实地考察答案：'+JSON.stringify(userAnswers)+'\n\n要求：\n1.判断哪些数据信号得到了实地验证、哪些被推翻\n2.重新评估四层分析（每层0-100分+调整理由）\n3.给出最终评分和判定\n4.列出后续待办\n\n输出JSON：{"finalScore":70,"verdict":"可考虑","verifiedInsights":["实地验证的洞察"],"overturnedAssumptions":["被推翻的假设"],"adjustedScores":{"layer1":75,"layer2":60,"layer3":70,"layer4":55},"adjustReasons":[],"keyFindings":[],"actionItems":[],"finalSummary":""}';
+                clearLoadSteps();setLoadStep(1,'① 校验假设 ⏳');setLoadMsg('🔬 正在交叉对比实地回答与初步数据，校验假设真伪...');
+                try{var r=await callDS([{role:'system',content:'只输出JSON'},{role:'user',content:p}],0.4,6000);
+                setLoadStep(1,'① 校验假设 ✓');setLoadStep(2,'② 重新评分 ✓');setLoadStep(3,'③ 生成结论 ⏳');setLoadMsg('✅ 数据交叉验证完成，正在生成最终评分与结论...');
+                var m=r.match(/\{[\s\S]*\}/);if(!m)throw new Error('JSON失败');currentEval.finalReport=JSON.parse(m[0]);setLoadStep(3,'③ 结论完成 ✅');setLoadMsg('📋 最终报告生成完毕！');currentEval.status='final';stopLoadTimer();saveCurrent();renderStep5Result();}catch(e){stopLoadTimer();render('<div class="card"><p>❌'+esc(e.message)+'</p><button class="btn btn-primary" id="rf">重试</button></div>');document.getElementById('rf').addEventListener('click',renderStep5);}}
+
+            function renderStep5Result(){
+                var fr=currentEval.finalReport||{};
+                var vc='var(--success)',vi='✅';if(fr.verdict==='谨慎'){vc='var(--warning)';vi='⚠️';}if(fr.verdict==='建议放弃'){vc='var(--danger)';vi='❌';}
+                var h='<div class="summary-card" style="text-align:center;"><div class="summary-label">📋最终结论</div><div class="summary-score">'+(fr.finalScore||'--')+'分</div><div style="font-size:16px;font-weight:700;color:'+vc+';">'+vi+' '+esc(fr.verdict||'--')+'</div><div style="font-size:10px;">'+renderMD(fr.finalSummary||'')+'</div></div>';
+                if(fr.verifiedInsights&&fr.verifiedInsights.length){h+='<div class="card"><div class="card-title">✅实地验证的洞察</div>'+(fr.verifiedInsights||[]).map(function(v){return'<div style="font-size:10px;padding:3px 0;">•'+esc(v)+'</div>';}).join('')+'</div>';}
+                if(fr.overturnedAssumptions&&fr.overturnedAssumptions.length){h+='<div class="card"><div class="card-title">⚠️被推翻的假设</div>'+(fr.overturnedAssumptions||[]).map(function(n){return'<div style="font-size:10px;padding:3px 0;">•'+esc(n)+'</div>';}).join('')+'</div>';}
+                if(fr.adjustedScores){h+='<div class="card"><div class="card-title">🔄修正后四层评分</div><div class="adjusted-score-grid">'+adjScoreItem('整体客群',fr.adjustedScores.layer1)+adjScoreItem('有效客群',fr.adjustedScores.layer2)+adjScoreItem('地形垄断',fr.adjustedScores.layer3)+adjScoreItem('竞争对手',fr.adjustedScores.layer4)+'</div>'+(fr.adjustReasons&&fr.adjustReasons.length?'<div style="margin-top:8px;font-size:9px;color:var(--text-muted);">'+(fr.adjustReasons||[]).map(function(r){return'<div style="font-size:9px;">•'+esc(r)+'</div>';}).join('')+'</div>':'')+'</div>';}
+                if(fr.keyFindings&&fr.keyFindings.length)h+='<div class="card"><div class="card-title">🔍关键发现</div>'+(fr.keyFindings||[]).map(function(k){return'<div style="font-size:10px;padding:3px 0;">•'+esc(k)+'</div>';}).join('')+'</div>';
+                if(fr.actionItems&&fr.actionItems.length)h+='<div class="card"><div class="card-title">📝后续待办</div>'+fr.actionItems.map(function(a){return'<div style="font-size:10px;padding:3px 0;"><input type="checkbox">'+esc(a)+'</div>';}).join('')+'</div>';
+                h+='<div class="card"><div class="card-title">💬AI问答</div>'+renderChat()+'</div>';
+                h+='<div style="display:flex;gap:6px;margin-bottom:40px;"><button class="btn btn-outline" id="bb" style="flex:1;">🔙返回报告</button><button class="btn btn-outline btn-sm" id="bsv2">💾暂存</button><button class="btn btn-ghost btn-sm" id="bn2">🆕新建</button></div>';
+                render(h);
+                document.getElementById('bb').addEventListener('click',function(){updateSteps(3);renderStep3Result();});
+                document.getElementById('bsv2').addEventListener('click',function(){saveCurrent();toast('已保存');});
+                document.getElementById('bn2').addEventListener('click',startNew);
+                if(step5Chat.length>0)document.getElementById('chat5').classList.add('show');
+                toast('✅深度分析完成');saveToCloud();
+            }
+
+            function showHistory(){
+                document.getElementById('scanRoot').style.display='none';
+                document.getElementById('mainContent').style.display='flex';
+                document.getElementById('stepsBar').style.display='flex';
+                document.getElementById('headerTitle').textContent='📍 商铺选址分析';
+                updateSteps(0);
+                var evals=getLocalEvals();
+                if(!evals.length){
+                    var emptyH='<div class="card"><div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;"><button class="btn btn-outline btn-sm" id="btnBackFromHistory">🔙 返回</button></div><div class="empty-state"><div>📂暂无记录</div><button class="btn btn-primary btn-sm" id="be">🆕 新建</button></div></div>';
+                    render(emptyH);
+                    document.getElementById('btnBackFromHistory').addEventListener('click',function(){refreshView();});
+                    var beBtn=document.getElementById('be');
+                    if(beBtn)beBtn.addEventListener('click',function(){startNew();});
+                    return;
+                }
+                var h='<div class="card" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;"><button class="btn btn-outline btn-sm" id="btnBackFromHistory">🔙 返回</button><span style="font-weight:700;">📂 本地历史 ('+evals.length+')</span><button class="btn btn-ghost btn-xs" id="bc">🗑 清空</button></div>';
+                evals.slice().reverse().forEach(function(e){
+                    var sc=e.finalReport?e.finalReport.finalScore:(e.aiAnalysis?e.aiAnalysis.overall_score:'--');
+                    h+='<div class="history-item" data-id="'+esc(e.id)+'"><div><strong>'+esc((e.address||'').slice(0,18))+'</strong><div style="font-size:9px;">'+esc(e.industry||'')+'·'+(e.status==='final'?'✅':'⏳')+'</div></div><div><strong>'+sc+'</strong><button class="btn btn-ghost btn-xs bd" data-id="'+esc(e.id)+'">🗑</button></div></div>';
+                });
+                render(h);
+                document.getElementById('btnBackFromHistory').addEventListener('click',function(){refreshView();});
+                document.getElementById('bc').addEventListener('click',function(){
+                    showConfirm('清空','清空本地记录？',function(ok){if(ok){localStorage.removeItem('_ev24');toast('已清空');showHistory();}});
+                });
+                document.querySelectorAll('.history-item').forEach(function(el){
+                    el.addEventListener('click',function(){loadEval(this.getAttribute('data-id'));});
+                });
+                document.querySelectorAll('.bd').forEach(function(el){
+                    el.addEventListener('click',function(e){e.stopPropagation();var id=this.getAttribute('data-id');
+                        showConfirm('删除','确定删除？',function(ok){if(ok)deleteEval(id);});
+                    });
+                });
+            }
+            function loadEval(id){
+                var evals=getLocalEvals(),f=null;
+                for(var i=0;i<evals.length;i++){if(evals[i].id===id){f=evals[i];break;}}
+                if(!f){toast('未找到');return;}
+                currentEval=JSON.parse(JSON.stringify(f));
+                step4Chat=currentEval.chatHistory4||[];
+                step5Chat=currentEval.chatHistory5||[];
+                weatherData=currentEval.weatherData||null;
+                localStorage.setItem('_lastEvalId',currentEval.id);
+                if(currentEval.status==='final')renderStep5();
+                else if(currentEval.status==='deep_checklist')renderDeepChecklist();
+                else if(currentEval.status==='ai_analyzed'){updateSteps(3);renderStep3Result();}
+                else if(currentEval.status==='data_collected'){updateSteps(3);renderStep3Loading();}
+                else renderStep1();
+                toast('已加载');
+            }
+            function deleteEval(id){
+                saveLocalEvals(getLocalEvals().filter(function(e){return e.id!==id;}));
+                toast('已删除');
+                showHistory();
+            }
+            function startNew(){
+                currentEval=null;step4Chat=[];step5Chat=[];weatherData=null;compareList=[];localStorage.removeItem('_lastEvalId');
+                if(mapObj){mapObj.destroy();mapObj=null;}
+                selectedRadius=1000;
+                document.getElementById('scanRoot').style.display='none';
+                document.getElementById('mainContent').style.display='flex';
+                document.getElementById('stepsBar').style.display='flex';
+                document.getElementById('headerTitle').textContent='📍 商铺选址分析';
+                renderStep1();
+            }
+
+            return{
+                showHistory:showHistory,openQueryPanel:openQueryPanel,closeQueryPanel:closeQueryPanel,startNew:startNew,showConfig:showConfigModal,refreshView:refreshView,
+                openMsgPanel:openMsgPanel,closeMsgPanel:closeMsgPanel,
+                toast:toast,
+                init:function(){selectedRadius=1000;
+                    // 首次访问标记：防止重复清空
+                    if(!localStorage.getItem('_cfgdone')){
+                        localStorage.removeItem('_ak24');
+                        localStorage.removeItem('_ibrk');
+                        localStorage.removeItem('_ibjk');
+                        localStorage.removeItem('_provider');
+                        localStorage.removeItem('_gt24');
+                        localStorage.setItem('_cfgdone','1');
+                    }
+                    try{var _si=localStorage.getItem('_lastEvalId');if(_si){var _el=getLocalEvals();for(var _ei=0;_ei<_el.length;_ei++){if(_el[_ei].id===_si){var _ev=JSON.parse(JSON.stringify(_el[_ei]));currentEval=_ev;step4Chat=_ev.chatHistory4||[];step5Chat=_ev.chatHistory5||[];weatherData=_ev.weatherData||null;if(_ev.status==='final')renderStep5();else if(_ev.status==='deep_checklist')renderDeepChecklist();else if(_ev.status==='ai_analyzed'){updateSteps(3);renderStep3Result();}else if(_ev.status==='data_collected'){updateSteps(3);renderStep3Loading();}return;}}}}catch(_e){}renderStep1();console.log('✅ V25 就绪');}
+            };
+        })();
+        App.init();
+    </script>
+
+  <script>
+        // ========== 扫店模块（市8000/区县4000/镇2000 · 修复数字转换） ==========
+        (function() {
+            var DK = 'sk-079eb73ca6b944f6a3ee479c2cacff51';
+            var DS_URL = 'https://api.deepseek.com/v1/chat/completions';
+            var located = null, running = false, map = null;
+            var allPOIs = [], regions = [], lastLng = null, lastLat = null, lastAddr = '';
+            var cacheKey = '';
+            function getAK(){return window.getRestKey?window.getRestKey():'';}
+
+            function toast(msg) { if (window.App && App.toast) { App.toast(msg); return; } var t = document.getElementById('toast'); if (!t) return; t.textContent = msg; t.classList.add('show'); clearTimeout(t._timer); t._timer = setTimeout(function() { t.classList.remove('show'); }, 2500); }
+            function updateStatus(html) { var el = document.getElementById('scanStatusArea'); if (el) el.innerHTML = html; }
+            function updateResult(html) { var el = document.getElementById('scanResultArea'); if (el) el.innerHTML = html; }
+            function sleep(ms) { return new Promise(function(r) { setTimeout(r, ms); }); }
+
+            function getLevelInfo(addr) {
+                if (!addr) return { level: 'city', name: '市级', range: 10000, icon: '🏛️', cssClass: 'city' };
+                if (/^(北京|上海|天津|重庆)市/.test(addr)) return { level: 'city', name: '直辖市', range: 10000, icon: '🏛️', cssClass: 'city' };
+                if (/镇|乡/.test(addr)) return { level: 'town', name: '镇/乡', range: 2000, icon: '🏡', cssClass: 'town' };
+                if (/(街道|镇)/.test(addr)) return { level: 'town', name: /镇/.test(addr) ? '镇' : '街道', range: 1000, icon: '🏡', cssClass: 'town' };
+                if (/区|县/.test(addr) && /市.*[区县]/.test(addr)) return { level: 'district', name: '区/县', range: 5000, icon: '🏘️', cssClass: 'district' };
+                if (/[区县]/.test(addr) && !/市/.test(addr.replace(/区|县/g,''))) return { level: 'district', name: '区/县', range: 5000, icon: '🏘️', cssClass: 'district' };
+                if (/省/.test(addr)) return { level: 'city', name: '省级', range: 10000, icon: '🏛️', cssClass: 'city' };
+                if (/市/.test(addr)) return { level: 'city', name: '市级', range: 10000, icon: '🏛️', cssClass: 'city' };
+                return { level: 'city', name: '市级', range: 10000, icon: '🏛️', cssClass: 'city' };
+            }
+
+            // 安全转换数字
+            
+            function weightPOI(poi) {
+                var name = (poi.name || '').toLowerCase();
+                var type = (poi.type || '').toLowerCase();
+                var w = 1.0;
+                if (type.indexOf('住宅小区') >= 0 || type.indexOf('社区') >= 0 || type.indexOf('公寓') >= 0) {
+                    if (/别墅|豪庭|庄园|府|邸|山庄/.test(name)) w = 3.0;
+                    else if (/国际|世纪|城|花园|苑|庭|湾|锦|翡/.test(name)) w = 1.5;
+                    else w = 1.0;
+                    return { category: 'residential', weight: w, tier: w >= 2.5 ? 'high' : 'low' };
+                }
+                if (type.indexOf('写字楼') >= 0 || type.indexOf('商务') >= 0 || type.indexOf('办公') >= 0) {
+                    if (/中心|广场|大厦|国际|财富/.test(name)) w = 2.0;
+                    else if (/大楼|城/.test(name)) w = 1.5;
+                    else w = 1.0;
+                    return { category: 'office', weight: w, tier: w >= 1.8 ? 'high' : 'low' };
+                }
+                if (type.indexOf('餐饮') >= 0 || type.indexOf('奶茶') >= 0 || type.indexOf('咖啡') >= 0) {
+                    if (/喜茶|奈雪|星巴克|瑞幸|茶百道|蜜雪冰城/.test(name)) w = 2.0;
+                    else w = 1.0;
+                    return { category: 'competitor', weight: w, tier: w >= 1.5 ? 'chain' : 'single' };
+                }
+                if (type.indexOf('学校') >= 0) {
+                    if (/大学|学院/.test(name)) w = 3.0;
+                    else if (/中学/.test(name)) w = 2.0;
+                    else w = 1.0;
+                    return { category: 'school', weight: w };
+                }
+                if (type.indexOf('商场') >= 0 || type.indexOf('购物') >= 0) {
+                    if (/IFS|太古里|万达|万象城/.test(name)) w = 3.0;
+                    else if (/购物中心|广场/.test(name)) w = 2.0;
+                    else w = 1.0;
+                    return { category: 'mall', weight: w };
+                }
+                return { category: 'other', weight: 1.0 };
+            }
+            function calcWeightedMetrics(pois) {
+                var m = { res: { h: 0, l: 0, w: 0 }, off: { h: 0, w: 0 }, comp: { c: 0, s: 0, w: 0 }, sch: 0, mall: 0 };
+                pois.forEach(function(p) {
+                    var r = weightPOI(p);
+                    if (r.category === 'residential') { m.res.w += r.weight; if (r.tier === 'high') m.res.h++; else m.res.l++; }
+                    if (r.category === 'office') { m.off.w += r.weight; if (r.tier === 'high') m.off.h++; }
+                    if (r.category === 'competitor') { m.comp.w += r.weight; if (r.tier === 'chain') m.comp.c++; else m.comp.s++; }
+                    if (r.category === 'school') m.sch++;
+                    if (r.category === 'mall') m.mall++;
+                });
+                var pop = Math.round((m.res.h * 1800 + m.res.l * 750) * 2.8);
+                var offPop = Math.round(m.off.h * 500 + (m.off.w - m.off.h) * 200);
+                return { totalPopulation: pop + offPop, officePopulation: offPop, highTierResidential: m.res.h, competitorDensity: m.comp.w, chainCompetitors: m.comp.c, singleCompetitors: m.comp.s, largeMalls: m.mall, schools: m.sch };
+            }
+function toNum(v, fallback) { fallback = fallback || 0; if (typeof v === 'number' && !isNaN(v)) return v; var n = parseFloat(v); return isNaN(n) ? fallback : n; }
+            function escHTML(s) { if (!s) return ''; var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+            async function callAI(sys, user, maxTokens) {
+                maxTokens = maxTokens || 2000;
+                var body = JSON.stringify({
+                    model: 'deepseek-chat',
+                    messages: [{ role: 'system', content: sys }, { role: 'user', content: user + '\n\n只返回JSON，不要任何其他内容。' }],
+                    temperature: 0.5, max_tokens: maxTokens, stream: false
+                });
+                var resp = await fetch(DS_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + DK },
+                    body: body
+                });
+                if (!resp.ok) {
+                    var errText = await resp.text();
+                    throw new Error('API ' + resp.status + ': ' + (errText || '').substring(0, 100));
+                }
+                var j = await resp.json();
+                var content = j.choices[0].message.content;
+                var jsonMatch = content.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
+                if (jsonMatch) return JSON.parse(jsonMatch[0]);
+                throw new Error('AI返回非JSON: ' + content.substring(0, 80));
+            }
+
+            function searchRect(lng, lat, range, kw) {
+                return new Promise(function(resolve) {
+                    var d = range / 111320;
+                    var poly = (lng - d) + ',' + (lat - d) + '|' + (lng + d) + ',' + (lat + d);
+                    var all = [];
+                    function fp(p) { if (p > 4) { resolve(all); return; } fetch(''+window.restBase()+'/place/polygon?key=' + getAK() + '&polygon=' + encodeURIComponent(poly) + '&keywords=' + encodeURIComponent(kw) + '&offset=25&page=' + p + '&extensions=all').then(function(r) { return r.json(); }).then(function(d) { var pd=uw(d); if (pd.status === '1' && pd.pois) { pd.pois.forEach(function(poi) { if (poi.location) { var ll = poi.location.split(','); all.push({ id: poi.id, name: poi.name, type: poi.type || '', address: poi.address || '', location: { lng: parseFloat(ll[0]), lat: parseFloat(ll[1]) } }); } }); if (pd.pois && pd.pois.length >= 25 && p < 4) setTimeout(function() { fp(p + 1); }, 200); else resolve(all); } else resolve(all); }).catch(function() { resolve(all); }); } fp(1);
+                });
+            }
+
+            async function locate() {
+                var addr = document.getElementById('scanAddrInput').value.trim();
+                if (!addr) { toast('请输入地址'); return; }
+                var k=getAK();
+                if(!k){toast('⚠️ 请先配置密钥（点击上方配置按钮）');refreshKeyBar();return;}
+                var btn = document.getElementById('scanBtnLocate');
+                btn.disabled = true; btn.textContent = '…';
+                updateStatus('<div class="card"><div class="spinner-wrap"><div class="spinner"></div><span>解析地址...</span></div></div>');
+                try {
+                    var resp = await fetch(''+window.restBase()+'/geocode/geo?key=' + getAK() + '&address=' + encodeURIComponent(addr));
+                    if (!resp.ok) throw new Error('网络错误 ' + resp.status);
+                    var d = uw(await resp.json());
+                    if (d.status === '1' && d.geocodes && d.geocodes.length > 0) {
+                        var g = d.geocodes[0], ll = g.location.split(',');
+                        located = { lng: parseFloat(ll[0]), lat: parseFloat(ll[1]), addr: g.formattedAddress || addr };
+                        document.getElementById('scanAddrInput').value = located.addr;
+                        document.getElementById('scanStartBtn').disabled = false;
+                        var levelInfo = getLevelInfo(located.addr);
+                        var scanRange = levelInfo.range;
+                        cacheKey = 'scan_cache_' + located.lng.toFixed(4) + '_' + located.lat.toFixed(4) + '_' + scanRange;
+                        var cached = localStorage.getItem(cacheKey);
+                        var statusHTML = '<div class="card"><div class="level-indicator"><div class="icon">' + levelInfo.icon + '</div><div class="info"><div class="name">📍 ' + escHTML(located.addr) + '</div><div class="detail">📏 地址级别：<span class="level-tag ' + levelInfo.cssClass + '">' + levelInfo.icon + ' ' + levelInfo.name + ' · ' + scanRange + 'm</span></div></div></div>';
+                        if (cached) statusHTML += '<p style="color:var(--success);margin-top:6px;">✅ 检测到缓存数据，将跳过第一步搜索</p>';
+                        statusHTML += '</div>';
+                        updateStatus(statusHTML);
+                    } else {
+                        updateStatus('<div class="card"><p style="color:var(--danger);">❌ 地址未找到：' + (d.info || '请检查地址是否正确') + '</p></div>');
+                    }
+                } catch (e) {
+                    updateStatus('<div class="card"><p style="color:var(--danger);">❌ 网络错误：' + e.message + '</p></div>');
+                }
+                btn.disabled = false; btn.textContent = '定位';
+            }
+
+            async function start() {
+                if (running) return;
+                var k=getAK();
+                if(!k){toast('⚠️ 请先配置密钥（点击上方配置按钮）');refreshKeyBar();return;}
+                var industry = document.getElementById('scanIndustry').value.trim() || '包子店';
+                var addr = document.getElementById('scanAddrInput').value.trim();
+                if (!addr) { toast('请输入地址'); return; }
+                if (!located || located.addr !== addr) {
+                    document.getElementById('scanStartBtn').disabled = true;
+                    document.getElementById('scanStartBtn').textContent = '📍 定位中...';
+                    try {
+                        var resp = await fetch(''+window.restBase()+'/geocode/geo?key=' + getAK() + '&address=' + encodeURIComponent(addr));
+                        if (!resp.ok) throw new Error('网络错误');
+                        var d = uw(await resp.json());
+                        if (d.status !== '1' || !d.geocodes || d.geocodes.length === 0) {
+                            toast('❌ 地址定位失败：' + (d.info || '请检查地址'));
+                            document.getElementById('scanStartBtn').disabled = false;
+                            document.getElementById('scanStartBtn').textContent = '🔍 开始扫描';
+                            return;
+                        }
+                        var g = d.geocodes[0], ll = g.location.split(',');
+                        located = { lng: parseFloat(ll[0]), lat: parseFloat(ll[1]), addr: g.formattedAddress || addr };
+                        document.getElementById('scanAddrInput').value = located.addr;
+                    } catch(e) {
+                        toast('❌ 定位失败：' + e.message);
+                        document.getElementById('scanStartBtn').disabled = false;
+                        document.getElementById('scanStartBtn').textContent = '🔍 开始扫描';
+                        return;
+                    }
+                }
+                running = true;
+                document.getElementById('scanStartBtn').disabled = true;
+                document.getElementById('scanStartBtn').textContent = '🔍 扫描中...';
+                document.getElementById('scanCancelBtn').style.display = '';
+                regions = []; updateResult('');
+                var levelInfo = getLevelInfo(located.addr);
+                var scanRange = levelInfo.range;
+                cacheKey = 'scan_cache_' + located.lng.toFixed(4) + '_' + located.lat.toFixed(4) + '_' + scanRange;
+                var cached = localStorage.getItem(cacheKey);
+                if (cached) {
+                    try { allPOIs = JSON.parse(cached); updateStatus('<div class="card"><p style="color:var(--success);">✅ 已从缓存加载 ' + allPOIs.length + ' 条 POI | <span class="level-tag ' + levelInfo.cssClass + '">' + levelInfo.icon + ' ' + levelInfo.name + ' · ' + scanRange + 'm</span>，跳过第一步搜索</p></div>'); }
+                    catch(e) { allPOIs = []; cached = null; localStorage.removeItem(cacheKey); }
+                }
+                if (running === false) { return; }
+                if (!cached || allPOIs.length === 0) {
+                    updateStatus('<div class="card"><div class="spinner-wrap"><div class="spinner"></div><span>第一步：<span class="level-tag ' + levelInfo.cssClass + '">' + levelInfo.icon + ' ' + levelInfo.name + ' · ' + scanRange + 'm</span> 搜索基础数据...</span></div></div>');
+                    var baseKeywords = [industry, '住宅小区|社区|公寓', '学校|大学|中学|小学|幼儿园', '写字楼|商务大厦|办公楼', '菜市场|农贸市场|生鲜', '购物中心|商场|商铺', '地铁站|轨道交通|地铁'];
+                    allPOIs = [];
+                    for (var i = 0; i < baseKeywords.length; i++) {
+                        var kw = baseKeywords[i];
+                        updateStatus('<div class="card"><p>🔍 搜索 ' + kw.split('|')[0] + ' (' + (i + 1) + '/' + baseKeywords.length + ') | <span class="level-tag ' + levelInfo.cssClass + '">' + levelInfo.icon + ' ' + levelInfo.name + ' · ' + scanRange + 'm</span> | 累计 ' + allPOIs.length + ' 条</p></div>');
+                        try {
+                            var res = await searchRect(located.lng, located.lat, scanRange, kw);
+                            var exist = {}; allPOIs.forEach(function(p) { exist[p.id] = true; });
+                            res.forEach(function(p) { if (!exist[p.id]) { exist[p.id] = true; allPOIs.push(p); } });
+                        } catch(e) {}
+                        await sleep(250);
+                    }
+                    if (allPOIs.length === 0) { updateStatus('<div class="card"><p style="color:var(--danger);">❌ 未搜到任何POI数据</p></div>'); running = false; document.getElementById('scanStartBtn').disabled = false; document.getElementById('scanStartBtn').textContent = '☁️ 开始扫描'; return; }
+                    try { localStorage.setItem(cacheKey, JSON.stringify(allPOIs)); } catch(e) {}
+                    updateStatus('<div class="card"><p style="color:var(--success);">✅ 第一步完成 | <span class="level-tag ' + levelInfo.cssClass + '">' + levelInfo.icon + ' ' + levelInfo.name + ' · ' + scanRange + 'm</span> | 共收集 ' + allPOIs.length + ' 条 POI（已缓存）</p></div>');
+                }
+                updateStatus('<div class="card"><div class="spinner-wrap"><div class="spinner"></div><span>第二步：AI 正在分析 ' + allPOIs.length + ' 条 POI 分布，推测潜在地点（目标 ' + (levelInfo.level==='city'?'60':(levelInfo.level==='district'?'30':'10')) + ' 个）...</span><div style="font-size:10px;color:var(--text-muted);margin-top:6px;">⏳ 预计 ' + (levelInfo.level==='city'?'60~120':(levelInfo.level==='district'?'40~80':'20~40')) + ' 秒，正在综合十维标准筛选蓝海点位</div></div>');
+                // ===== 减少输入数据量，加速AI响应 =====
+                var poiSummary = allPOIs.slice(0, 150).map(function(p) { return { name: p.name, type: (p.type || '').split(';')[0], lng: p.location.lng.toFixed(5), lat: p.location.lat.toFixed(5) }; });
+                                var metrics = calcWeightedMetrics(allPOIs);
+if (running === false) { return; }
+                                var targetCount = levelInfo.level==='city'?60:(levelInfo.level==='district'?30:10);
+                                var aiMaxTokens = levelInfo.level==='city'?8000:(levelInfo.level==='district'?6000:4000);
+                                var prompt = '你是资深商业选址顾问。当前经济形势下，帮助小微商户寻找真正适合开店的潜力点位。你的任务是避开高租金高竞争的红海，找到有实际生存空间的蓝海位置。\n\n【基础数据】\n地址：' + located.addr + '（坐标' + located.lng.toFixed(4) + ',' + located.lat.toFixed(4) + '）\n行业：' + industry + '\n搜索范围：' + scanRange + 'm\n\n【加权统计】\n• 加权人口：' + metrics.totalPopulation + '人（高档小区' + metrics.highTierResidential + '个，办公' + metrics.officePopulation + '人）\n• 竞品密度：' + metrics.competitorDensity.toFixed(2) + '（连锁' + metrics.chainCompetitors + '家）\n• 商场：' + metrics.largeMalls + '个\n• 学校：' + metrics.schools + '个\n\n【十维筛选标准 — 必须逐项考量】\n① 居住质量：只看新建/中高端小区（名称含花园、苑、府、湾、锦、国际、世纪且户数>500），排除老旧小区、城中村、安置房、烂尾楼周边\n② 办公质量：只看甲级/大型写字楼（入驻率高），排除老破小办公楼、空置率高的商务楼\n③ 教育质量：只看全日制正规学校（大学/中学/小学），排除培训机构、老年大学、科研机构\n④ 交通质量：换乘地铁站 > 单线地铁站 > 多公交线路 > 单公交，无公共交通直接降级\n⑤ 商业环境：优先社区底商活跃区、生活商业街，排除纯住宅区、工业区、施工区\n⑥ 竞争格局：同质化低/连锁少/有差异化空间 → 高分；连锁品牌密集/同质化严重 → 低分\n⑦ 租金推断：优先社区底商、次干道、非核心商圈（租金合理可承受），排除万达/万象城/IFS/太古里核心区、知名商圈核心区（租金极高不适合小微商户）\n⑧ 人口质量：优先年轻家庭+上班族聚集区、消费力中上区域；消费力过低的区域降级\n⑨ 行业匹配：针对"' + industry + '"这个行业，判断核心客群与点位匹配度（参考weightPOI数据中的竞品分布和需求来源）\n⑩ 经济形势：当前消费降级趋势下，刚需消费区 > 可选消费区，租金温和区 > 高租金区，社区底商 > 大型商场内部\n\n【明确排除清单 — 不要推荐以下类型】\n✗ 火车站/汽车站/机场（人流大但租金高、转化率低）\n✗ 万达广场/万象城/IFS/太古里等大型商场核心区（租金极高只适合连锁品牌）\n✗ 知名商圈核心区（春熙路/解放碑/南京路等，竞争完全饱和）\n✗ 城中村/棚户区（消费力弱）\n✗ 大型施工区域/待开发新区（不确定性大）\n\n请推荐 ' + targetCount + ' 个高潜力点位，用具体可搜索的社区商业地名（如"XX小区底商区域""XX学校正门周边""XX写字楼群附近""XX菜市场周边"），不要用地标名。\n坐标由高德自动搜索，你不需要生成坐标。\n\n返回 JSON: [{\n  "name": "社区商业地名（非地标）",\n  "range": 500,\n  "score": 0-100,\n  "demandSource": "需求来源",\n  "competitionGap": "竞争空隙",\n  "riskToVerify": "风险"\n}]';
+
+                try {
+                    regions = await callAI('你是商业选址专家。避开红海找蓝海，综合考量十维标准筛选真正适合小微企业开店的点位。', prompt, aiMaxTokens);
+                    // ===== 坐标全部用高德地理编码，不用AI生成坐标 =====
+                    if (regions && regions.length > 0) {
+                        for (var _ri = 0; _ri < regions.length; _ri++) {
+                            regions[_ri].range = 500;
+                            // 确保有默认坐标（兜底用搜索中心）
+                            if (!regions[_ri].lng) { regions[_ri].lng = located.lng; regions[_ri].lat = located.lat; }
+                            try {
+                                var _gq = located.addr + ' ' + (regions[_ri].name || '');
+                                var _gr = await fetch(''+window.restBase()+'/geocode/geo?key=' + getAK() + '&address=' + encodeURIComponent(_gq));
+                                var _gd = uw(await _gr.json());
+                                if (_gd.status === '1' && _gd.geocodes && _gd.geocodes.length > 0) {
+                                    var _gll = _gd.geocodes[0].location.split(',');
+                                    regions[_ri].lng = parseFloat(_gll[0]);
+                                    regions[_ri].lat = parseFloat(_gll[1]);
+                                }
+                            } catch(_ge) {}
+                            await sleep(80);
+                        }
+                    }
+                    if (regions && regions.length > 0) {
+                        var html = '<div class="card"><div class="card-title">✅ 第二步：AI 推荐了 ' + regions.length + ' 个潜在地点 <span class="level-tag ' + levelInfo.cssClass + '">' + levelInfo.icon + ' ' + levelInfo.name + '</span></div>';
+                        html += '<p style="font-size:11px;color:var(--text-muted);margin-bottom:8px;">点击任意地点，进入第三步深度分析</p>';
+                        regions.forEach(function(r, i) {
+                            var safeLng = toNum(r.lng, 0);
+                            var safeLat = toNum(r.lat, 0);
+                            var safeRange = toNum(r.range, 500);
+                            html += '<div class="region-item" onclick="ScanApp.analyzeRegion(' + i + ')"><div class="region-name">' + (i + 1) + '. ' + escHTML(r.name || '') + '</div><div class="region-meta">📍 中心：' + safeLng.toFixed(4) + ', ' + safeLat.toFixed(4) + ' | 🔍 推荐半径：' + safeRange + 'm</div><div class="region-reason">💡 ' + escHTML(r.reason || '') + '</div><div id="regionAnalysis' + i + '"></div></div>';
+                        });
+                        html += '</div>';
+                        updateResult(html);
+                        html += '<div style="margin-top:12px;padding:12px;background:var(--surface);border:1px solid var(--border);border-radius:8px;">';
+                        html += '<div style="font-weight:700;margin-bottom:8px;">🎯 定向筛选（二次筛选）</div>';
+                        html += '<textarea id="dingxiangCondition" placeholder="例如：只要评分 70 分以上的点位 | 只要靠近学校的点位" style="width:100%;min-height:50px;font-size:12px;padding:8px;border:1px solid var(--border);border-radius:4px;margin-bottom:8px;"></textarea>';
+                        html += '<div style="display:flex;gap:6px;">';
+                        html += '<button class="btn btn-primary btn-sm" onclick="dingxiangFilter()">🔍 重新评估生成</button>';
+                        html += '<button class="btn btn-ghost btn-sm" onclick="dingxiangClear()">✕ 清空条件</button>';
+                        html += '</div>';
+                        html += '<div id="dingxiangResult"></div>';
+                        html += '</div>';
+updateResult(html);
+                        updateStatus('<div class="card"><p style="color:var(--success);">✅ 第二步完成 | 共推荐 ' + regions.length + ' 个潜在地点 | 点击任意地点进行深度分析</p></div>');
+                    } else {
+                        updateResult('<div class="card"><p>AI未能返回有效区域</p></div>');
+                        updateStatus('<div class="card"><p style="color:var(--danger);">AI返回数据为空，请重试</p></div>');
+                    }
+                } catch (e) {
+                    updateResult('<div class="card"><p style="color:var(--danger);">❌ AI调用失败：' + e.message + '</p><p style="font-size:10px;">可能原因：DeepSeek API密钥失效或额度用尽</p></div>');
+                    updateStatus('<div class="card"><p style="color:var(--danger);">第二步失败</p></div>');
+                }
+                running = false;
+                document.getElementById('scanStartBtn').disabled = false;
+                document.getElementById('scanStartBtn').textContent = '🔍 开始扫描';
+                document.getElementById('scanCancelBtn').style.display = 'none';
+            }
+
+            function cancelScan() {
+                if (!running) return;
+                running = false;
+                document.getElementById('scanStartBtn').disabled = false;
+                document.getElementById('scanStartBtn').textContent = '🔍 开始扫描';
+                document.getElementById('scanCancelBtn').style.display = 'none';
+                updateStatus('<div class="card"><p style="color:var(--warning);">⏹ 已取消</p></div>');
+            }
+
+                        async function analyzeRegion(index) {
+                if (!regions[index]) return;
+                var region = regions[index];
+                var industry = document.getElementById('scanIndustry').value.trim() || '包子店';
+                var analysisContainer = document.getElementById('regionAnalysis' + index);
+                if (!analysisContainer) return;
+                if (analysisContainer.innerHTML && analysisContainer.innerHTML.indexOf('综合评分') > -1) { analysisContainer.scrollIntoView({ behavior: 'smooth' }); return; }
+                analysisContainer.innerHTML = '<div class="spinner-wrap"><div class="spinner"></div><span>分析中...</span></div>';
+                updateStatus('<div class="card"><div class="spinner-wrap"><div class="spinner"></div><span>第三步：正在深度搜索 "' + escHTML(region.name || '') + '" ...</span></div></div>');
+                document.getElementById('scanStartBtn').disabled = true;
+                var deepKeywords = [industry, '住宅小区|社区|公寓', '学校|大学|中学|小学|幼儿园', '写字楼|商务大厦|办公楼', '菜市场|农贸市场|生鲜', '购物中心|商场|商铺', '地铁站|轨道交通|地铁', '公交站|公交车站'];
+                var deepPOIs = [];
+                for (var i = 0; i < deepKeywords.length; i++) {
+                    var kw = deepKeywords[i];
+                    analysisContainer.innerHTML = '<div class="spinner-wrap"><div class="spinner"></div><span>搜索 ' + kw.split('|')[0] + ' (' + (i + 1) + '/' + deepKeywords.length + ')...</span></div>';
+                    try {
+                        var res = await searchRect(toNum(region.lng, 0), toNum(region.lat, 0), toNum(region.range, 500), kw);
+                        var exist = {}; deepPOIs.forEach(function(p) { exist[p.id] = true; });
+                        res.forEach(function(p) { if (!exist[p.id]) { exist[p.id] = true; deepPOIs.push(p); } });
+                    } catch(e) {}
+                    await sleep(200);
+                }
+                if (deepPOIs.length === 0) { analysisContainer.innerHTML = '<p style="color:var(--danger);">该区域未搜到POI</p>'; document.getElementById('scanStartBtn').disabled = false; return; }
+                analysisContainer.innerHTML = '<div class="spinner-wrap"><div class="spinner"></div><span>AI 深度分析中...</span></div>';
+                var poiData = deepPOIs.slice(0, 150).map(function(p) { return { name: p.name, type: (p.type || '').split(';')[0], lng: p.location.lng.toFixed(5), lat: p.location.lat.toFixed(5) }; });
+                                var deepMetrics = calcWeightedMetrics(deepPOIs);
+                var prompt = '你是顶级商业选址顾问。当前经济形势下，帮助小微商户在具体点位找到真正能开店的铺面。\n\n【点位】' + (region.name || '') + '（坐标' + toNum(region.lng, 0).toFixed(4) + ',' + toNum(region.lat, 0).toFixed(4) + '，半径' + toNum(region.range, 500) + 'm）\n【行业】' + industry + '\n【加权统计】\n• 人口：' + deepMetrics.totalPopulation + '人\n• 竞品密度：' + deepMetrics.competitorDensity.toFixed(2) + '（连锁' + deepMetrics.chainCompetitors + '家）\n• 商场：' + deepMetrics.largeMalls + '个\n• 学校：' + deepMetrics.schools + '个\n\n【POI】' + JSON.stringify(poiData) + '\n\n【筛选标准 — 必须逐项考量】\n① 居住质量：只看新建/中高端小区，排除老旧小区、城中村、安置房周边\n② 办公质量：只看甲级/大型写字楼（入驻率高），排除老破小办公楼\n③ 教育质量：只看全日制正规学校（大学/中学/小学），排除培训机构/老年大学\n④ 交通质量：换乘地铁站 > 单线地铁站 > 多公交 > 单公交\n⑤ 商业环境：优先社区底商活跃区、生活商业街，排除纯住宅区、工业区\n⑥ 竞争格局：同质化低/连锁少有差异化空间 → 高分\n⑦ 租金推断：优先社区底商、次干道 → 租金合理可承受\n⑧ 人口质量：优先年轻家庭+上班族聚集区\n⑨ 行业匹配：针对"' + industry + '"行业判断核心客群匹配度\n⑩ 排除：火车站/汽车站/机场/万达核心区/万象城/IFS/太古里/知名商圈核心区/城中村/施工区\n\n分析刚性需求、软性需求、竞争格局、风险，推荐 3-5 个具体铺面位置。\n用社区商业地名（如"XX小区底商""XX写字楼大堂旁""XX学校正门对面"），坐标由高德自动搜索，你不用生成坐标。\n\n返回 JSON: {\n  "score": 0-100,\n  "rigidDemand": "",\n  "softDemand": "",\n  "risk": "",\n  "suggestedLocations": [{"name":"社区商业地名","reason":"为什么这里比地标更适合开店"}]\n}';
+
+                try {
+                    var analysis = await callAI('你是顶级商业选址顾问。', prompt, 2000);
+                    // ===== 坐标全部用高德地理编码，不用AI生成坐标 =====
+                    if (analysis && analysis.suggestedLocations && analysis.suggestedLocations.length > 0) {
+                        for (var _si = 0; _si < analysis.suggestedLocations.length; _si++) {
+                            // 兜底用区域中心坐标
+                            analysis.suggestedLocations[_si].lng = toNum(region.lng, located.lng);
+                            analysis.suggestedLocations[_si].lat = toNum(region.lat, located.lat);
+                            try {
+                                var _sq = located.addr + ' ' + (analysis.suggestedLocations[_si].name || '');
+                                var _sr = await fetch(''+window.restBase()+'/geocode/geo?key=' + getAK() + '&address=' + encodeURIComponent(_sq));
+                                var _sd = uw(await _sr.json());
+                                if (_sd.status === '1' && _sd.geocodes && _sd.geocodes.length > 0) {
+                                    var _sll = _sd.geocodes[0].location.split(',');
+                                    analysis.suggestedLocations[_si].lng = parseFloat(_sll[0]);
+                                    analysis.suggestedLocations[_si].lat = parseFloat(_sll[1]);
+                                }
+                            } catch(_se) {}
+                            await sleep(80);
+                        }
+                    }
+                    if (analysis) {
+                        var html = '<div class="region-analysis">';
+                        html += '<p><strong>综合评分：</strong><span style="font-size:18px;font-weight:700;color:' + (analysis.score >= 70 ? 'var(--success)' : analysis.score >= 50 ? 'var(--warning)' : 'var(--danger)') + ';">' + (analysis.score || '--') + '</span></p>';
+                        html += '<p><strong>🏠 刚性需求：</strong>' + escHTML(analysis.rigidDemand || '') + '</p>';
+                        html += '<p><strong>🍵 软性需求：</strong>' + escHTML(analysis.softDemand || '') + '</p>';
+                        html += '<p><strong>⚠️ 潜在风险：</strong>' + escHTML(analysis.risk || '') + '</p>';
+                        if (analysis.suggestedLocations && analysis.suggestedLocations.length > 0) {
+                            html += '<p style="margin-top:8px;"><strong>📍 优先考察位置：</strong></p>';
+                            analysis.suggestedLocations.forEach(function(loc, i) {
+                                var sLng = toNum(loc.lng, 0), sLat = toNum(loc.lat, 0);
+                                html += '<div class="suggested-loc" onclick="event.stopPropagation();ScanApp.openMap(' + sLng + ',' + sLat + ',\'' + (loc.name || '').replace(/'/g, "\\'") + '\')"><strong>' + (i + 1) + '. ' + escHTML(loc.name || '') + '</strong> - ' + escHTML(loc.reason || '') + '<div class="map-hint">👆点击查看地图</div></div>';
+                            });
+                        }
+                        html += '</div>';
+                        analysisContainer.innerHTML = html;
+                        updateStatus('<div class="card"><p style="color:var(--success);">✅ 深度分析完成</p></div>');
+                    } else { analysisContainer.innerHTML = '<p>AI未返回有效分析</p>'; }
+                } catch (e) { analysisContainer.innerHTML = '<p style="color:var(--danger);">AI分析失败：' + e.message + '</p>'; }
+                document.getElementById('scanStartBtn').disabled = false;
+                document.getElementById('scanCancelBtn').style.display = 'none';
+            }
+
+            function openMap(lng, lat, addr) {
+                lastLng = lng; lastLat = lat; lastAddr = addr || (lng.toFixed(5) + ',' + lat.toFixed(5));
+                document.getElementById('scanMapModal').style.display = 'flex';
+                document.getElementById('scanMapLabel').textContent = '📍 ' + lastAddr + ' ✅高德坐标';
+                if (typeof AMap === 'undefined') { var s = document.createElement('script'); var jsurl2 = jsapiUrl(); s.src = jsurl2; s.onload = function() { initMap(lng, lat); }; document.head.appendChild(s); } else { initMap(lng, lat); }
+            }
+            function initMap(lng, lat) { if (map) map.destroy(); map = new AMap.Map('scanMapContainer', { center: [lng, lat], zoom: 17, resizeEnable: true }); var mk = '<div style="position:relative;width:36px;height:36px;"><div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:36px;height:36px;background:#2563eb;border-radius:50%;opacity:0.2;animation:pulse 1.5s infinite;"></div><div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:16px;height:16px;background:#2563eb;border-radius:50%;border:2px solid #fff;"></div></div>'; new AMap.Marker({ position: [lng, lat], content: mk, offset: new AMap.Pixel(-18, -18), zIndex: 200 }).setMap(map); }
+            function closeMap() { document.getElementById('scanMapModal').style.display = 'none'; }
+
+            function importToMain() {
+                if (!lastLng || !lastLat) return;
+                // 验证坐标有效性
+                if (!isFinite(lastLng) || !isFinite(lastLat) || (lastLng === 0 && lastLat === 0)) {
+                    alert('坐标无效，请重新打开地图后再导入');
+                    return;
+                }
+                document.getElementById('scanMapModal').style.display = 'none';
+                document.getElementById('mainContent').style.display = 'flex';
+                document.getElementById('stepsBar').style.display = 'flex';
+                document.getElementById('scanRoot').style.display = 'none';
+                document.getElementById('headerTitle').textContent = '📍 商铺选址分析';
+                var addrInput = document.getElementById('evalAddress');
+                var indInput = document.getElementById('evalIndustry');
+                // 只填坐标，主模块的 amapGeocode 会用它反向查找地址
+                if (addrInput) addrInput.value = lastLng.toFixed(6) + ', ' + lastLat.toFixed(6);
+                if (indInput) indInput.value = document.getElementById('scanIndustry').value;
+            }
+
+            function toggle() {
+                var main = document.getElementById('mainContent');
+                var steps = document.getElementById('stepsBar');
+                var scanRoot = document.getElementById('scanRoot');
+                var title = document.getElementById('headerTitle');
+                if (scanRoot.style.display === 'none' || !scanRoot.style.display) {
+                    main.style.display = 'none'; steps.style.display = 'none'; scanRoot.style.display = 'flex'; title.textContent = '🔍 地毯式扫店';
+                    refreshKeyBar();
+                } else { main.style.display = 'flex'; steps.style.display = 'flex'; scanRoot.style.display = 'none'; title.textContent = '📍 商铺选址分析'; }
+            }
+
+            function refreshKeyBar(){
+                var bar=document.getElementById('scanKeyBar');if(!bar)return;
+                var k=getAK();var p=window.getProvider?window.getProvider()||'amap':'amap';
+                var pname=p==='amap'?'高德地图':'IBT地图';
+                if(k){
+                    bar.innerHTML='<span style="color:var(--success);">✅ '+pname+' ('+k.substring(0,6)+'...)</span> <button onclick="window.showConfigModal&&window.showConfigModal()" style="font-size:10px;padding:1px 8px;border-radius:4px;border:1px solid var(--primary);background:transparent;color:var(--primary);cursor:pointer;">🔧 配置</button>';
+                }else{
+                    bar.innerHTML='<span style="color:var(--danger);">⚠️ 未配置密钥</span> <button onclick="window.showConfigModal&&window.showConfigModal()" style="font-size:10px;padding:1px 8px;border-radius:4px;border:1px solid var(--primary);background:var(--primary);color:#fff;cursor:pointer;">🔧 立即配置</button>';
+                }
+            }
+
+                        function dingxiangClear() { document.getElementById('dingxiangCondition').value = ''; }
+            async function dingxiangFilter() {
+                var condition = document.getElementById('dingxiangCondition').value.trim();
+                if (!condition) { alert('请输入定向条件'); return; }
+                var resultDiv = document.getElementById('dingxiangResult');
+                resultDiv.innerHTML = '<div class="spinner-wrap"><div class="spinner"></div><span>AI 正在按十维标准重新筛选（预计 30~60 秒）...</span></div>';
+                var metrics = calcWeightedMetrics(allPOIs);
+                var prompt = '你是商业选址专家。当前经济形势下帮助小微商户精准找店铺。\n\n【用户需求】地址：' + (located ? located.addr : '未知') + ' | 行业：' + (document.getElementById('scanIndustry').value.trim() || '未知') + '\n【加权统计】加权人口：' + metrics.totalPopulation + '人，竞品密度：' + metrics.competitorDensity.toFixed(2) + '\n首次推荐 ' + regions.length + ' 个地点\n\n【定向条件】' + condition + '\n\n【十维筛选标准 — 筛选时逐项应用】\n① 居住质量：只看新建/中高端小区，排除老旧小区、城中村、安置房\n② 办公质量：只看甲级/大型写字楼（入驻率高），排除老破小办公楼\n③ 教育质量：只看全日制正规学校，排除培训机构/老年大学\n④ 交通质量：换乘地铁站 > 单线地铁站 > 多公交 > 单公交\n⑤ 商业环境：优先社区底商活跃区、生活商业街，排除纯住宅区、工业区\n⑥ 竞争格局：同质化低/连锁少有差异化空间 → 高分\n⑦ 租金推断：优先社区底商、次干道（租金合理），排除万达/万象城/IFS/太古里核心区\n⑧ 人口质量：优先年轻家庭+上班族聚集区，消费力中上\n⑨ 行业匹配：针对' + (document.getElementById('scanIndustry').value.trim() || '未知') + '行业判断核心客群匹配度\n⑩ 经济形势：刚需消费区 > 可选消费区，社区底商 > 商场内部\n\n【排除清单】火车站/汽车站/机场/万达核心区/万象城/IFS/太古里/知名商圈核心区/城中村/施工区\n\n请基于' + (located ? located.addr : '该区域') + '的商业环境，推荐 8-12 个完全符合定向条件+十维标准的点位。每个点位给出"为什么比地标更适合' + (document.getElementById('scanIndustry').value.trim() || '未知') + '开店"的解析。\n坐标由高德自动搜索，你不用生成坐标。\n\n返回 JSON: [{"name":"社区商业地名（非地标）","range":半径,"score":评分,"whyMatch":"为什么比地标更适合开店","demandSource":"需求来源","competitionGap":"竞争空隙","riskToVerify":"风险"}]';
+                try {
+                    var newRegions = await callAI('你是商业选址专家。严格按照用户定向条件筛选。', prompt, 3000);
+                    if (newRegions && newRegions.length > 0) {
+                        // 坐标全部用高德地理编码
+                        for (var _nr = 0; _nr < newRegions.length; _nr++) {
+                            newRegions[_nr].lng = located.lng; newRegions[_nr].lat = located.lat;
+                            try {
+                                var _nq = located.addr + ' ' + (newRegions[_nr].name || '');
+                                var _nrResp = await fetch(''+window.restBase()+'/geocode/geo?key=' + getAK() + '&address=' + encodeURIComponent(_nq));
+                                var _nd = uw(await _nrResp.json());
+                                if (_nd.status === '1' && _nd.geocodes && _nd.geocodes.length > 0) {
+                                    var _nll = _nd.geocodes[0].location.split(',');
+                                    newRegions[_nr].lng = parseFloat(_nll[0]);
+                                    newRegions[_nr].lat = parseFloat(_nll[1]);
+                                }
+                            } catch(_ne) {}
+                            await sleep(80);
+                        }
+                        var h = '<div class="card" style="margin-top:12px;background:var(--success-light);"><div style="font-weight:700;color:var(--success);margin-bottom:8px;">✅ 生成 ' + newRegions.length + ' 个符合要求的点位</div>';
+                        newRegions.forEach(function(r, i) {
+                            var sLng = toNum(r.lng, 0), sLat = toNum(r.lat, 0), sRange = toNum(r.range, 500);
+                            var sb = r.score ? (r.score >= 80 ? '<span class="score-badge score-hot">🔥' + r.score + '分</span>' : r.score >= 60 ? '<span class="score-badge score-mid">👍' + r.score + '分</span>' : '<span class="score-badge score-low">⚠️' + r.score + '分</span>') : '';
+                            h += '<div class="region-item" style="margin:6px 0;"><div class="region-header"><div class="region-name">' + (i + 1) + '. ' + (r.name || '新点位') + '</div>' + sb + '</div>';
+                            h += '<div class="region-meta">📍 ' + sLng.toFixed(4) + ', ' + sLat.toFixed(4) + ' | ' + sRange + 'm</div>';
+                            if (r.whyMatch) h += '<div class="region-detail" style="background:var(--success-light);color:var(--success);"><strong>✅ 符合定向：</strong>' + (r.whyMatch || '') + '</div>';
+                            if (r.demandSource) h += '<div class="region-detail"><strong>📊 需求来源：</strong>' + (r.demandSource || '') + '</div>';
+                            if (r.competitionGap) h += '<div class="region-detail"><strong>💎 竞争空隙：</strong>' + (r.competitionGap || '') + '</div>';
+                            if (r.riskToVerify) h += '<div class="region-detail risk"><strong>⚠️ 风险待验证：</strong>' + (r.riskToVerify || '') + '</div>';
+                            h += '<div class="suggested-loc" onclick="event.stopPropagation();ScanApp.openMap(' + sLng + ',' + sLat + ',\'' + (r.name || '').replace(/\'/g, "\\'") + '\')"><strong>👆 点击查看地图</strong></div>';
+                            h += '</div>';
+                        });
+                        h += '</div>';
+                        resultDiv.innerHTML = h;
+                    } else {
+                        resultDiv.innerHTML = '<div class="card" style="margin-top:12px;background:var(--warning-light);"><p style="color:var(--warning);">⚠️ 未能生成符合定向条件的点位</p></div>';
+                    }
+                } catch (e) {
+                    resultDiv.innerHTML = '<div class="card" style="margin-top:12px;background:var(--danger-light);"><p style="color:var(--danger);">❌ 失败：' + e.message + '</p></div>';
+                }
+            }
+
+            window.ScanApp = { toggle: toggle, locate: locate, start: start, cancelScan: cancelScan, analyzeRegion: analyzeRegion, openMap: openMap, closeMap: closeMap, importToMain: importToMain, dingxiangFilter: dingxiangFilter, dingxiangClear: dingxiangClear, refreshKeyBar: refreshKeyBar, hasResults: function() { return regions.length > 0; } };
+            window.dingxiangFilter = dingxiangFilter;
+            window.dingxiangClear = dingxiangClear;;
+        })();
+    </script>
+   <style>@keyframes pulse2{0%,100%{transform:translate(-50%,-50%) scale(1);opacity:0.2;}50%{transform:translate(-50%,-50%) scale(1.6);opacity:0;}}</style>
+</body>
+</html>
