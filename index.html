@@ -4572,7 +4572,8 @@
                 });
                 if (res.ok) {
                     var info = await res.json();
-                    var content = JSON.parse(atob(info.content));
+                    var raw = decodeURIComponent(escape(atob(info.content)));
+                    var content = JSON.parse(raw);
                     if (Array.isArray(content)) {
                         videoList = content;
                         // 本地缓存一份
