@@ -1624,19 +1624,6 @@
         .reader-nav button { flex: 1; padding: 10px 0; border-radius: 8px; border: 1px solid #c9a96e; background: #fff; color: #5a3a2a; font-size: 13px; cursor: pointer; transition: all 0.15s; }
         .reader-nav button:hover:not(:disabled) { background: #c9a96e; color: #fff; }
         .reader-nav button:disabled { opacity: 0.35; cursor: default; }
-        /* 翻页动画 */
-        .page-flip-left { animation: flipLeft 0.35s ease-in-out; }
-        .page-flip-right { animation: flipRight 0.35s ease-in-out; }
-        @keyframes flipLeft {
-            0% { transform: perspective(1200px) rotateY(0); opacity: 1; }
-            40% { transform: perspective(1200px) rotateY(12deg); opacity: 0.5; }
-            100% { transform: perspective(1200px) rotateY(0); opacity: 1; }
-        }
-        @keyframes flipRight {
-            0% { transform: perspective(1200px) rotateY(0); opacity: 1; }
-            40% { transform: perspective(1200px) rotateY(-12deg); opacity: 0.5; }
-            100% { transform: perspective(1200px) rotateY(0); opacity: 1; }
-        }
         .reader-copyright { padding: 12px 16px; text-align: center; color: #a09080; font-size: 11px; letter-spacing: 1px; background: #f5f0e6; border-top: 1px solid rgba(180,160,120,0.2); flex-shrink: 0; }
 
         /* === 章节留言 === */
@@ -3894,34 +3881,34 @@
 
         // 翻页：将当前章节按屏幕高度分页，整页翻动 + 翻书动画
         var readerPageIndex = 0; // 当前章节内页码（切换章节时自动归零）
+        var readerPageHeight = 0; // 缓存每页高度
+
         function pageFlip(dir) {
             var el = document.getElementById('readerContent');
             if (!el) return;
-            var vh = el.clientHeight * 0.9; // 一页90%视口高度
-            var totalPages = Math.ceil(el.scrollHeight / vh);
-
-            // 根据当前滚动位置估算当前页码
-            var curPage = Math.round(el.scrollTop / vh);
-            var targetPage = curPage + dir;
-            if (targetPage < 0) {
-                // 已经是第一页，翻上一章
-                prevChapter();
-                return;
-            }
-            if (targetPage >= totalPages) {
-                // 已经是最后一页，翻下一章
-                nextChapter();
-                return;
-            }
-            readerPageIndex = targetPage;
-            // 翻书动画
-            el.classList.remove('page-flip-left', 'page-flip-right');
-            void el.offsetWidth;
-            el.classList.add(dir > 0 ? 'page-flip-right' : 'page-flip-left');
-            el.scrollTo({ top: targetPage * vh, behavior: 'smooth' });
+            var vh = el.clientHeight;
+            if (!readerPageHeight || readerPageHeight < 10) readerPageHeight = vh;
+            var total = el.scrollHeight;
+            var totalPages = Math.ceil(total / readerPageHeight);
+            var newPage = readerPageIndex + dir;
+            if (newPage < 0) { prevChapter(); return; }
+            if (newPage >= totalPages) { nextChapter(); return; }
+            readerPageIndex = newPage;
+            // 翻书动画：先缩小→翻→放大
+            el.style.transition = 'transform 0.18s ease-in, opacity 0.18s ease-in';
+            el.style.transform = 'scale(0.85) perspective(800px) rotateY(' + (dir > 0 ? -25 : 25) + 'deg)';
+            el.style.opacity = '0.3';
             setTimeout(function() {
-                el.classList.remove('page-flip-left', 'page-flip-right');
-            }, 400);
+                el.scrollTop = readerPageIndex * readerPageHeight;
+                el.style.transition = 'transform 0.22s ease-out, opacity 0.22s ease-out';
+                el.style.transform = 'scale(1) perspective(800px) rotateY(0deg)';
+                el.style.opacity = '1';
+                setTimeout(function() {
+                    el.style.transition = '';
+                    el.style.transform = '';
+                    el.style.opacity = '';
+                }, 250);
+            }, 200);
         }
 
         // ===== 重生世界 =====
