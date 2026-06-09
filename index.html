@@ -1759,6 +1759,7 @@
             <button class="query-tab" id="tabJournals" onclick="switchQueryTab('journals')" style="padding:10px 8px;background:none;border:none;color:var(--text-light);font-size:12px;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;flex-shrink:0;">📰 周刊</button>
             <button class="query-tab" id="tabVideos" onclick="switchQueryTab('videos')" style="padding:10px 8px;background:none;border:none;color:var(--text-light);font-size:12px;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;flex-shrink:0;">📱 视频</button>
             <button class="query-tab" id="tabShops" onclick="switchQueryTab('shops')" style="padding:10px 8px;background:none;border:none;color:var(--text-light);font-size:12px;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;flex-shrink:0;">🏪 转让</button>
+            <button class="query-tab" id="tabComments" onclick="switchQueryTab('comments')" style="padding:10px 8px;background:none;border:none;color:var(--text-light);font-size:12px;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;flex-shrink:0;">💬 评论</button>
         </div>
         <!-- 聊天记录 -->
         <div id="queryContent" style="flex:1;display:flex;flex-direction:column;overflow:hidden;padding:0 12px;">
@@ -1800,6 +1801,14 @@
         <div id="queryVideosContent" style="flex:1;display:none;flex-direction:column;overflow:hidden;background:#000;">
             <!-- 视频流（纯展示，无编辑功能） -->
             <div id="videoWall" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;align-items:center;gap:0;scroll-snap-type:y mandatory;"></div>
+        </div>
+        <!-- 评论管理 -->
+        <div id="queryCommentsContent" style="flex:1;display:none;flex-direction:column;overflow:hidden;padding:0 12px;background:#0d1117;">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;">
+                <span id="commentAdminCount" style="font-size:12px;color:var(--text-light);"></span>
+                <button onclick="adminLoadAllComments()" style="background:none;border:1px solid #d4c8b0;color:#8a7a6a;padding:4px 12px;border-radius:14px;font-size:12px;cursor:pointer;margin-right:6px;">🔄 刷新</button>
+            </div>
+            <div id="commentAdminList" style="flex:1;overflow-y:auto;"></div>
         </div>
         <!-- 店铺转让 -->
         <div id="queryShopsContent" style="flex:1;display:none;flex-direction:column;overflow:hidden;background:#0d1117;">
@@ -2672,14 +2681,16 @@
             var journals = document.getElementById('queryJournalsContent');
             var videos = document.getElementById('queryVideosContent');
             var shops = document.getElementById('queryShopsContent');
+            var comments = document.getElementById('queryCommentsContent');
             var tabChat = document.getElementById('tabChat');
             var tabVoice = document.getElementById('tabVoice');
             var tabBooks = document.getElementById('tabBooks');
             var tabJournals = document.getElementById('tabJournals');
             var tabVideos = document.getElementById('tabVideos');
             var tabShops = document.getElementById('tabShops');
-            var allTabs = [tabChat, tabVoice, tabBooks, tabJournals, tabVideos, tabShops];
-            var allPanels = [chat, voice, books, journals, videos, shops];
+            var tabComments = document.getElementById('tabComments');
+            var allTabs = [tabChat, tabVoice, tabBooks, tabJournals, tabVideos, tabShops, tabComments];
+            var allPanels = [chat, voice, books, journals, videos, shops, comments];
             allPanels.forEach(function(p) { if (p) p.style.display = 'none'; });
             allTabs.forEach(function(t) { if (t) { t.style.color = 'var(--text-light)'; t.style.borderBottom = '2px solid transparent'; } });
             if (tab === 'chat') {
@@ -2717,6 +2728,11 @@
                 tabShops.style.color = 'var(--accent)'; tabShops.style.borderBottom = '2px solid var(--accent)';
                 document.getElementById('queryTabTitle').textContent = '🏪 店铺转让';
                 loadShopTransfers();
+            } else if (tab === 'comments') {
+                comments.style.display = 'flex';
+                tabComments.style.color = 'var(--accent)'; tabComments.style.borderBottom = '2px solid var(--accent)';
+                document.getElementById('queryTabTitle').textContent = '💬 评论管理';
+                adminLoadAllComments();
             }
         }
 
@@ -4534,6 +4550,128 @@
             } catch(e) {
                 row.style.opacity = '1';
                 showToast('❌ 删除失败: ' + e.message);
+            }
+        }
+
+        // ========== 评论管理（管理员入口 💬 评论 tab） ==========
+        async function adminLoadAllComments() {
+            var list = document.getElementById('commentAdminList');
+            var count = document.getElementById('commentAdminCount');
+            list.innerHTML = '<div style="color:#8b949e;text-align:center;padding:40px 20px;font-size:13px;">⏳ 扫描评论目录…</div>';
+            count.textContent = '';
+            var allComments = [];
+            try {
+                var token = getGithubToken();
+                var api = 'https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/contents/' + COMMENTS_DIR;
+                var res = await fetch(api, { headers: { 'Authorization': 'token ' + token } });
+                if (!res.ok) {
+                    if (res.status === 404) {
+                        list.innerHTML = '<div style="color:#8b949e;text-align:center;padding:60px 20px;font-size:13px;">📭 暂无评论</div>';
+                        count.textContent = '0 条评论';
+                        return;
+                    }
+                    throw new Error('HTTP ' + res.status);
+                }
+                var bookFolders = await res.json();
+                for (var b = 0; b < bookFolders.length; b++) {
+                    var bookApi = 'https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/contents/' + COMMENTS_DIR + '/' + bookFolders[b].name;
+                    var chapterRes = await fetch(bookApi, { headers: { 'Authorization': 'token ' + token } });
+                    if (!chapterRes.ok) continue;
+                    var chapterFiles = await chapterRes.json();
+                    for (var c = 0; c < chapterFiles.length; c++) {
+                        var fileApi = 'https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/contents/' + COMMENTS_DIR + '/' + bookFolders[b].name + '/' + chapterFiles[c].name;
+                        var fileRes = await fetch(fileApi, { headers: { 'Authorization': 'token ' + token } });
+                        if (!fileRes.ok) continue;
+                        var fileData = await fileRes.json();
+                        var json = JSON.parse(decodeURIComponent(escape(atob(fileData.content))));
+                        var bookName = json.book || bookFolders[b].name;
+                        var chapterName = json.chapter || chapterFiles[c].name.replace('.json', '');
+                        var comments = json.comments || [];
+                        for (var ci = 0; ci < comments.length; ci++) {
+                            allComments.push({
+                                book: bookName,
+                                chapter: chapterName,
+                                time: comments[ci].time || '',
+                                body: comments[ci].body || '',
+                                sha: fileData.sha,
+                                path: COMMENTS_DIR + '/' + bookFolders[b].name + '/' + chapterFiles[c].name,
+                                commentIdx: ci
+                            });
+                        }
+                    }
+                }
+            } catch(e) {
+                list.innerHTML = '<div style="color:#f85149;text-align:center;padding:40px 20px;font-size:13px;">⚠️ 加载失败: ' + esc(e.message) + '</div>';
+                return;
+            }
+            count.textContent = allComments.length + ' 条评论';
+            if (!allComments.length) {
+                list.innerHTML = '<div style="color:#8b949e;text-align:center;padding:60px 20px;font-size:13px;">📭 暂无评论</div>';
+                return;
+            }
+            // 按时间倒序
+            allComments.sort(function(a, b) { return b.time.localeCompare(a.time); });
+            // 存储当前列表用于删除操作
+            window._commentAdminCache = allComments;
+            renderCommentAdminList(allComments);
+        }
+
+        function renderCommentAdminList(comments) {
+            var list = document.getElementById('commentAdminList');
+            var h = '<div style="display:flex;flex-direction:column;gap:6px;">';
+            for (var i = 0; i < comments.length; i++) {
+                var c = comments[i];
+                h += '<div style="background:#161b22;border:1px solid #21262d;border-radius:8px;padding:10px 14px;">' +
+                    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">' +
+                        '<span style="font-size:11px;color:#58a6ff;">📖 ' + esc(c.book) + ' · ' + esc(c.chapter) + '</span>' +
+                        '<span style="font-size:10px;color:#484f58;">' + esc(c.time) + '</span>' +
+                    '</div>' +
+                    '<div style="display:flex;justify-content:space-between;align-items:center;">' +
+                        '<div style="color:#c9d1d9;font-size:13px;line-height:1.5;flex:1;min-width:0;word-break:break-all;">' + esc(c.body) + '</div>' +
+                        '<button onclick="adminDeleteComment(' + i + ')" style="flex-shrink:0;margin-left:12px;background:rgba(248,81,73,0.1);color:#f85149;border:1px solid rgba(248,81,73,0.3);border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;">🗑</button>' +
+                    '</div>' +
+                '</div>';
+            }
+            h += '</div>';
+            list.innerHTML = h;
+        }
+
+        async function adminDeleteComment(idx) {
+            var cache = window._commentAdminCache;
+            if (!cache || idx < 0 || idx >= cache.length) return;
+            var c = cache[idx];
+            try {
+                var token = getGithubToken();
+                var api = 'https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/contents/' + c.path;
+                // 先获取最新 sha（并发安全）
+                var getRes = await fetch(api, { headers: { 'Authorization': 'token ' + token } });
+                var sha = c.sha;
+                if (getRes.ok) { var d = await getRes.json(); sha = d.sha; }
+                // 读取文件内容，删除对应评论
+                var fileRes = await fetch(api, { headers: { 'Authorization': 'token ' + token } });
+                if (!fileRes.ok) throw new Error('读取文件失败');
+                var fileData = await fileRes.json();
+                var json = JSON.parse(decodeURIComponent(escape(atob(fileData.content))));
+                var comments = json.comments || [];
+                if (c.commentIdx < comments.length) {
+                    comments.splice(c.commentIdx, 1);
+                }
+                json.comments = comments;
+                var b64 = btoa(unescape(encodeURIComponent(JSON.stringify(json, null, 2))));
+                var body = { message: '删除评论: ' + c.book + ' - ' + c.chapter, content: b64, sha: sha };
+                var putRes = await fetch(api, {
+                    method: 'PUT',
+                    headers: { 'Authorization': 'token ' + token, 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                if (!putRes.ok) throw new Error('保存失败');
+                showToast('✅ 已删除');
+                // 从缓存移除
+                cache.splice(idx, 1);
+                document.getElementById('commentAdminCount').textContent = cache.length + ' 条评论';
+                renderCommentAdminList(cache);
+            } catch(e) {
+                showToast('⚠️ 删除失败: ' + esc(e.message));
             }
         }
 
