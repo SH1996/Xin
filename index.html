@@ -1628,7 +1628,10 @@
 
         /* === 章节留言 === */
         .comment-bubble { position: fixed; right: 16px; bottom: 120px; z-index: 420; width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg,#4a90d9,#5b6abf); color: #fff; border: none; font-size: 20px; cursor: pointer; box-shadow: 0 3px 16px rgba(74,144,217,0.35); display: flex; align-items: center; justify-content: center; transition: all 0.2s; animation: cloudFloat 3s ease-in-out infinite; -webkit-tap-highlight-color: transparent; }
-        .comment-bubble.hidden { display: none; }
+        .comment-bubble::before { content: '💬'; }
+        .comment-bubble::after { content: attr(data-count); position: absolute; right: -2px; top: -2px; min-width: 16px; height: 16px; padding: 0 4px; background: #f85149; color: #fff; border-radius: 8px; font-size: 9px; font-weight: bold; display: flex; align-items: center; justify-content: center; line-height: 1; }
+        .comment-bubble[data-count=""]::after { display: none; }
+        .comment-bubble.hidden { display: none !important; }
         @keyframes cloudFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
         .comment-panel { position: fixed; right: 8px; bottom: 180px; z-index: 430; width: 320px; max-width: calc(100vw - 16px); max-height: 50vh; background: #fff; border-radius: 16px; box-shadow: 0 8px 40px rgba(0,0,0,0.25); display: flex; flex-direction: column; opacity: 0; pointer-events: none; transform: translateY(12px); transition: all 0.25s ease; overflow: hidden; }
         .comment-panel.open { opacity: 1; pointer-events: auto; transform: translateY(0); }
@@ -3648,15 +3651,10 @@
             var total = currentBookData.chapters.length;
             document.getElementById('readerPrevBtn').disabled = (idx === 0);
             document.getElementById('readerNextBtn').disabled = (idx >= total - 1);
-            // 章节切换时显示气泡，关闭留言面板，重置为默认
+            // 章节切换时重置气泡，关闭留言面板
             stopListen();
-            var bub = document.getElementById('commentBubble');
-            bub.classList.remove('hidden');
-            bub.textContent = '💬';
-            bub.style.fontSize = '';
-            bub.style.fontWeight = '';
-            bub.style.background = 'linear-gradient(135deg,#4a90d9,#5b6abf)';
             document.getElementById('commentPanel').classList.remove('open');
+            updateCommentBubble(commentStore.length);
             commentBook = currentBookData.title;
             commentChapter = ch.title;
             loadCommentsSilent();
@@ -3671,24 +3669,22 @@
                 var path = getCommentPath(commentBook, commentChapter);
                 var api = 'https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/contents/' + path;
                 var res = await fetch(api, { headers: { 'Authorization': 'token ' + getGithubToken() } });
-                if (!res.ok) { commentStore = []; return; }
+                if (!res.ok) { commentStore = []; updateCommentBubble(0); return; }
                 var data = await res.json();
                 var json = decodeURIComponent(escape(atob(data.content)));
                 var parsed = JSON.parse(json);
                 commentStore = parsed.comments || [];
-                var count = commentStore.length;
-                if (count > 0) {
-                    document.getElementById('commentBubble').style.background = 'linear-gradient(135deg,#e8a040,#d9705a)';
-                    document.getElementById('commentBubble').textContent = count;
-                    document.getElementById('commentBubble').style.fontSize = '13px';
-                    document.getElementById('commentBubble').style.fontWeight = 'bold';
-                } else {
-                    document.getElementById('commentBubble').style.background = 'linear-gradient(135deg,#4a90d9,#5b6abf)';
-                    document.getElementById('commentBubble').textContent = '💬';
-                    document.getElementById('commentBubble').style.fontSize = '';
-                    document.getElementById('commentBubble').style.fontWeight = '';
-                }
-            } catch(e) { commentStore = []; }
+                updateCommentBubble(commentStore.length);
+            } catch(e) { commentStore = []; updateCommentBubble(0); }
+        }
+
+        function updateCommentBubble(count) {
+            var bub = document.getElementById('commentBubble');
+            bub.classList.remove('hidden');
+            bub.style.fontSize = '';
+            bub.style.fontWeight = '';
+            bub.style.background = 'linear-gradient(135deg,#4a90d9,#5b6abf)';
+            bub.setAttribute('data-count', count > 0 ? String(count) : '');
         }
         // === 朗读功能 (智谱 TTS) ===
         var ZHIPU_API_KEY = 'bf709c17973f4d48a6254b03bd7c5544.6RkZwVp54GW1ZyJA';
@@ -5027,7 +5023,7 @@
         </div>
         <div class="reader-copyright">✍️ 原创作品 · 作者保留所有权利 · 禁止转载</div>
         <!-- 章节留言 -->
-        <button class="comment-bubble" id="commentBubble" onclick="toggleCommentPanel()" title="章节有话说">💬</button>
+        <button class="comment-bubble" id="commentBubble" onclick="toggleCommentPanel()" title="章节有话说" data-count=""></button>
         <div class="comment-panel" id="commentPanel">
             <div class="comment-header">
                 <span class="comment-title">💬 读者留言</span>
