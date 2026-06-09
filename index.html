@@ -1741,6 +1741,18 @@
             </div>
         </div>
     </div>
+    <!-- 听书密码弹窗 -->
+    <div id="listenPwOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:center;justify-content:center;">
+        <div style="background:var(--card-bg);padding:24px;border-radius:16px;text-align:center;min-width:280px;">
+            <div style="font-size:18px;margin-bottom:8px;">🔐</div>
+            <div style="font-size:14px;color:var(--text-light);margin-bottom:12px;">请输入听书密码</div>
+            <input id="listenPwInput" type="password" placeholder="密码" maxlength="20" style="width:100%;padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);text-align:center;margin-bottom:12px;font-size:16px;outline:none;" onkeydown="if(event.key==='Enter')submitListenPw()">
+            <div style="display:flex;gap:8px;">
+                <button onclick="document.getElementById('listenPwOverlay').style.display='none'" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);cursor:pointer;">取消</button>
+                <button onclick="submitListenPw()" style="flex:1;padding:8px;border-radius:8px;border:none;background:var(--accent);color:#fff;cursor:pointer;">确认</button>
+            </div>
+        </div>
+    </div>
 
     <div class="query-panel" id="queryPanel">
         <div class="query-header">
@@ -3697,15 +3709,41 @@
         var cacheCursor = 0;
         var audioCtx = null;
         var activeSource = null;
+        var listenPwCallback = null;
+        function submitListenPw() {
+            var inp = document.getElementById('listenPwInput');
+            var pw = inp.value.trim();
+            inp.value = '';
+            document.getElementById('listenPwOverlay').style.display = 'none';
+            if (listenPwCallback) {
+                var cb = listenPwCallback;
+                listenPwCallback = null;
+                cb(pw);
+            }
+        }
         var listenUnlocked = false;
         async function toggleListen() {
             if (isListening) { stopListen(); return; }
             if (isCaching) return;
             if (!listenUnlocked) {
-                var pwd = prompt('请输入听书密码：');
-                if (pwd !== '2027') { showToast('⚠️ 密码错误'); return; }
-                listenUnlocked = true;
+                showListenPwDialog(function(pw) {
+                    if (pw !== '2027') { showToast('⚠️ 密码错误'); return; }
+                    listenUnlocked = true;
+                    doStartListen();
+                });
+                return;
             }
+            doStartListen();
+        }
+        function showListenPwDialog(cb) {
+            listenPwCallback = cb;
+            document.getElementById('listenPwInput').value = '';
+            document.getElementById('listenPwOverlay').style.display = 'flex';
+            setTimeout(function() {
+                document.getElementById('listenPwInput').focus();
+            }, 100);
+        }
+        function doStartListen() {
             if (!currentBookData || currentBookData._idx === undefined) return;
             var ch = currentBookData.chapters[currentBookData._idx];
             if (!ch) return;
