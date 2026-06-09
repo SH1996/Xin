@@ -1712,7 +1712,7 @@
         .sandbox-close:hover { background: rgba(255,255,255,0.05); color: #fff; }
         .sandbox-iframe { flex: 1; width: 100%; border: none; background: #060a14; }
 
-        /* ═══ 地毯式扫店 Overlay ═══ */
+        /* ═══ 选址分析 Overlay ═══ */
         .shoploc-overlay { position: fixed; inset: 0; z-index: 460; background: #f5f0e6; opacity: 0; pointer-events: none; transition: opacity 0.35s; display: flex; flex-direction: column; }
         .shoploc-overlay.active { opacity: 1; pointer-events: auto; }
         .shoploc-topbar { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; background: #fff; border-bottom: 1px solid #e0d5c0; flex-shrink: 0; }
@@ -5081,7 +5081,7 @@
         function closeSandbox() {
             document.getElementById('sandboxOverlay').classList.remove('active');
         }
-        // ═══ 地毯式扫店 ═══
+        // ═══ 选址分析 ═══
         function openShopLocation() {
             closeLibrary(); closeWeekly(); closeVoicePanel();
             closeVideosPanel(); closeShopsPanel(); closeShopLocation(); closeSandbox();
@@ -5229,7 +5229,7 @@
         <button class="hamburger-item" onclick="openShopsPanel();toggleHamburger()">🏪 店铺转让</button>
         <button class="hamburger-item" onclick="startRebirth();toggleHamburger()">🔄 重生世界</button>
         <button class="hamburger-item" onclick="openSandbox();toggleHamburger()">🌌 万象沙盘</button>
-        <button class="hamburger-item" onclick="openShopLocation();toggleHamburger()">📍 地毯式扫店</button>
+        <button class="hamburger-item" onclick="openShopLocation();toggleHamburger()">📍 选址分析</button>
         <button class="hamburger-item" onclick="openQueryPanel();toggleHamburger()">🔑 管理员入口</button></div>
     <!-- === 万象沙盘 === -->
     <div class="sandbox-overlay" id="sandboxOverlay">
@@ -5239,10 +5239,10 @@
         </div>
         <iframe class="sandbox-iframe" id="sandboxFrame" src="sandbox.html" allow="clipboard-write"></iframe>
     </div>
-    <!-- === 地毯式扫店 === -->
+    <!-- === 选址分析 === -->
     <div class="shoploc-overlay" id="shoplocOverlay">
         <div class="shoploc-topbar">
-            <h3>📍 地毯式扫店 · AI选址</h3>
+            <h3>📍 选址分析 · AI选址</h3>
             <button class="shoploc-close" onclick="closeShopLocation()">✕</button>
         </div>
         <iframe class="shoploc-iframe" id="shoplocFrame" src="shop-location.html" allow="clipboard-write;geolocation"></iframe>
