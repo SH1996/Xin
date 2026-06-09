@@ -4677,40 +4677,13 @@
             var h = '';
             for (var i = 0; i < videoList.length; i++) {
                 var v = videoList[i];
-                var embedSrc = null;
-                if (v.url.indexOf('weixin.qq.com/sph/') !== -1) {
-                    embedSrc = v.url;
-                } else if (v.url.indexOf('bilibili.com/video/') !== -1) {
-                    var bv = v.url.match(/(BV[a-zA-Z0-9]+)/);
-                    if (bv) embedSrc = 'https://player.bilibili.com/player.html?bvid=' + bv[1] + '&page=1&high_quality=1';
-                } else if (v.url.indexOf('youtube.com/watch?v=') !== -1) {
-                    var yid = v.url.match(/v=([^&]+)/);
-                    if (yid) embedSrc = 'https://www.youtube.com/embed/' + yid[1];
-                } else if (v.url.indexOf('youtu.be/') !== -1) {
-                    var yid2 = v.url.match(/youtu\.be\/([^?&]+)/);
-                    if (yid2) embedSrc = 'https://www.youtube.com/embed/' + yid2[1];
-                }
-                var card = '';
-                if (embedSrc) {
-                    card = '<div style="background:#161b22;border:1px solid #21262d;border-radius:12px;overflow:hidden;margin-bottom:10px;">' +
-                        '<div style="position:relative;background:#0d1117;aspect-ratio:16/9;">' +
-                            '<iframe src="' + embedSrc + '" style="width:100%;height:100%;border:none;" allow="autoplay;fullscreen;encrypted-media" allowfullscreen></iframe>' +
-                        '</div>' +
-                        '<div style="padding:10px 14px;display:flex;justify-content:space-between;align-items:center;">' +
-                            '<span style="color:#c9d1d9;font-size:13px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + esc(v.title) + '</span>' +
-                            '<button onclick="delVideo(' + i + ')" style="background:none;color:#f85149;border:1px solid #f8514966;border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;">🗑 删除</button>' +
-                        '</div>' +
-                    '</div>';
-                } else {
-                    card = '<div style="background:#161b22;border:1px solid #21262d;border-radius:12px;padding:16px 14px;display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">' +
-                        '<div style="flex:1;min-width:0;">' +
-                            '<div style="color:#c9d1d9;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">🎬 ' + esc(v.title) + '</div>' +
-                            '<a href="' + escAttr(v.url) + '" target="_blank" style="color:#58a6ff;font-size:11px;word-break:break-all;">🔗 打开观看</a>' +
-                        '</div>' +
-                        '<button onclick="delVideo(' + i + ')" style="background:none;color:#f85149;border:1px solid #f8514966;border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;">🗑 删除</button>' +
-                    '</div>';
-                }
-                h += card;
+                h += '<div style="background:#161b22;border:1px solid #21262d;border-radius:8px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">' +
+                    '<div style="flex:1;min-width:0;">' +
+                        '<div style="color:#c9d1d9;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + esc(v.title) + '</div>' +
+                        '<a href="' + escAttr(v.url) + '" target="_blank" style="color:#58a6ff;font-size:11px;word-break:break-all;">🔗 打开</a>' +
+                    '</div>' +
+                    '<button onclick="delVideo(' + i + ')" style="flex-shrink:0;margin-left:10px;background:none;color:#f85149;border:1px solid #f8514966;border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;">🗑 删除</button>' +
+                '</div>';
             }
             wall.innerHTML = h;
         }
