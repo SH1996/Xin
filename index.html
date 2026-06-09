@@ -3653,7 +3653,6 @@
         }
         function selectChapter(idx, btn) {
             if (!currentBookData) return;
-            readerPageIndex = 0;
             const ch = currentBookData.chapters[idx];
             document.getElementById('readerContent').innerHTML = ch.html;
             document.getElementById('readerContent').scrollTop = 0;
@@ -3880,35 +3879,39 @@
         }
 
         // 翻页：将当前章节按屏幕高度分页，整页翻动 + 翻书动画
-        var readerPageIndex = 0; // 当前章节内页码（切换章节时自动归零）
-        var readerPageHeight = 0; // 缓存每页高度
+        var readerPageIndex = 0;
 
         function pageFlip(dir) {
             var el = document.getElementById('readerContent');
             if (!el) return;
-            var vh = el.clientHeight;
-            if (!readerPageHeight || readerPageHeight < 10) readerPageHeight = vh;
-            var total = el.scrollHeight;
-            var totalPages = Math.ceil(total / readerPageHeight);
-            var newPage = readerPageIndex + dir;
-            if (newPage < 0) { prevChapter(); return; }
-            if (newPage >= totalPages) { nextChapter(); return; }
-            readerPageIndex = newPage;
-            // 翻书动画：先缩小→翻→放大
-            el.style.transition = 'transform 0.18s ease-in, opacity 0.18s ease-in';
-            el.style.transform = 'scale(0.85) perspective(800px) rotateY(' + (dir > 0 ? -25 : 25) + 'deg)';
+            var pageH = el.clientHeight * 0.88; // 一屏88%，留点重叠避免跳行
+            var cur = el.scrollTop;
+            var target = dir > 0 ? cur + pageH : cur - pageH;
+            var maxScroll = el.scrollHeight - el.clientHeight;
+            target = Math.max(0, Math.min(target, maxScroll));
+
+            // 翻到边界交给上下章
+            if (dir < 0 && cur <= 2) { prevChapter(); return; }
+            if (dir > 0 && cur >= maxScroll - 2) { nextChapter(); return; }
+
+            // 翻书动画
+            el.style.transition = 'transform 0.15s ease-in, opacity 0.15s ease-in';
+            el.style.transform = 'scale(0.9) perspective(800px) rotateY(' + (dir > 0 ? -20 : 20) + 'deg)';
             el.style.opacity = '0.3';
             setTimeout(function() {
-                el.scrollTop = readerPageIndex * readerPageHeight;
-                el.style.transition = 'transform 0.22s ease-out, opacity 0.22s ease-out';
+                el.style.transition = 'none';
+                el.scrollTop = target;
+                el.style.transform = 'scale(0.9) perspective(800px) rotateY(' + (dir > 0 ? 20 : -20) + 'deg)';
+                void el.offsetWidth;
+                el.style.transition = 'transform 0.2s ease-out, opacity 0.2s ease-out';
                 el.style.transform = 'scale(1) perspective(800px) rotateY(0deg)';
                 el.style.opacity = '1';
                 setTimeout(function() {
                     el.style.transition = '';
                     el.style.transform = '';
                     el.style.opacity = '';
-                }, 250);
-            }, 200);
+                }, 230);
+            }, 170);
         }
 
         // ===== 重生世界 =====
