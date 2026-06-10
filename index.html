@@ -1706,8 +1706,8 @@
         .rebirth-game-loading { flex: 1; display: flex; align-items: center; justify-content: center; color: #6a5a9a; font-size: 14px; }
     
         /* ═══ 万象沙盘 Overlay ═══ */
-        .sandbox-overlay { position: fixed; inset: 0; z-index: 460; background: rgba(2,4,8,0.95); opacity: 0; pointer-events: none; transition: opacity 0.35s; display: flex; flex-direction: column; }
-        .sandbox-overlay.active { opacity: 1; pointer-events: auto; }
+        .sandbox-overlay { position: fixed; inset: 0; z-index: 460; background: rgba(2,4,8,0.95); opacity: 0; pointer-events: none; transition: opacity 0.35s; display: none; flex-direction: column; }
+        .sandbox-overlay.active { display: flex; opacity: 1; pointer-events: auto; }
         .sandbox-topbar { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; background: rgba(15,23,42,0.9); border-bottom: 1px solid rgba(34,211,238,0.08); flex-shrink: 0; }
         .sandbox-topbar h3 { margin: 0; color: #94c5f7; font-size: 14px; letter-spacing: 2px; }
         .sandbox-close { background: none; border: 1px solid rgba(255,255,255,0.1); color: #aaa; font-size: 18px; cursor: pointer; padding: 4px 12px; border-radius: 6px; transition: all 0.15s; line-height: 1; }
@@ -1715,8 +1715,8 @@
         .sandbox-iframe { flex: 1; width: 100%; border: none; background: #060a14; }
 
         /* ═══ 选址分析 Overlay ═══ */
-        .shoploc-overlay { position: fixed; inset: 0; z-index: 460; background: #f5f0e6; opacity: 0; pointer-events: none; transition: opacity 0.35s; display: flex; flex-direction: column; }
-        .shoploc-overlay.active { opacity: 1; pointer-events: auto; }
+        .shoploc-overlay { position: fixed; inset: 0; z-index: 460; background: #f5f0e6; opacity: 0; pointer-events: none; transition: opacity 0.35s; display: none; flex-direction: column; }
+        .shoploc-overlay.active { display: flex; opacity: 1; pointer-events: auto; }
         .shoploc-topbar { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; background: #fff; border-bottom: 1px solid #e0d5c0; flex-shrink: 0; }
         .shoploc-topbar h3 { margin: 0; color: #5a3a2a; font-size: 14px; letter-spacing: 1px; }
         .shoploc-close { background: none; border: 1px solid #d8c8a8; color: #8a6a4a; font-size: 18px; cursor: pointer; padding: 4px 12px; border-radius: 6px; transition: all 0.15s; line-height: 1; }
@@ -5240,7 +5240,7 @@
             <h3>🌌 万象沙盘 · 推演</h3>
             <button class="sandbox-close" onclick="closeSandbox()">✕</button>
         </div>
-        <iframe class="sandbox-iframe" id="sandboxFrame" src="sandbox.html" allow="clipboard-write"></iframe>
+        <iframe class="sandbox-iframe" id="sandboxFrame" src="" allow="clipboard-write"></iframe>
     </div>
     <!-- === 选址分析 === -->
     <div class="shoploc-overlay" id="shoplocOverlay">
@@ -5248,7 +5248,7 @@
             <h3>📍 选址分析 · AI选址</h3>
             <button class="shoploc-close" onclick="closeShopLocation()">✕</button>
         </div>
-        <iframe class="shoploc-iframe" id="shoplocFrame" src="shop-location.html" allow="clipboard-write;geolocation"></iframe>
+        <iframe class="shoploc-iframe" id="shoplocFrame" src="" allow="clipboard-write;geolocation"></iframe>
     </div>
 
 
