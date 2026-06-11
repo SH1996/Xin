@@ -1795,6 +1795,7 @@
             <button class="query-tab" id="tabVideos" onclick="switchQueryTab('videos')" style="padding:10px 8px;background:none;border:none;color:var(--text-light);font-size:12px;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;flex-shrink:0;">📱 视频</button>
             <button class="query-tab" id="tabShops" onclick="switchQueryTab('shops')" style="padding:10px 8px;background:none;border:none;color:var(--text-light);font-size:12px;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;flex-shrink:0;">🏪 转让</button>
             <button class="query-tab" id="tabComments" onclick="switchQueryTab('comments')" style="padding:10px 8px;background:none;border:none;color:var(--text-light);font-size:12px;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;flex-shrink:0;">💬 评论</button>
+            <button class="query-tab" id="tabSandbox" onclick="switchQueryTab('sandbox')" style="padding:10px 8px;background:none;border:none;color:var(--text-light);font-size:12px;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;flex-shrink:0;">🌌 沙盘</button>
         </div>
         <!-- 聊天记录 -->
         <div id="queryContent" style="flex:1;display:flex;flex-direction:column;overflow:hidden;padding:0 12px;">
@@ -1853,6 +1854,15 @@
             </div>
             <div id="shopTransferList" style="flex:1;overflow-y:auto;padding:8px;"></div>
             <div id="shopsWall_admin" style="flex:1;overflow-y:auto;padding:8px;display:none;"></div>
+        </div>
+        <!-- 沙盘推演备份 -->
+        <div id="querySandboxContent" style="flex:1;display:none;flex-direction:column;overflow:hidden;padding:0 12px;background:#0d1117;">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;">
+                <span id="sandboxCount" style="font-size:12px;color:#8b949e;"></span>
+                <button onclick="refreshSandboxRecords()" style="background:none;border:1px solid #d4c8b0;color:#8a7a6a;padding:4px 12px;border-radius:14px;font-size:12px;cursor:pointer;margin-right:6px;">🔄 刷新</button>
+                <button onclick="delAllSandboxRecords()" style="background:none;border:1px solid #e8c0c8;color:#c97b8b;padding:4px 12px;border-radius:14px;font-size:12px;cursor:pointer;">🗑 全部删除</button>
+            </div>
+            <div id="sandboxRecordList" style="flex:1;overflow-y:auto;"></div>
         </div>
     </div>
 
@@ -2717,6 +2727,7 @@
             var videos = document.getElementById('queryVideosContent');
             var shops = document.getElementById('queryShopsContent');
             var comments = document.getElementById('queryCommentsContent');
+            var sandbox = document.getElementById('querySandboxContent');
             var tabChat = document.getElementById('tabChat');
             var tabVoice = document.getElementById('tabVoice');
             var tabBooks = document.getElementById('tabBooks');
@@ -2724,8 +2735,9 @@
             var tabVideos = document.getElementById('tabVideos');
             var tabShops = document.getElementById('tabShops');
             var tabComments = document.getElementById('tabComments');
-            var allTabs = [tabChat, tabVoice, tabBooks, tabJournals, tabVideos, tabShops, tabComments];
-            var allPanels = [chat, voice, books, journals, videos, shops, comments];
+            var tabSandbox = document.getElementById('tabSandbox');
+            var allTabs = [tabChat, tabVoice, tabBooks, tabJournals, tabVideos, tabShops, tabComments, tabSandbox];
+            var allPanels = [chat, voice, books, journals, videos, shops, comments, sandbox];
             allPanels.forEach(function(p) { if (p) p.style.display = 'none'; });
             allTabs.forEach(function(t) { if (t) { t.style.color = 'var(--text-light)'; t.style.borderBottom = '2px solid transparent'; } });
             if (tab === 'chat') {
@@ -2768,6 +2780,11 @@
                 tabComments.style.color = 'var(--accent)'; tabComments.style.borderBottom = '2px solid var(--accent)';
                 document.getElementById('queryTabTitle').textContent = '💬 评论管理';
                 adminLoadAllComments();
+            } else if (tab === 'sandbox') {
+                sandbox.style.display = 'flex';
+                tabSandbox.style.color = 'var(--accent)'; tabSandbox.style.borderBottom = '2px solid var(--accent)';
+                document.getElementById('queryTabTitle').textContent = '🌌 沙盘推演备份';
+                refreshSandboxRecords();
             }
         }
 
@@ -4652,6 +4669,98 @@
                 row.style.opacity = '1';
                 showToast('❌ 删除失败: ' + e.message);
             }
+        }
+
+        // ========== 沙盘推演备份（管理员入口 🌌 沙盘 tab） ==========
+        var SBOX_FILEB = 'sandbox_records.json';
+        var SBOX_APIB = 'https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/contents/' + SBOX_FILEB;
+
+        async function getSandboxRecords(){
+            var token = getGithubToken();
+            if(!token) return [];
+            try {
+                var res = await fetch(SBOX_APIB, {headers:{'Authorization':'token '+token,'Accept':'application/vnd.github.v3+json'}});
+                if(!res.ok) return [];
+                var info = await res.json();
+                var raw = atob(info.content);
+                var records = JSON.parse(decodeURIComponent(escape(raw)));
+                return Array.isArray(records) ? records : [];
+            } catch(e) { return []; }
+        }
+
+        async function saveSandboxRecords(records){
+            var token = getGithubToken();
+            if(!token) return;
+            try {
+                var jsonStr = JSON.stringify(records, null, 2);
+                var utf8Bytes = unescape(encodeURIComponent(jsonStr));
+                var content = btoa(utf8Bytes);
+                var sha = null;
+                try {
+                    var check = await fetch(SBOX_APIB, {headers:{'Authorization':'token '+token,'Accept':'application/vnd.github.v3+json'}});
+                    if(check.ok){ var info = await check.json(); sha = info.sha; }
+                } catch(e) {}
+                var body = {message:'update sandbox records', content:content, branch:'main'};
+                if(sha) body.sha = sha;
+                await fetch(SBOX_APIB, {
+                    method:'PUT',
+                    headers:{'Authorization':'token '+token,'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'},
+                    body:JSON.stringify(body)
+                });
+            } catch(e) {}
+        }
+
+        async function refreshSandboxRecords(){
+            var list = document.getElementById('sandboxRecordList');
+            var count = document.getElementById('sandboxCount');
+            list.innerHTML = '<div style="color:#8b949e;text-align:center;padding:40px;font-size:13px;">⏳ 加载中…</div>';
+            var records = await getSandboxRecords();
+            count.textContent = '共 ' + records.length + ' 条推演记录';
+            if(!records.length){
+                list.innerHTML = '<div style="color:#8b949e;text-align:center;padding:40px;font-size:13px;">还没有沙盘推演记录</div>';
+                return;
+            }
+            var html = records.slice().reverse().map(function(r, i){
+                var realIdx = records.length - 1 - i;
+                var date = r.date ? new Date(r.date).toLocaleString('zh-CN') : '';
+                var scene = esc(r.scene || '无');
+                var gua = esc(r.gua || '');
+                var attitude = esc(r.attitude || '');
+                return '<div style="background:#161b22;border:1px solid #21262d;border-radius:8px;padding:10px;margin:6px 0;">'
+                    + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">'
+                    + '<span style="font-size:11px;color:#58a6ff;">📅 '+date+'</span>'
+                    + '<button onclick="delSandboxRecord('+realIdx+')" style="background:none;border:1px solid #c0392b;color:#c0392b;padding:2px 10px;border-radius:4px;font-size:11px;cursor:pointer;">🗑 删除</button>'
+                    + '</div>'
+                    + '<div style="font-size:13px;color:#e6edf3;margin-bottom:4px;"><strong>👤 场景：</strong>'+scene+'</div>'
+                    + '<div style="font-size:12px;color:#d2a8ff;margin-bottom:4px;">☯ '+gua+' | 态度：'+attitude+'</div>'
+                    + '<div style="font-size:11px;color:#7d8590;line-height:1.5;">💡 '+esc(r.conclusion||'').substring(0,200)+'</div>'
+                    + '</div>';
+            }).join('');
+            list.innerHTML = html;
+        }
+
+        async function delSandboxRecord(index){
+            if(!confirm('确定删除这条沙盘推演记录？')) return;
+            showToast('⏳ 删除中…');
+            try {
+                var records = await getSandboxRecords();
+                if(index >= 0 && index < records.length){
+                    records.splice(index, 1);
+                    await saveSandboxRecords(records);
+                    showToast('✅ 已删除');
+                    refreshSandboxRecords();
+                }
+            } catch(e){ showToast('❌ 删除失败'); }
+        }
+
+        async function delAllSandboxRecords(){
+            if(!confirm('确定删除全部沙盘推演记录？不可恢复！')) return;
+            showToast('⏳ 删除中…');
+            try {
+                await saveSandboxRecords([]);
+                showToast('✅ 全部已删除');
+                refreshSandboxRecords();
+            } catch(e){ showToast('❌ 删除失败'); }
         }
 
         // ========== 评论管理（管理员入口 💬 评论 tab） ==========
