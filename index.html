@@ -1478,33 +1478,64 @@
         }
         /* 书库列表页精选卡片 */
         .book-card.featured-card {
-            border: 2px solid transparent;
-            background: linear-gradient(#fff, #fff) padding-box,
-                        linear-gradient(90deg, #ff2d55, #ff6b35, #ffc107, #00c853, #2979ff, #d500f9) border-box;
-            animation: featuredBorder 2s linear infinite;
+            border: 3px solid transparent;
+            background: linear-gradient(#fffdf8, #fffdf8) padding-box,
+                        linear-gradient(102deg, #ff0080, #ff8c00, #40e0d0, #8b5cf6, #ff0080) border-box;
+            background-size: 300% 300%;
+            animation: featuredGradient 3s ease infinite, featuredGlow 2s ease-in-out infinite;
             position: relative;
+            box-shadow: 0 4px 24px rgba(213,0,249,0.15);
+            transform: scale(1.02);
+        }
+        .book-card.featured-card:hover {
+            transform: scale(1.04) translateY(-2px);
+            box-shadow: 0 8px 36px rgba(255,0,128,0.25), 0 0 60px rgba(139,92,246,0.12);
+        }
+        .book-card.featured-card::before {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 15px;
+            background: linear-gradient(102deg, #ff0080, #ff8c00, #40e0d0, #8b5cf6, #ff0080);
+            background-size: 300% 300%;
+            animation: featuredGradient 3s ease infinite;
+            filter: blur(12px);
+            opacity: 0.35;
+            z-index: -1;
         }
         .book-card.featured-card::after {
-            content: '🔥 精选推荐';
+            content: '👑 精选推荐';
             position: absolute;
-            top: -10px;
-            right: 12px;
-            background: linear-gradient(90deg, #ff2d55, #d500f9);
+            top: -12px;
+            right: 14px;
+            background: linear-gradient(135deg, #ff0080, #ff6b35, #ffc107);
+            background-size: 200% 200%;
+            animation: featuredBadgeBg 2s ease infinite;
             color: #fff;
-            font-size: 10px;
-            font-weight: 800;
-            padding: 2px 10px;
-            border-radius: 8px;
-            letter-spacing: 1px;
-            animation: featuredBadge 0.5s ease-in-out infinite alternate;
+            font-size: 11px;
+            font-weight: 900;
+            padding: 3px 12px;
+            border-radius: 10px;
+            letter-spacing: 1.5px;
+            box-shadow: 0 3px 14px rgba(255,0,128,0.5);
+            animation: featuredBadge 1s ease-in-out infinite alternate, featuredBadgeBg 2s ease infinite;
         }
-        @keyframes featuredBorder {
-            0% { border-image: linear-gradient(90deg, #ff2d55, #ff6b35, #ffc107, #00c853, #2979ff, #d500f9) 1; }
-            100% { border-image: linear-gradient(90deg, #d500f9, #00c853, #ffc107, #ff6b35, #ff2d55, #ff6b35) 1; }
+        @keyframes featuredGradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        @keyframes featuredGlow {
+            0%, 100% { box-shadow: 0 4px 24px rgba(213,0,249,0.15); }
+            50% { box-shadow: 0 6px 36px rgba(255,0,128,0.28), 0 0 48px rgba(139,92,246,0.1); }
         }
         @keyframes featuredBadge {
-            0% { transform: translateY(0px); box-shadow: 0 2px 8px rgba(255,45,85,0.4); }
-            100% { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(213,0,249,0.6); }
+            0% { transform: translateY(0px) rotate(-1deg); }
+            100% { transform: translateY(-3px) rotate(1deg); }
+        }
+        @keyframes featuredBadgeBg {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 200% 50%; }
         }
         @keyframes featuredBtnPulse {
             0%, 100% { box-shadow: 0 0 8px rgba(255,45,85,0.4); }
@@ -3164,12 +3195,18 @@
                 if (!Array.isArray(files)) { bookList = []; bookListLoaded = true; return; }
                 bookList = files
                     .filter(f => f.type === 'file' && (f.name.endsWith('.json') || f.name.endsWith('.md')))
-                    .map((f, i) => ({
-                        name: f.name.replace(/\.(json|md)$/,''),
-                        path: f.path,
-                        api: f.url || `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${f.path}`,
-                        emoji: BOOKS_EMOJI[i % BOOKS_EMOJI.length]
-                    }));
+                    .map((f, i) => {
+                        var name = f.name.replace(/\.(json|md)$/,'');
+                        var tag = BOOK_TAGS[name] || {};
+                        return {
+                            name: name,
+                            path: f.path,
+                            api: f.url || `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${f.path}`,
+                            emoji: tag.emoji || BOOKS_EMOJI[i % BOOKS_EMOJI.length],
+                            subtitle: tag.subtitle || '',
+                            featured: tag.featured || false
+                        };
+                    });
                 bookListLoaded = true;
                 console.log('books found:', bookList.map(b=>b.name));
             } catch(e) {
@@ -3327,7 +3364,8 @@
             '怎么结合AI给AI提示词啊':       { cat: '技能·科普', css: 'tag-mind',     emoji: '🤖', color: '#2a2a5e', color2: '#4a4a8e' },
             '逆袭女王':                     { cat: '文学·小说', css: 'tag-mind',     emoji: '👑', color: '#5e1a3e', color2: '#8e3a5e' },
             '做一个有福的人':               { cat: '处世·哲学', css: 'tag-health',   emoji: '🍀', color: '#4a6b2e', color2: '#6a8b4e' },
-            '拾暮·迟刃':                   { cat: '精选', css: 'tag-featured', emoji: '🔥', color: '#8b1a1a', color2: '#c93030', featured: true }
+            '拾暮·迟刃':                   { cat: '精选', css: 'tag-featured', emoji: '🔥', color: '#8b1a1a', color2: '#c93030', featured: true },
+            '如何探SPA店_从入门到精通':     { cat: '精选', css: 'tag-featured', emoji: '💆', color: '#1a0533', color2: '#3d0a6e', featured: true, subtitle: '从品类速览到城市地图 · 十二大篇章 · 全网最全探店攻略' }
         };
         let libFilter = '全部';
 
