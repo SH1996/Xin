@@ -765,7 +765,7 @@ try{
 var response = await fetch('https://api.deepseek.com/v1/chat/completions', {
 method:'POST',
 headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
-body:JSON.stringify({model:'deepseek-chat',messages:[
+body:JSON.stringify({model:'deepseek-v4-flash',messages:[
 {role:'system',content:'\u4f60\u662f\u7cbe\u901a\u6613\u7ecf\u7684AI\u63a8\u6f14\u52a9\u624b\uff0c\u64c5\u957f\u7ed3\u5408\u5366\u8c61\u7ed9\u51fa\u6df1\u523b\u7684\u4eba\u751f\u6307\u5bfc\u3002\u5fc5\u987b\u4e25\u683c\u8fd4\u56deJSON\u683c\u5f0f\uff0c\u4e0d\u8981\u4efb\u4f55\u989d\u5916\u6587\u5b57\u3002'},
 {role:'user',content:prompt}
 ],temperature:0.8,max_tokens:600}),
@@ -940,7 +940,7 @@ async function fetchAISummary(summary){
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer sk-e29cdb9da8ba4de18af87c9e27511283'},
       body:JSON.stringify({
-        model:'deepseek-chat',
+        model:'deepseek-v4-flash',
         messages:[{role:'system',content:'你是一位易经研究专家和资深人生顾问。你融合易经智慧与实用人生建议，回复简洁有力、温暖而不油腻。每次回复控制在200字以内。'},{role:'user',content:prompt}],
         max_tokens:600,
         temperature:0.7
