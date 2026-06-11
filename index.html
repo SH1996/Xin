@@ -1919,7 +1919,7 @@
         function getModel() { return advancedMode ? DC.proModel : DC.flashModel; }
 
         // ===== GitHub 配置 =====
-        const GITHUB_OWNER = 'SH1996';
+        const GITHUB_OWNER = 'sh1996';
         const GITHUB_REPO = 'Xin';
         const GITHUB_FILE = 'chat.json';
         const GITHUB_API = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE}`;
@@ -4744,13 +4744,14 @@
             showToast('⏳ 删除中…');
             try {
                 var records = await getSandboxRecords();
+                if(!records.length){ showToast('❌ 无记录可删，请先刷新'); refreshSandboxRecords(); return; }
                 if(index >= 0 && index < records.length){
                     records.splice(index, 1);
                     await saveSandboxRecords(records);
                     showToast('✅ 已删除');
                     refreshSandboxRecords();
-                }
-            } catch(e){ showToast('❌ 删除失败'); }
+                } else { showToast('❌ 记录序号无效'); }
+            } catch(e){ showToast('❌ 删除失败: ' + e.message); }
         }
 
         async function delAllSandboxRecords(){

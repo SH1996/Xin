@@ -260,6 +260,7 @@ body { font-family:var(--font-serif); background:var(--bg-primary); color:var(--
 
 .summary-conclusion { font-size:1.4rem; color:var(--gold-primary); text-align:center; letter-spacing:0.12em; line-height:1.6; font-weight:600; margin-bottom:0.8rem; }
 .summary-divider { width:60px; height:1px; background:linear-gradient(90deg,transparent,var(--gold-primary),transparent); margin:0 auto 0.8rem; }
+.summary-ai { animation: fadeIn 0.5s ease; }
 .summary-revelation { font-size:0.9rem; color:var(--text-primary); line-height:1.9; text-align:justify; margin-bottom:1rem; }
 .summary-keywords { display:flex; flex-wrap:wrap; gap:0.4rem; justify-content:center; }
 .keyword-tag { padding:0.25rem 0.7rem; font-size:0.8rem; color:var(--gold-primary); background:rgba(212,168,83,0.08); border:1px solid var(--border); border-radius:var(--radius-sm); letter-spacing:0.05em; }
@@ -540,6 +541,11 @@ body { font-family:var(--font-serif); background:var(--bg-primary); color:var(--
       <h2 class="summary-conclusion" id="summary-conclusion"></h2>
       <div class="summary-divider"></div>
       <div class="summary-revelation" id="summary-revelation"></div>
+      <div class="summary-ai" id="summary-ai" style="display:none;margin:1rem 0;padding:1rem;background:rgba(212,175,55,0.08);border:1px solid rgba(212,175,55,0.2);border-radius:8px;line-height:1.8;font-size:0.95rem;color:var(--text-primary);text-align:justify;">
+        <div style="font-size:0.8rem;color:var(--gold-primary);margin-bottom:0.5rem;opacity:0.8;">🤖 AI 综合解读</div>
+        <div id="summary-ai-text"></div>
+      </div>
+      <div id="summary-ai-loading" style="text-align:center;padding:0.5rem;color:var(--text-secondary);font-size:0.8rem;display:none;">⏳ AI 正在深度解读…</div>
       <div class="summary-keywords" id="summary-keywords"></div>
     </div>
     <div class="summary-actions">
@@ -904,6 +910,56 @@ async function saveSandboxRecord(){
       body:JSON.stringify(body)
     });
   } catch(e) { console.error('saveSandboxRecord err:', e); }
+}
+
+// ===== 八点六、AI 综合总结 =====
+async function fetchAISummary(summary){
+  var aiBox = $('summary-ai');
+  var aiText = $('summary-ai-text');
+  var aiLoading = $('summary-ai-loading');
+  if(!aiBox || !aiText) return;
+  
+  // 构建上下文：场景 + 卦象 + 推演过程
+  var origName = state.hexagram ? getHexagramName(state.hexagram.originalId) : '';
+  var chgName = state.hexagram ? getHexagramName(state.hexagram.changedId) : '';
+  var deductions = state.deductions || [];
+  var deduText = '';
+  for(var i = 0; i < deductions.length; i++){
+    deduText += '步骤'+(i+1)+'（'+(deductions[i].type||'')+'）：'+(deductions[i].content||'')+'\n';
+  }
+  
+  var prompt = '你是一位易经研究专家和人生顾问。用户「'+unescape(encodeURIComponent(state.scene||''))+'」，心态是「'+unescape(encodeURIComponent(state.attitude||''))+'」。起卦得「'+unescape(encodeURIComponent(origName))+'」→「'+unescape(encodeURIComponent(chgName))+'」。\n\n推演过程：\n'+unescape(encodeURIComponent(deduText))+'\n\n请用200字左右，从易经智慧角度给出综合解读和人生建议。要求：1)结合具体卦象含义 2)针对用户的场景和心态 3)给出切实可行的建议 4)语气温暖有力量但不啰嗦。直接输出正文，不要标题和标签。';
+  
+  aiLoading.style.display = 'block';
+  try {
+    var res = await fetch('https://api.deepseek.com/v1/chat/completions', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer sk-e29cdb9da8ba4de18af87c9e27511283'},
+      body:JSON.stringify({
+        model:'deepseek-chat',
+        messages:[{role:'system',content:'你是一位易经研究专家和资深人生顾问。你融合易经智慧与实用人生建议，回复简洁有力、温暖而不油腻。每次回复控制在200字以内。'},{role:'user',content:prompt}],
+        max_tokens:600,
+        temperature:0.7
+      })
+    });
+    aiLoading.style.display = 'none';
+    if(res.ok){
+      var data = await res.json();
+      var reply = data.choices && data.choices[0] && data.choices[0].message ? data.choices[0].message.content : '';
+      if(reply){
+        aiText.textContent = reply;
+        aiBox.style.display = 'block';
+        // 更新保存的记录，加入 AI 总结
+        try {
+          var saved = JSON.parse(sessionStorage.getItem('wxs_ai_summary')||'{}');
+          saved.aiSummary = reply;
+          sessionStorage.setItem('wxs_ai_summary', JSON.stringify(saved));
+        } catch(e) {}
+        return;
+      }
+    }
+  } catch(e) { console.error('fetchAISummary err:', e); }
+  aiLoading.style.display = 'none';
 }
 
 // ===== 九、事件处理 =====
@@ -1477,6 +1533,8 @@ kwEl.appendChild(span);
 }
 // 保存沙盘记录
 saveSandboxRecord();
+// 调用 DeepSeek API 获取真正的 AI 总结
+fetchAISummary(summary);
 }
 
 // ===== 十六、重置 =====
