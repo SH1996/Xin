@@ -3163,9 +3163,9 @@
                 const files = await res.json();
                 if (!Array.isArray(files)) { bookList = []; bookListLoaded = true; return; }
                 bookList = files
-                    .filter(f => f.type === 'file' && f.name.endsWith('.json'))
+                    .filter(f => f.type === 'file' && (f.name.endsWith('.json') || f.name.endsWith('.md')))
                     .map((f, i) => ({
-                        name: f.name.replace(/\.json$/,''),
+                        name: f.name.replace(/\.(json|md)$/,''),
                         path: f.path,
                         api: f.url || `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${f.path}`,
                         emoji: BOOKS_EMOJI[i % BOOKS_EMOJI.length]
@@ -3568,10 +3568,49 @@
                 if (!res.ok) { console.log('load book fail:', bookName); return; }
                 const data = await res.json();
                 if (!data.content) return;
-                const json = decodeURIComponent(escape(atob(data.content)));
-                bookCache[bookName] = JSON.parse(json);
-                console.log('loaded:', bookName, bookCache[bookName].chapters?.length, 'sections');
+                const text = decodeURIComponent(escape(atob(data.content)));
+                // .md 文件直接当单章书处理，.json 文件按结构化解析
+                if (b.api.endsWith('.md') || b.path.endsWith('.md')) {
+                    bookCache[bookName] = mdToBook(text, bookName);
+                } else {
+                    bookCache[bookName] = JSON.parse(text);
+                }
+                console.log('loaded:', bookName, (bookCache[bookName].chapters || []).length, 'chapters');
             } catch(e) { console.error('loadBookContent err:', bookName, e); }
+        }
+        function mdToBook(md, name) {
+            // 将 Markdown 文件解析为书：按 ## 标题拆分章节，# 一级标题为书名
+            var title = name;
+            var chapters = [];
+            var lines = md.split('\n');
+            var curTitle = '';
+            var curBody = '';
+            for (var i = 0; i < lines.length; i++) {
+                var line = lines[i];
+                if (/^#\s/.test(line) && !curTitle) {
+                    title = line.replace(/^#\s+/, '').trim();
+                    continue;
+                }
+                if (/^##\s/.test(line)) {
+                    if (curTitle && curBody.trim()) {
+                        var bodyMd = curBody.trim();
+                        chapters.push({ title: curTitle, body: bodyMd, html: safeMarkedParse(bodyMd) });
+                    }
+                    curTitle = line.replace(/^##\s+/, '').trim();
+                    curBody = '';
+                    continue;
+                }
+                curBody += line + '\n';
+            }
+            if (curTitle && curBody.trim()) {
+                var bodyMd = curBody.trim();
+                chapters.push({ title: curTitle, body: bodyMd, html: safeMarkedParse(bodyMd) });
+            }
+            // 如果没有 ## 标题，整篇作为一个章节
+            if (chapters.length === 0 && md.trim()) {
+                chapters.push({ title: title, body: md.trim(), html: safeMarkedParse(md.trim()) });
+            }
+            return { title: title, chapters: chapters };
         }
         function closeReader() {
             document.getElementById('readerOverlay').classList.remove('active');
