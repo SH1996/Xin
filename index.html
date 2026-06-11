@@ -13,24 +13,24 @@
     </script>
     <style>
         :root {
-            --bg: #fff5f7;
+            --bg: #fdf8f0;
             --card-bg: #ffffff;
-            --primary: #d4849a;
-            --accent: #e8a0b4;
-            --accent-soft: #fce4ec;
-            --rose-gold: #c97b8b;
-            --lavender: #c9b8d4;
-            --lavender-light: #f0e8f4;
-            --text: #4a3548;
-            --text-light: #8b7b88;
-            --text-soft: #b8a8b4;
-            --bubble-user: #ffe8ee;
+            --primary: #c4825a;
+            --accent: #d4956b;
+            --accent-soft: #f5e6d8;
+            --rose-gold: #8b6b4a;
+            --lavender: #c4a882;
+            --lavender-light: #f0e4d4;
+            --text: #4a3628;
+            --text-light: #8b7b6a;
+            --text-soft: #b8a894;
+            --bubble-user: #fdf0e0;
             --bubble-ai: #ffffff;
-            --border: #f5e0e8;
-            --border-soft: #fde8ef;
-            --shadow: 0 2px 16px rgba(212, 132, 154, 0.08);
-            --shadow-soft: 0 4px 20px rgba(232, 160, 180, 0.12);
-            --shadow-card: 0 2px 12px rgba(200, 150, 170, 0.06);
+            --border: #f0e0cc;
+            --border-soft: #fdf0e0;
+            --shadow: 0 2px 16px rgba(180, 140, 100, 0.08);
+            --shadow-soft: 0 4px 20px rgba(200, 150, 100, 0.12);
+            --shadow-card: 0 2px 12px rgba(180, 140, 100, 0.06);
             --radius: 24px;
             --radius-sm: 16px;
             --safe-bottom: env(safe-area-inset-bottom, 16px);
@@ -52,7 +52,7 @@
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', 'Microsoft YaHei', 'Hiragino Sans', sans-serif;
             background: var(--bg);
-            background-image: radial-gradient(ellipse at 20% 20%, rgba(252, 228, 236, 0.5) 0%, transparent 50%), radial-gradient(ellipse at 80% 80%, rgba(240, 232, 244, 0.4) 0%, transparent 50%), radial-gradient(ellipse at 50% 50%, rgba(255, 245, 247, 0.6) 0%, transparent 70%);
+            background-image: radial-gradient(ellipse at 20% 20%, rgba(240, 220, 200, 0.5) 0%, transparent 50%), radial-gradient(ellipse at 80% 80%, rgba(220, 200, 170, 0.4) 0%, transparent 50%), radial-gradient(ellipse at 50% 50%, rgba(250, 240, 225, 0.6) 0%, transparent 70%);
             color: var(--text);
             height: 100vh;
             height: 100dvh;
@@ -128,7 +128,7 @@
             font-size: 16px;
             font-weight: 700;
             letter-spacing: 0.3px;
-            background: linear-gradient(135deg, #c97b8b, #d4849a, #e8a0b4);
+            background: linear-gradient(135deg, #b07850, #d4849a, #e8a0b4);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -140,7 +140,7 @@
 
         .header-subtitle {
             font-size: 10px;
-            color: #c97b8b;
+            color: #b07850;
             letter-spacing: 0.4px;
             font-weight: 600;
             font-style: italic;
@@ -286,7 +286,7 @@
         }
         .voice-suggest-box .vs-item .vs-phrase {
             font-weight: 600;
-            color: #8b5cf6;
+            color: #c4825a;
         }
         .voice-suggest-box .vs-item .vs-tone {
             font-size: 10px;
@@ -518,7 +518,7 @@
 
         .model-tag.flash {
             background: linear-gradient(135deg, #fce4ec, #f8d0e0);
-            color: #c97b8b;
+            color: #b07850;
         }
 
         .model-tag.pro {
@@ -534,7 +534,7 @@
         .bubble.error-bubble {
             background: #fff5f7;
             border: 1.5px solid #f8d0da;
-            color: #c97b8b;
+            color: #b07850;
         }
 
         .speak-btn {
@@ -824,7 +824,7 @@
             border: 1.5px solid var(--border);
             border-radius: 16px;
             font-size: 11px;
-            color: #c97b8b;
+            color: #b07850;
             animation: floatIn 0.4s ease;
             box-shadow: 0 2px 8px rgba(212, 132, 154, 0.06);
         }
@@ -1013,7 +1013,7 @@
             font-size: 18px;
             font-weight: 800;
             margin-bottom: 18px;
-            background: linear-gradient(135deg, #c97b8b, #d4849a);
+            background: linear-gradient(135deg, #b07850, #d4849a);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -1178,17 +1178,17 @@
         .voice-panel-close { background: none; border: none; color: #777; font-size: 24px; cursor: pointer; line-height: 1; }
         .voice-panel-body { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; min-height: 0; }
         .voice-clip-item { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.04); border-radius: 12px; padding: 10px 12px; margin-bottom: 6px; }
-        .voice-clip-item .v-play { width: 34px; height: 34px; border-radius: 50%; border: none; background: linear-gradient(135deg, #8b5cf6, #7158e2); color: #fff; font-size: 13px; cursor: pointer; flex-shrink: 0; }
+        .voice-clip-item .v-play { width: 34px; height: 34px; border-radius: 50%; border: none; background: linear-gradient(135deg, #d4956b, #b07850); color: #fff; font-size: 13px; cursor: pointer; flex-shrink: 0; }
         .voice-clip-item .v-play.playing { background: linear-gradient(135deg, #ff4757, #e84118); }
         .voice-clip-item .v-info { flex: 1; overflow: hidden; }
         .voice-clip-item .v-label { font-size: 14px; font-weight: 600; color: #e0d0ff; }
         .voice-clip-item .v-del { background: none; border: none; color: #555; font-size: 16px; cursor: pointer; flex-shrink: 0; padding: 4px; }
         .voice-record-row { display: flex; gap: 8px; align-items: center; padding: 12px 0 4px; flex-shrink: 0; border-top: 1px solid rgba(255,255,255,0.06); margin-top: 8px; }
         .voice-record-row input { flex: 1; background: rgba(255,255,255,0.08); border: 2px solid rgba(255,255,255,0.12); border-radius: 10px; padding: 12px 14px; color: #fff; font-size: 14px; outline: none; transition: border-color 0.2s; }
-        .voice-record-row input:focus { border-color: #8b5cf6; }
+        .voice-record-row input:focus { border-color: #c4825a; }
         .voice-record-row input::placeholder { color: #666; }
         .voice-record-row .btn-sm { border: none; border-radius: 10px; padding: 12px 18px; font-size: 14px; font-weight: 600; cursor: pointer; color: #fff; flex-shrink: 0; }
-        .voice-record-row .btn-rec { background: linear-gradient(135deg, #8b5cf6, #7158e2); }
+        .voice-record-row .btn-rec { background: linear-gradient(135deg, #d4956b, #b07850); }
         .voice-record-row .btn-rec.recording { background: linear-gradient(135deg, #ff4757, #e84118); animation: voicePulse 0.8s infinite; }
         @keyframes voicePulse { 0%,100%{box-shadow:0 0 0 0 rgba(255,71,87,0.4)}50%{box-shadow:0 0 0 12px rgba(255,71,87,0)} }
         .voice-empty { text-align: center; color: #666; padding: 24px 0; font-size: 13px; }
@@ -1292,8 +1292,8 @@
 
 .query-del-btn {
     background: none;
-    border: 1px solid #e8c0c8;
-    color: #c97b8b;
+    border: 1px solid #e8d0c0;
+    color: #b07850;
     font-size: 14px;
     cursor: pointer;
     border-radius: 50%;
@@ -1779,8 +1779,8 @@
             <span id="queryTabTitle">📋 对话记录查询</span>
             <button class="icon-btn" onclick="closeQueryPanel()" style="width:30px;height:30px;">✕</button>
         </div>
-        <div style="display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg, #1a1040, #0d1a3a);padding:6px 12px;margin:0;font-size:12px;color:#a080d0;border-bottom:1px solid rgba(120,80,200,0.2);">
-            <span>⚡ 高级模式 <span style="font-size:10px;color:#604080;">(Pro模型)</span></span>
+        <div style="display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg, #2c1e10, #1a1008);padding:6px 12px;margin:0;font-size:12px;color:#c4a068;border-bottom:1px solid rgba(180,140,80,0.2);">
+            <span>⚡ 高级模式 <span style="font-size:10px;color:#8b6b4a;">(Pro模型)</span></span>
             <label class="adv-toggle">
                 <input type="checkbox" id="advModeCheck" onchange="toggleAdvancedMode()">
                 <span class="adv-toggle-slider"></span>
@@ -1801,7 +1801,7 @@
         <div id="queryContent" style="flex:1;display:flex;flex-direction:column;overflow:hidden;padding:0 12px;">
             <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;">
                 <span id="recordCount" style="font-size:12px;color:var(--text-light);"></span>
-                <button onclick="deleteAllRecords()" style="background:none;border:1px solid #e8c0c8;color:#c97b8b;padding:4px 12px;border-radius:14px;font-size:12px;cursor:pointer;">🗑 全部删除</button>
+                <button onclick="deleteAllRecords()" style="background:none;border:1px solid #e8d0c0;color:#b07850;padding:4px 12px;border-radius:14px;font-size:12px;cursor:pointer;">🗑 全部删除</button>
             </div>
             <div id="queryRecordList" style="flex:1;overflow-y:auto;"></div>
         </div>
@@ -1809,7 +1809,7 @@
         <div id="queryVoiceContent" style="flex:1;display:none;flex-direction:column;overflow:hidden;padding:0 12px;">
             <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;">
                 <span id="voiceCount" style="font-size:12px;color:var(--text-light);"></span>
-                <button onclick="deleteAllVoices()" style="background:none;border:1px solid #e8c0c8;color:#c97b8b;padding:4px 12px;border-radius:14px;font-size:12px;cursor:pointer;">🗑 全部删除</button>
+                <button onclick="deleteAllVoices()" style="background:none;border:1px solid #e8d0c0;color:#b07850;padding:4px 12px;border-radius:14px;font-size:12px;cursor:pointer;">🗑 全部删除</button>
             </div>
             <div id="queryVoiceList" style="flex:1;overflow-y:auto;"></div>
         </div>
@@ -1818,7 +1818,7 @@
             <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;">
                 <span style="font-size:12px;color:var(--text-light);">GitHub books/ 目录管理</span>
                 <button onclick="adminRefreshBooks()" style="background:none;border:1px solid #d4c8b0;color:#8a7a6a;padding:4px 12px;border-radius:14px;font-size:12px;cursor:pointer;margin-right:6px;">🔄 刷新</button>
-                <button onclick="adminDelAllBooks()" style="background:none;border:1px solid #e8c0c8;color:#c97b8b;padding:4px 12px;border-radius:14px;font-size:12px;cursor:pointer;">🗑 全部删除</button>
+                <button onclick="adminDelAllBooks()" style="background:none;border:1px solid #e8d0c0;color:#b07850;padding:4px 12px;border-radius:14px;font-size:12px;cursor:pointer;">🗑 全部删除</button>
             </div>
             <div id="qpBookList" style="flex:1;overflow-y:auto;"></div>
             <div class="admin-log" id="qpLog" style="margin-top:8px;max-height:120px;"></div>
@@ -1828,7 +1828,7 @@
             <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;">
                 <span style="font-size:12px;color:var(--text-light);">GitHub journals/ 目录管理</span>
                 <button onclick="adminRefreshJournals()" style="background:none;border:1px solid #d4c8b0;color:#8a7a6a;padding:4px 12px;border-radius:14px;font-size:12px;cursor:pointer;margin-right:6px;">🔄 刷新</button>
-                <button onclick="adminDelAllJournals()" style="background:none;border:1px solid #e8c0c8;color:#c97b8b;padding:4px 12px;border-radius:14px;font-size:12px;cursor:pointer;">🗑 全部删除</button>
+                <button onclick="adminDelAllJournals()" style="background:none;border:1px solid #e8d0c0;color:#b07850;padding:4px 12px;border-radius:14px;font-size:12px;cursor:pointer;">🗑 全部删除</button>
             </div>
             <div id="qpJournalList" style="flex:1;overflow-y:auto;"></div>
             <div class="admin-log" id="qpJournalLog" style="margin-top:8px;max-height:120px;"></div>
@@ -1860,14 +1860,14 @@
             <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;">
                 <span id="sandboxCount" style="font-size:12px;color:#8b949e;"></span>
                 <button onclick="refreshSandboxRecords()" style="background:none;border:1px solid #d4c8b0;color:#8a7a6a;padding:4px 12px;border-radius:14px;font-size:12px;cursor:pointer;margin-right:6px;">🔄 刷新</button>
-                <button onclick="delAllSandboxRecords()" style="background:none;border:1px solid #e8c0c8;color:#c97b8b;padding:4px 12px;border-radius:14px;font-size:12px;cursor:pointer;">🗑 全部删除</button>
+                <button onclick="delAllSandboxRecords()" style="background:none;border:1px solid #e8d0c0;color:#b07850;padding:4px 12px;border-radius:14px;font-size:12px;cursor:pointer;">🗑 全部删除</button>
             </div>
             <div id="sandboxRecordList" style="flex:1;overflow-y:auto;"></div>
         </div>
     </div>
 
     <div class="header">
-        <div class="header-left"><div class="avatar" id="headerAvatar">🌸</div><div><div class="header-title" id="headerTitle">爱你的鹏飞 ❤️</div><div class="header-subtitle" id="headerSubtitle">愿金锡宝宝每天开心 ✨</div></div></div>
+        <div class="header-left"><div class="avatar" id="headerAvatar">🌸</div><div><div class="header-title" id="headerTitle">山海自有归期</div><div class="header-subtitle" id="headerSubtitle">风雨自有相逢</div></div></div>
         <div class="header-actions">
             <button class="hamburger-btn" onclick="toggleHamburger()" title="菜单">☰</button>
         </div>
@@ -2669,8 +2669,8 @@
                 if (avatar) avatar.textContent = '🔮';
                 if (badge) { badge.classList.add('used'); badge.innerHTML = '🔙 点击<strong>退出重生</strong>'; }
             } else {
-                if (title) title.textContent = '爱你的鹏飞 ❤️';
-                if (sub) sub.textContent = '愿金锡宝宝每天开心 ✨';
+                if (title) title.textContent = '山海自有归期';
+                if (sub) sub.textContent = '风雨自有相逢';
                 if (avatar) avatar.textContent = '🌸';
                 if (badge) { badge.classList.remove('used'); badge.innerHTML = '🏪 点我可切换<strong>找店参谋</strong>'; }
             }
@@ -2796,7 +2796,7 @@
             list.innerHTML = keys.map(k =>
                 '<div class="voice-clip-item" style="justify-content:space-between;">' +
                 '<span style="flex:1;font-size:13px;color:#e0d0ff;cursor:pointer;" onclick="playVoiceFromLib(\''+esc(k)+'\')">▶ 🎤 '+esc(k)+' <span style="font-size:10px;color:var(--text-light);">'+esc(voiceLibrary[k].replace('voices/',''))+'</span></span>' +
-                '<button class="btn-sm" style="background:#c97b8b;font-size:11px;padding:4px 10px;" onclick="deleteVoiceFromLib(\''+esc(k)+'\')">🗑</button>' +
+                '<button class="btn-sm" style="background:#b07850;font-size:11px;padding:4px 10px;" onclick="deleteVoiceFromLib(\''+esc(k)+'\')">🗑</button>' +
                 '</div>'
             ).join('');
         }
@@ -2958,7 +2958,7 @@
                                 '<div class="vm-bars">'+Array.from({length:8},()=>'<div class="vm-bar"></div>').join('')+'</div>' +
                                 '<div class="vm-dur">'+(Math.round(audio.duration||3))+'″</div>' +
                                 '</div>' +
-                                '<div style="font-size:11px;color:#8b5cf6;margin-top:6px;text-align:center;">🎤 语音: '+esc(kw)+'</div>';
+                                '<div style="font-size:11px;color:#c4825a;margin-top:6px;text-align:center;">🎤 语音: '+esc(kw)+'</div>';
                             el4.innerHTML = (currentMode==='advisor'?'<div class="model-tag advisor">🏪</div>':(advancedMode?'<div class="model-tag pro">Pro</div>':'<div class="model-tag flash">Flash</div>')) + '<div class="bubble voice-reply">'+voiceBubbleHTML+'</div>';
                             audio.onloadedmetadata = () => {
                                 const vm = el4.querySelector('.vm-dur');
@@ -3185,7 +3185,7 @@
             listBooks().then(() => {
                 renderBookList();
             }).catch(e => {
-                document.getElementById('bookList').innerHTML = '<div style="color:#c97b8b;text-align:center;padding:40px 20px;">⚠️ 网络连接失败<br><span style="font-size:12px;color:#999;">' + e.message + '</span><br><button onclick="openLibrary()" style="margin-top:16px;padding:8px 20px;border-radius:8px;border:1px solid #ccc;background:#fff;cursor:pointer;font-size:13px;">🔄 重试</button></div>';
+                document.getElementById('bookList').innerHTML = '<div style="color:#b07850;text-align:center;padding:40px 20px;">⚠️ 网络连接失败<br><span style="font-size:12px;color:#999;">' + e.message + '</span><br><button onclick="openLibrary()" style="margin-top:16px;padding:8px 20px;border-radius:8px;border:1px solid #ccc;background:#fff;cursor:pointer;font-size:13px;">🔄 重试</button></div>';
             });
         }
         function closeLibrary() {
@@ -3207,7 +3207,7 @@
             }).then(function(data) {
                 renderWeekly(data);
             }).catch(function(e) {
-                document.getElementById('weeklyBody').innerHTML = '<div class="weekly-loading" style="color:#c97b8b;">⚠️ 加载失败<br><span style="font-size:12px;color:#999;">' + e.message + '</span></div>';
+                document.getElementById('weeklyBody').innerHTML = '<div class="weekly-loading" style="color:#b07850;">⚠️ 加载失败<br><span style="font-size:12px;color:#999;">' + e.message + '</span></div>';
             });
         }
         function closeWeekly() {
@@ -3273,7 +3273,7 @@
                 renderWeekly(data);
                 renderJournalDropdown();
             } catch(e) {
-                document.getElementById('weeklyBody').innerHTML = '<div class="weekly-loading" style="color:#c97b8b;">⚠️ 加载失败: ' + e.message + '</div>';
+                document.getElementById('weeklyBody').innerHTML = '<div class="weekly-loading" style="color:#b07850;">⚠️ 加载失败: ' + e.message + '</div>';
             }
         }
         // fileUrl: optional. If omitted, loads latest from journals/
@@ -3392,7 +3392,7 @@
                 }
                 listEl.innerHTML = rows;
             } catch(e) {
-                listEl.innerHTML = '<div style="font-size:12px;color:#c97b8b;text-align:center;padding:16px;">⚠️ 加载失败: ' + e.message + '</div>';
+                listEl.innerHTML = '<div style="font-size:12px;color:#b07850;text-align:center;padding:16px;">⚠️ 加载失败: ' + e.message + '</div>';
             }
         }
         async function adminDelBook(name) {
@@ -3480,7 +3480,7 @@
                 }
                 listEl.innerHTML = rows;
             } catch(e) {
-                listEl.innerHTML = '<div style="font-size:12px;color:#c97b8b;text-align:center;padding:16px;">⚠️ 加载失败: ' + e.message + '</div>';
+                listEl.innerHTML = '<div style="font-size:12px;color:#b07850;text-align:center;padding:16px;">⚠️ 加载失败: ' + e.message + '</div>';
             }
         }
         async function adminDelJournal(name) {
@@ -4330,7 +4330,7 @@
             try {
                 await sendRebirthTurn('开始这段人生吧');
             } catch(e) {
-                document.getElementById('rebirthGameBody').innerHTML = '<div class="rg-scene"><div class="rg-scene-text" style="color:#c97b8b;">⚠️ 命运之神暂时失联：' + e.message + '<br><br>换一个身份再试试？</div></div><div class="rg-choices"><button class="rg-choice-btn" onclick="exitRebirth()">🔙 回到暖心模式</button></div>';
+                document.getElementById('rebirthGameBody').innerHTML = '<div class="rg-scene"><div class="rg-scene-text" style="color:#b07850;">⚠️ 命运之神暂时失联：' + e.message + '<br><br>换一个身份再试试？</div></div><div class="rg-choices"><button class="rg-choice-btn" onclick="exitRebirth()">🔙 回到暖心模式</button></div>';
             }
         }
 
@@ -4344,7 +4344,7 @@
                 var resp = await callRebirthAI(choice);
                 parseRebirthScene(resp);
             } catch(e) {
-                body.innerHTML = '<div class="rg-scene"><div class="rg-scene-text" style="color:#c97b8b;">⚠️ 失败：' + e.message + '</div></div><div class="rg-choices"><button class="rg-choice-btn" onclick="exitRebirth()">🔙 返回</button></div>';
+                body.innerHTML = '<div class="rg-scene"><div class="rg-scene-text" style="color:#b07850;">⚠️ 失败：' + e.message + '</div></div><div class="rg-choices"><button class="rg-choice-btn" onclick="exitRebirth()">🔙 返回</button></div>';
             }
             rebirthBusy = false;
         }
@@ -5211,7 +5211,7 @@
     <div class="voice-overlay" id="voiceOverlay" onclick="closeVoicePanel()"></div>
     <div class="voice-panel" id="voicePanel">
         <div class="voice-panel-header">
-            <span class="voice-panel-title">📼 语音库 <span id="voiceLibCount" style="font-size:11px;color:#8b5cf6;font-weight:400;">(加载中…)</span></span>
+            <span class="voice-panel-title">📼 语音库 <span id="voiceLibCount" style="font-size:11px;color:#c4825a;font-weight:400;">(加载中…)</span></span>
             <button class="voice-panel-close" onclick="closeVoicePanel()">✕</button>
         </div>
         <!-- 录制区 -->
@@ -5222,9 +5222,9 @@
         <div style="text-align:center;margin:4px 0;font-size:10px;color:#555;">填关键词 → 🎤录 → ⏹停 → 自动加入待上传列表</div>
         <!-- 待上传列表 -->
         <div id="voicePendingWrap" style="display:none;margin:8px 0;">
-            <div style="font-size:12px;color:#8b5cf6;margin-bottom:4px;">📋 待上传</div>
+            <div style="font-size:12px;color:#c4825a;margin-bottom:4px;">📋 待上传</div>
             <div id="voicePendingList"></div>
-            <button class="btn-sm" style="background:#8b5cf6;width:100%;margin-top:6px;font-size:13px;" onclick="saveAllPending()">📤 全部上传</button>
+            <button class="btn-sm" style="background:#c4825a;width:100%;margin-top:6px;font-size:13px;" onclick="saveAllPending()">📤 全部上传</button>
         </div>
         <!-- 已存列表 -->
         <div class="voice-panel-body" id="voiceLibList"><div class="voice-empty">加载中…</div></div>
